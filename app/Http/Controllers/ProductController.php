@@ -11,18 +11,51 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    private $client;
+    // private $client;
 
-    public function __construct()
+    // public function __construct()
+    // {
+    //     $this->client = new Client();
+    //     // $this->client->setAuthConfig(storage_path('app/credentials.json'));
+    //     $this->client->addScope(Drive::DRIVE_FILE);
+    //     $this->client->setAccessType('offline');
+    //     $this->client->setPrompt('select_account consent');
+    // }
+    public function create(Request $request)
     {
-        $this->client = new Client();
-        $this->client->setAuthConfig(storage_path('app/credentials.json'));
-        $this->client->addScope(Drive::DRIVE_FILE);
-        $this->client->setAccessType('offline');
-        $this->client->setPrompt('select_account consent');
-    }
+        // Validar los datos del producto y las imágenes
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    public function store(Request $request)
+        // Crear el producto
+        $product = Product::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+        ]);
+
+        // Guardar cada imagen en el almacenamiento local y en la base de datos
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                // Guarda la imagen en el almacenamiento local (storage/app/public/products)
+                $path = $image->store('products', 'public');
+
+                // Crear un registro en la tabla de imágenes del producto con la ruta de la imagen
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'path' => $path, // Ruta de la imagen en el sistema de archivos
+                ]);
+            }
+        }
+
+        // Responder con éxito
+        return response()->json(['message' => 'Product created successfully', 'product' => $product], 201);
+    }
+    public function storeGoogle(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',

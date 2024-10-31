@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -27,20 +28,29 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Validación de las credenciales
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // Intentar autenticar al usuario
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            // Obtener el usuario autenticado
+            $user = Auth::user();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
+            // Crear el token de acceso para el usuario
+            $token = $user->createToken('auth_token', ['role' => $user->role])->plainTextToken;
+
+            // Devolver el token y el rol del usuario
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'role' => $user->role,
+            ]);
         }
 
-        // Incluir el rol del usuario en el payload del token de acceso
-        $token = $user->createToken('auth_token', ['role' => $user->role])->plainTextToken;
-
-        return response()->json(['access_token' => $token, 'token_type' => 'Bearer', 'role' => $user->role]);
+        // Si las credenciales son incorrectas
+        return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
     }
 }

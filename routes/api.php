@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleDriveController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -26,13 +27,20 @@ Route::middleware(['verify.access.token', 'role:admin,vendor'])->group(function 
     Route::delete('products/{product}', [ProductController::class, 'destroy']);
 });
 
-Route::middleware(['verify.access.token'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    //Categorías
+    Route::post('/create-category', [CategoryController::class, 'store']);
+    
+    //Productos
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{product}', [ProductController::class, 'show']);
-    Route::post('/products', [ProductController::class, 'store']);
+    // Ruta para crear el producto
+    Route::post('/create-product', [ProductController::class, 'create']);
     // Route::put('/products/{product}', [ProductController::class, 'update']);
     Route::get('/auth/google', [GoogleDriveController::class, 'redirectToGoogle']);
     Route::get('/auth/google/callback', [GoogleDriveController::class, 'handleGoogleCallback']);
+
+
 });
 
 // Rutas públicas para Google OAuth
