@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\ProductImage;
 use Google\Client;
 use Google\Service\Drive;
@@ -21,10 +22,31 @@ class ProductController extends Controller
     //     $this->client->setAccessType('offline');
     //     $this->client->setPrompt('select_account consent');
     // }
+    public function index()
+    {
+        $categories = Category::all();
+        $productItems = Product::all();
+        return view('products', compact('categories', 'productItems')); // Asegúrate de tener una vista para mostrar las categorías.
+    }
+    public function showByCategory($categoryId)
+    {
+        $category = Category::findOrFail($categoryId);
+        $categories = Category::all();
+        $productItems = Product::where('category_id', $category->id)->get();
+    
+        return view('products', compact('productItems', 'category', 'categories'));
+    }
+    public function showByProduct($id)
+    {
+        $product = Product::findOrFail($id);
+
+        return view('productItem', compact('product'));
+    }
     public function create(Request $request)
     {
         // Validar los datos del producto y las imágenes
         $request->validate([
+            'category_id' => 'required|numeric',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric',
@@ -33,6 +55,7 @@ class ProductController extends Controller
 
         // Crear el producto
         $product = Product::create([
+            'category_id' => $request->category_id,
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
@@ -100,7 +123,7 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product created successfully', 'product' => $product], 201);
     }
 
-    public function update(Request $request, Product $product)
+    public function update1(Request $request, Product $product)
     {
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -154,4 +177,23 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
     }
+    public function show($id) {
+        $product = Product::with(['product_images', 'product_variants'])->find($id);
+        return response()->json($product);
+    }
+    
+    public function update(Request $request, $id) {
+        $product = Product::find($id);
+        $product->name = $request->input('name');
+        $product->description = $request->input('description');
+        $product->price = $request->input('price');
+        $product->category_id = $request->input('category_id');
+        
+        // Manejar imágenes y variantes aquí
+        // ...
+    
+        $product->save();
+        return response()->json(['message' => 'Producto actualizado con éxito.']);
+    }
+    
 }

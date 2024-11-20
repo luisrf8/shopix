@@ -12,15 +12,14 @@
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
   <!-- Nucleo Icons -->
-  <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
+  <link href="../assets/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="../assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <!-- Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
   <!-- CSS Files -->
-  <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
-
+  <link id="pagestyle" href="../assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -68,30 +67,179 @@
           </div>
         </div>
       </div>
-      <!-- Modal para crear categoría -->
       <div class="row">
         <div class="col-lg-8">
           <div class="row">
-            @foreach($categories as $category)
-              <div class="col-md-4 col-4">
-                <a href="{{ route('products.byCategory', $category->id) }}" class="text-decoration-none">
+            <div class="col-xl-6">
+              <div class="row">
+                <div class="col-md-6 col-6">
                   <div class="card">
                     <div class="card-header mx-4 p-3 text-center">
                       <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
-                        <!-- Puedes cambiar el ícono dinámicamente si tienes un campo para eso -->
-                        <i class="material-symbols-rounded opacity-10">category</i>
+                        <i class="material-symbols-rounded opacity-10">checkroom</i>
+                        </div>
+                      </div>
+                      <div class="card-body pt-0 p-3 text-center">
+                        <h6 class="text-center mb-0 opacity-9">Camisas</h6>
+                        <!-- <span class="text-xs">Belong Interactive</span>
+                        <hr class="horizontal dark my-3">
+                        <h5 class="mb-0">+$2000</h5> -->
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-6">
+                    <div class="card">
+                      <div class="card-header mx-4 p-3 text-center">
+                        <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
+                          <i class="material-symbols-rounded opacity-10">dry_cleaning</i>
                       </div>
                     </div>
                     <div class="card-body pt-0 p-3 text-center">
-                      <h6 class="text-center mb-0 opacity-9">{{ $category['name'] }}</h6>
-                      <span class="text-xs">{{ $category['description'] }}</span>
+                      <h6 class="text-center mb-0 opacity-9">Pantalones</h6>
+                      <!-- <span class="text-xs">Freelance Payment</span>
+                      <hr class="horizontal dark my-3">
+                      <h5 class="mb-0">$455.00</h5> -->
                     </div>
                   </div>
-                </a>
+                </div>
               </div>
-            @endforeach
+            </div>
+            <div class="col-xl-6">
+              <div class="row">
+                <div class="col-md-6 col-6">
+                  <div class="card">
+                    <div class="card-header mx-4 p-3 text-center">
+                      <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
+                        <i class="material-symbols-rounded opacity-10">checkroom</i>
+                      </div>
+                    </div>
+                    <div class="card-body pt-0 p-3 text-center">
+                      <h6 class="text-center mb-0 opacity-9">Franelas</h6>
+                      <!-- <span class="text-xs">Belong Interactive</span>
+                      <hr class="horizontal dark my-3">
+                      <h5 class="mb-0">+$2000</h5> -->
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-6">
+                  <div class="card">
+                    <div class="card-header mx-4 p-3 text-center">
+                      <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
+                        <i class="material-symbols-rounded opacity-10">bubble_chart</i>
+                      </div>
+                    </div>
+                    <div class="card-body pt-0 p-3 text-center">
+                      <h6 class="text-center mb-0 opacity-9">Accesorios</h6>
+                      <!-- <span class="text-xs">Freelance Payment</span>
+                      <hr class="horizontal dark my-3">
+                      <h5 class="mb-0">$455.00</h5> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="col-md-12 mb-lg-0 mb-4">
+              <div class="card mt-4">
+                <div class="card-header pb-0 p-3">
+                  <div class="row">
+                    <div class="col-6 d-flex align-items-center">
+                      <h6 class="mb-0">Payment Method</h6>
+                    </div>
+                    <div class="col-6 text-end">
+                      <a class="btn bg-gradient-info mb-0" href="javascript:;"><i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Add New Card</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body p-3">
+                  <div class="row">
+                    <div class="col-md-6 mb-md-0 mb-4">
+                      <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                        <img class="w-10 me-3 mb-0" src="../assets/img/logos/mastercard.png" alt="logo">
+                        <h6 class="mb-0">****&nbsp;&nbsp;&nbsp;****&nbsp;&nbsp;&nbsp;****&nbsp;&nbsp;&nbsp;7852</h6>
+                        <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                        <img class="w-10 me-3 mb-0" src="../assets/img/logos/visa.png" alt="logo">
+                        <h6 class="mb-0">****&nbsp;&nbsp;&nbsp;****&nbsp;&nbsp;&nbsp;****&nbsp;&nbsp;&nbsp;5248</h6>
+                        <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
           </div>
         </div>
+        <!-- <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-header pb-0 p-3">
+              <div class="row">
+                <div class="col-6 d-flex align-items-center">
+                  <h6 class="mb-0">Invoices</h6>
+                </div>
+                <div class="col-6 text-end">
+                  <button class="btn btn-outline-primary btn-sm mb-0">View All</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body p-3 pb-0">
+              <ul class="list-group">
+                <li class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <h6 class="mb-1 text-dark font-weight-bold text-sm">March, 01, 2020</h6>
+                    <span class="text-xs">#MS-415646</span>
+                  </div>
+                  <div class="d-flex align-items-center text-sm">
+                    $180
+                    <button class="btn btn-link text-dark text-sm mb-0 px-0 ms-4"><i class="material-symbols-rounded text-lg position-relative me-1">picture_as_pdf</i> PDF</button>
+                  </div>
+                </li>
+                <li class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <h6 class="text-dark mb-1 font-weight-bold text-sm">February, 10, 2021</h6>
+                    <span class="text-xs">#RV-126749</span>
+                  </div>
+                  <div class="d-flex align-items-center text-sm">
+                    $250
+                    <button class="btn btn-link text-dark text-sm mb-0 px-0 ms-4"><i class="material-symbols-rounded text-lg position-relative me-1">picture_as_pdf</i> PDF</button>
+                  </div>
+                </li>
+                <li class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <h6 class="text-dark mb-1 font-weight-bold text-sm">April, 05, 2020</h6>
+                    <span class="text-xs">#FB-212562</span>
+                  </div>
+                  <div class="d-flex align-items-center text-sm">
+                    $560
+                    <button class="btn btn-link text-dark text-sm mb-0 px-0 ms-4"><i class="material-symbols-rounded text-lg position-relative me-1">picture_as_pdf</i> PDF</button>
+                  </div>
+                </li>
+                <li class="list-group-item border-0 d-flex justify-content-between ps-0 mb-2 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <h6 class="text-dark mb-1 font-weight-bold text-sm">June, 25, 2019</h6>
+                    <span class="text-xs">#QW-103578</span>
+                  </div>
+                  <div class="d-flex align-items-center text-sm">
+                    $120
+                    <button class="btn btn-link text-dark text-sm mb-0 px-0 ms-4"><i class="material-symbols-rounded text-lg position-relative me-1">picture_as_pdf</i> PDF</button>
+                  </div>
+                </li>
+                <li class="list-group-item border-0 d-flex justify-content-between ps-0 border-radius-lg">
+                  <div class="d-flex flex-column">
+                    <h6 class="text-dark mb-1 font-weight-bold text-sm">March, 01, 2019</h6>
+                    <span class="text-xs">#AR-803481</span>
+                  </div>
+                  <div class="d-flex align-items-center text-sm">
+                    $300
+                    <button class="btn btn-link text-dark text-sm mb-0 px-0 ms-4"><i class="material-symbols-rounded text-lg position-relative me-1">picture_as_pdf</i> PDF</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div> -->
       </div>
       <div class="row">
       <div class="col-md-12 mt-4">
@@ -148,30 +296,63 @@
         </div>
       </div>
     </div>
-    <!-- Fin Modal para crear producto -->
     <div class="pt-4">
       <div class="row">
-        @foreach($productItems as $product)
-        <div class="col-md-4 mb-10">
+        <div class="col-md-4">
           <div class="card p-4 d-flex flex-row">
-            <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
-              <!-- Si tienes una imagen para el producto, puedes usar $product->image -->
-              <!-- <img src="{{ $product->image }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> -->
+            <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
+              <!-- <img src="path/to/your-image.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> -->
               <i class="material-symbols-rounded text-dark">photo_camera</i>
-            </a>
-            <!-- <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-info">Ver Producto</a> -->
-            <div class="d-flex flex-column mx-3">
-              <h6 class="mb-2 text-sm">{{ $product->name }}</h6>
-              <span class="mb-2 text-xs">Tallas: <span class="text-dark font-weight-bold ms-sm-2">{{ $product->sizes }}</span></span>
-              <span class="text-xs">Precio: <span class="text-dark ms-sm-2 font-weight-bold">{{ $product->price }}$</span></span>
             </div>
-          <div class="ms-auto text-end">
-            <a class="btn btn-link text-danger text-gradient" href="javascript:void(0);" onclick="deleteProduct({{ $product->id }})"><i class="material-symbols-rounded text-sm">delete</i>Delete</a>
-            <a class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Edit</a>
+            <div class="d-flex flex-column mx-3">
+              <h6 class="mb-2 text-sm">Camisa Polo Roja</h6>
+              <span class="mb-2 text-xs">Tallas: <span class="text-dark font-weight-bold ms-sm-2">S / M / L / XL</span></span>
+              <span class="text-xs">Precio: <span class="text-dark ms-sm-2 font-weight-bold">25$</span></span>
+            </div>
+            <div class="ms-auto text-end">
+              <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="javascript:;"><i class="material-symbols-rounded text-sm me-2">delete</i>Delete</a>
+              <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;"><i class="material-symbols-rounded text-sm me-2">edit</i>Edit</a>
+            </div>
           </div>
         </div>
+        
+        <div class="col-md-4">
+          <div class="card p-4 d-flex flex-row">
+          <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
+              <!-- <img src="path/to/your-image.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> -->
+              <i class="material-symbols-rounded text-dark">photo_camera</i>
+            </div>
+            <div class="d-flex flex-column mx-3">
+              <h6 class="mb-2 text-sm">Camisa Polo Verde</h6>
+              <span class="mb-2 text-xs">Tallas: <span class="text-dark font-weight-bold ms-sm-2">S / M / L / XL</span></span>
+              <span class="text-xs">Precio: <span class="text-dark ms-sm-2 font-weight-bold">25$</span></span>
+            </div>
+            <div class="ms-auto text-end">
+              <a class="btn btn-link text-danger text-gradient" href="javascript:;"><i class="material-symbols-rounded text-sm ">delete</i>Delete</a>
+              <a class="btn btn-link text-dark" href="javascript:;"><i class="material-symbols-rounded text-sm ">edit</i>Edit</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-10">
+          <div class="card p-4 d-flex flex-row">
+          <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
+              <!-- <img src="path/to/your-image.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> -->
+              <i class="material-symbols-rounded text-dark">photo_camera</i>
+            </div>
+            <div class="d-flex flex-column mx-3">
+              <h6 class="mb-2 text-sm">Camisa Polo Verde</h6>
+              <span class="mb-2 text-xs">Tallas: <span class="text-dark font-weight-bold ms-sm-2">S / M / L / XL</span></span>
+              <span class="text-xs">Precio: <span class="text-dark ms-sm-2 font-weight-bold">25$</span></span>
+            </div>
+            <div class="ms-auto text-end">
+              <a class="btn btn-link text-danger text-gradient" href="javascript:;"><i class="material-symbols-rounded text-sm ">delete</i>Delete</a>
+              <a class="btn btn-link text-dark" href="javascript:;"><i class="material-symbols-rounded text-sm ">edit</i>Edit</a>
+            </div>
+          </div>
+        </div>
+        <!-- Agrega más columnas según necesites -->
       </div>
-        @endforeach
     </div>
   </div>
 </div>
@@ -383,11 +564,15 @@
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+<script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 
 <!-- Github buttons -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+<script src="{{ asset('assets/js/material-dashboard.min.js?v=3.2.0') }}"></script>
+
   <script>
     document.getElementById('createProductForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Evita el envío normal del formulario

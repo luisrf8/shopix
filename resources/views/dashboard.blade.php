@@ -52,7 +52,7 @@
             Datos y Análisis.
           </p>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+        <!-- <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-header p-2 ps-3">
               <div class="d-flex justify-content-between">
@@ -70,8 +70,8 @@
               <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">+5% </span></p>
             </div>
           </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+        </div> -->
+        <!-- <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-header p-2 ps-3">
               <div class="d-flex justify-content-between">
@@ -89,14 +89,14 @@
               <p class="mb-0 text-sm"><span class="text-success font-weight-bolder">+3% </span></p>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-header p-2 ps-3">
               <div class="d-flex justify-content-between">
                 <div>
                   <p class="text-sm mb-0 text-capitalize">Productos</p>
-                  <h4 class="mb-0">3,462</h4>
+                  <h4 class="mb-0">122</h4>
                 </div>
                 <div class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
                   <i class="material-symbols-rounded opacity-10">leaderboard</i>
@@ -115,7 +115,7 @@
               <div class="d-flex justify-content-between">
                 <div>
                   <p class="text-sm mb-0 text-capitalize">Ventas</p>
-                  <h4 class="mb-0">$1,430</h4>
+                  <h4 class="mb-0">30</h4>
                 </div>
                 <div class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
                   <i class="material-symbols-rounded opacity-10">weekend</i>
@@ -129,6 +129,55 @@
           </div>
         </div>
       </div>
+      <div class="col-md-12 mb-lg-0 mb-4">
+        <div class="card mt-4">
+          <div class="card-header pb-0 p-3">
+            <div class="row">
+              <div class="col-6 d-flex align-items-center">
+                <h6 class="mb-0">Métodos de Pago</h6>
+              </div>
+              <div class="col-6 text-end">
+                <a class="btn bg-gradient-info mb-0" href="javascript:;"><i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Nuevo Método de Pago</a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-3">
+            <h6 class="mb-0">Bolívares</h6> 
+            <div class="row">
+              <div class="col-md-6 mb-md-0 mb-4">
+                <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                  <!-- <img class="w-10 me-3 mb-0" src="../assets/img/logos/mastercard.png" alt="logo"> -->
+                  <h6 class="mb-0">Pago Móvil</h6>
+                  <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+                </div>
+              </div>
+            <div class="col-md-6">
+              <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                <!-- <img class="w-10 me-3 mb-0" src="../assets/img/logos/visa.png" alt="logo"> -->
+                <h6 class="mb-0">Transferencia</h6>
+                <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+              </div>
+            </div>
+            <h6 class="mb-0 mt-2">Dólares</h6> 
+            <div class="row">
+              <div class="col-md-6 mb-md-0 mb-4">
+                <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                  <!-- <img class="w-10 me-3 mb-0" src="../assets/img/logos/mastercard.png" alt="logo"> -->
+                  <h6 class="mb-0">Efectivo</h6>
+                  <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+                </div>
+              </div>
+            <div class="col-md-6">
+              <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                <!-- <img class="w-10 me-3 mb-0" src="../assets/img/logos/visa.png" alt="logo"> -->
+                <h6 class="mb-0">Zelle</h6>
+                <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Card">edit</i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
       <!-- <div class="row">
         <div class="col-lg-4 col-md-6 mt-4 mb-4">
           <div class="card">
@@ -889,7 +938,6 @@
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="assets/js/material-dashboard.min.js?v=3.2.0"></script>
 </body>
 
 </html>

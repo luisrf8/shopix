@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Ruta principal
 Route::get('/', function () {
-    return view('welcome');
+    return view('ecommerce');
 });
 
 // Rutas sin protección de autenticación
@@ -32,11 +35,19 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/products', function () {
-        return view('products');
-    })->name('products');
-
+    // Route::get('/products', function () {
+    //     return view('products');
+    // })->name('products');
+    Route::get('/products', [ProductController::class, 'index'])->name('products');
+    // Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
+    Route::get('/products/{category}', [ProductController::class, 'showByCategory'])->name('products.byCategory');
+    Route::get('/products/product/{id}', [ProductController::class, 'showByProduct'])->name('productItem');
     Route::get('/profile', function () {
         return view('profile');
     });
+
+    // Nueva ruta para ventas
+    Route::get('/sales', function () {
+        return view('sales'); // Asegúrate de tener una vista 'sales.blade.php'
+    })->name('sales');
 });

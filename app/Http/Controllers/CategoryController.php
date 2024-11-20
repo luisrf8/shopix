@@ -10,9 +10,13 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return view('categories.index', compact('categories')); // Asegúrate de tener una vista para mostrar las categorías.
+        return view('products.index', compact('categories')); // Asegúrate de tener una vista para mostrar las categorías.
     }
-
+    public function getCategories()
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
     public function create()
     {
         return view('categories.create'); // Vista para crear una nueva categoría.
