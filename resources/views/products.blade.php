@@ -427,19 +427,20 @@
         },
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 201) {
-          alert('Categoría creado correctamente');
-          // Cierra el modal y refresca o actualiza el contenido
-          $('#createCategoryModal').modal('hide');
-          // Aquí puedes añadir lógica para actualizar la lista de Categoría si existe
+      .then(response => {
+        if (response.status === 201) { // Valida el código de estado HTTP
+          alert('Categoría creada correctamente');
+          window.location.reload();
         } else {
-          alert('Ocurrió un error al crear la Categoría');
+          throw new Error('Error al crear la categoría');
         }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al crear la Categoría');
+      });
     });
+
     function getSucursales() {
       fetch('api/categories', {
           method: 'GET',
