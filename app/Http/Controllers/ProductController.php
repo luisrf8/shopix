@@ -28,6 +28,11 @@ class ProductController extends Controller
         $productItems = Product::all();
         return view('products', compact('categories', 'productItems')); // Asegúrate de tener una vista para mostrar las categorías.
     }
+    public function categoriesIndex()
+    {
+        $categories = Category::all();
+        return view('categories', compact('categories')); // Asegúrate de tener una vista para mostrar las categorías.
+    }
     public function showByCategory($categoryId)
     {
         $category = Category::findOrFail($categoryId);

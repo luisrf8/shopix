@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/products', function () {
     //     return view('products');
     // })->name('products');
+    Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
+
     Route::get('/products', [ProductController::class, 'index'])->name('products');
     // Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::get('/products/{category}', [ProductController::class, 'showByCategory'])->name('products.byCategory');

@@ -19,6 +19,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::get('sanctum/csrf-cookie', function (Request $request) {
     return response()->json(['csrf-token' => csrf_token()]);
 });
+Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
 
 // Rutas protegidas por el middleware auth:sanctum
 Route::middleware(['verify.access.token', 'role:admin,vendor'])->group(function () {

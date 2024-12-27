@@ -55,6 +55,13 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link text-dark" href="/categories">
+            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+            <!-- <i class="bi bi-bag"></i> -->
+            <span class="nav-link-text ms-1">Categorías</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link text-dark" href="/products">
             <i class="material-symbols-rounded opacity-5">table_view</i>
             <span class="nav-link-text ms-1">Productos</span>

@@ -10,7 +10,7 @@
 <body>
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="col-md-4">
-            <!-- <h3 class="text-center mb-4">El Hombre Casual</h3> -->
+            <!-- <h3 class="text-center mb-4">Grupo Ecosta</h3> -->
             <form>
                 @csrf
                 <div class="form-group">
@@ -44,7 +44,12 @@
         event.preventDefault();
         
         let formData = new FormData(this);
+        let submitButton = this.querySelector("button[type='submit']");
         
+        // Cambiar texto a "Cargando..." y deshabilitar el botón
+        submitButton.textContent = "Cargando...";
+        submitButton.disabled = true;
+
         fetch("api/login", {
             method: "POST",
             body: formData
@@ -64,6 +69,11 @@
         .catch(error => {
             console.error("Error:", error);
             alert("Ocurrió un error");
+        })
+        .finally(() => {
+            // Restaurar el texto original y habilitar el botón
+            submitButton.textContent = "Ingresar";
+            submitButton.disabled = false;
         });
     });
 </script>
