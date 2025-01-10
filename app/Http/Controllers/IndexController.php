@@ -8,6 +8,7 @@ use App\Models\ProductInventory;
 use App\Models\Product;
 use App\Models\Provider;
 use App\Models\PurchaseOrder;
+use App\Models\DollarRate;
 use Carbon\Carbon;
 class IndexController extends Controller
 {
@@ -47,7 +48,11 @@ class IndexController extends Controller
         return view('dashboard', compact('stats', 'productInventories'));
     }
     
-    
+    public function head()
+    {
+        $dollarRate = DollarRate::latest('created_at')->first();
+        return view('layout.head', compact('dollarRate'));
+    }
 
     public function addToWarehouseindex()
     {

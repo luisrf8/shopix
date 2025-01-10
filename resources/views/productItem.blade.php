@@ -76,14 +76,18 @@
                     <div class="mx-4">
                       <!-- <div class="card-header">{{ $product->name }}</div> -->
                       <h2><strong>{{ $product->name }}</strong></h2>
+                      <p><strong>Categoría:</strong> {{ $product->category->name }}</p>
                       <p><strong>Descripción:</strong> {{ $product->description }}</p>
-                      <p><strong>Precio:</strong> ${{ $product->price }}</p>
-                      <p><strong>Tallas:</strong> S / M / L / XL</p>
+                      <p><strong>Tallas:</strong>
+                        <ul>
+                          @foreach ($product->variants as $variant)
+                              <li>{{ $variant->size }} - {{ $variant->price }} $</li>
+                          @endforeach
+                        </ul>
+                      </p>
                       <!-- <p><strong>Categoría:</strong> {{ $product->category->name }}</p> -->
                          <!-- Action Buttons -->
                       <div class="mt-4">
-                        <!-- <button class="btn btn-info me-2" onclick="addToCart({{ $product->id }})">Agregar al Carrito +</button>
-                        <button class="btn btn-info me-2" onclick="buyNow({{ $product->id }})">Comprar</button> -->
                         <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#editProductModal" onclick="editProduct()">Editar</button>
                         <button class="btn btn-primary" onclick="deleteProduct({{ $product->id }})">Eliminar</button>
                       </div>
@@ -98,47 +102,39 @@
                 <div class="modal-content">
                   <div class="modal-header d-flex justify-content-between">
                     <h5 class="modal-title" id="editProductModalLabel">Editar Producto</h5>
-                      <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true" class="btn-close" data-bs-dismiss="modal"></span>
                   </div>
                   <div class="modal-body">
-                    <form id="editProductForm">
-                      <div class="form-group">
-                        <label for="productName">Nombre</label>
-                        <input type="text" class="form-control border border-1 p-2" id="productName" required>
-                      </div>
-                      <div class="form-group">
-                        <label for="productDescription">Descripción</label>
-                        <textarea class="form-control border border-1 p-2" id="productDescription" rows="3" required></textarea>
-                      </div>
-                      <div class="form-group">
-                        <label for="productPrice">Precio</label>
-                        <input type="number" class="form-control border border-1 p-2" id="productPrice" required>
-                      </div>
-                      <div class="form-group">
-                        <label for="productCategory">Categoría</label>
-                        <select class="form-control border border-1 p-2" id="productCategory" required>
-                          <!-- Aquí puedes llenar las categorías disponibles -->
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label for="productImages">Imágenes</label>
-                        <input type="file" class="form-control-file border-1 p-2" id="productImages" multiple>
-                        <div id="imagePreview"></div> <!-- Para previsualizar imágenes -->
-                      </div>
-                      <div class="form-group">
-                          <label for="productVariants">Variedades</label>
-                          <div class="row" id="variantContainer">
-                            @csrf
-                              <!-- Aquí se agregarán dinámicamente las variantes -->
-                          </div>
-                          <button type="button" class="btn btn-secondary mt-3" id="addVariantBtn">Agregar Variante</button>
-                          <button type="button" class="btn btn-primary mt-3" id="saveVariantsBtn">Guardar Variantes</button>
-                      </div>
+                  <form id="editProductForm"enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group">
+                            <label for="productName">Nombre</label>
+                            <input type="text" class="form-control border border-1 p-2" id="productName" name="name" value="{{ old('name', $product->name) }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Descripción</label>
+                            <input class="form-control border border-1 p-2" id="productDescription" name="description" rows="3" value="{{ old('description', $product->description) }}" required></input>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="productCategory">Categoría</label>
+                            <select class="form-control border border-1 p-2" id="productCategory" name="category" required>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" 
+                                        {{ $category->id == old('category', $product->category_id) ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary" id="saveChangesBtn">Guardar Cambios</button>
                     </form>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="saveChangesBtn">Guardar Cambios</button>
+                    <div class="form-group">
+                      <label for="productVariants">Variedades</label>
+                      <div id="variantContainer"></div>
+                      <button type="button" class="btn btn-secondary mt-3" id="addVariantBtn">Agregar Variante</button>
+                      <button type="button" class="btn btn-primary mt-3" id="saveVariantsBtn">Guardar Variantes</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -148,123 +144,15 @@
       </div>
     </div>
   </div>
-      </div>
-      <footer class="footer py-4  ">
-        <div class="container-fluid">
-          <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
-              <div class="copyright text-center text-sm text-muted text-lg-start">
-                © <script>
-                  document.write(new Date().getFullYear())
-                </script>,
-                made with <i class="fa fa-heart"></i> by
-                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                for a better web.
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  </main>
-  <div class="fixed-plugin">
-    <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
-      <i class="material-symbols-rounded py-2">settings</i>
-    </a>
-    <div class="card shadow-lg">
-      <div class="card-header pb-0 pt-3">
-        <div class="float-start">
-          <h5 class="mt-3 mb-0">Material UI Configurator</h5>
-          <p>See our dashboard options.</p>
-        </div>
-        <div class="float-end mt-4">
-          <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
-            <i class="material-symbols-rounded">clear</i>
-          </button>
-        </div>
-        <!-- End Toggle Button -->
-      </div>
-      <hr class="horizontal dark my-1">
-      <div class="card-body pt-sm-3 pt-0">
-        <!-- Sidebar Backgrounds -->
-        <div>
-          <h6 class="mb-0">Sidebar Colors</h6>
-        </div>
-        <a href="javascript:void(0)" class="switch-trigger background-color">
-          <div class="badge-colors my-2 text-start">
-            <span class="badge filter bg-gradient-primary" data-color="primary" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-info active" data-color="dark" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-info" data-color="info" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-success" data-color="success" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-warning" data-color="warning" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-danger" data-color="danger" onclick="sidebarColor(this)"></span>
-          </div>
-        </a>
-        <!-- Sidenav Type -->
-        <div class="mt-3">
-          <h6 class="mb-0">Sidenav Type</h6>
-          <p class="text-sm">Choose between different sidenav types.</p>
-        </div>
-        <div class="d-flex">
-          <button class="btn bg-gradient-info px-3 mb-2" data-class="bg-gradient-info" onclick="sidebarType(this)">Dark</button>
-          <button class="btn bg-gradient-info px-3 mb-2 ms-2" data-class="bg-transparent" onclick="sidebarType(this)">Transparent</button>
-          <button class="btn bg-gradient-info px-3 mb-2  active ms-2" data-class="bg-white" onclick="sidebarType(this)">White</button>
-        </div>
-        <p class="text-sm d-xl-none d-block mt-2">You can change the sidenav type just on desktop view.</p>
-        <!-- Navbar Fixed -->
-        <div class="mt-3 d-flex">
-          <h6 class="mb-0">Navbar Fixed</h6>
-          <div class="form-check form-switch ps-0 ms-auto my-auto">
-            <input class="form-check-input mt-1 ms-auto" type="checkbox" id="navbarFixed" onclick="navbarFixed(this)">
-          </div>
-        </div>
-        <hr class="horizontal dark my-3">
-        <div class="mt-2 d-flex">
-          <h6 class="mb-0">Light / Dark</h6>
-          <div class="form-check form-switch ps-0 ms-auto my-auto">
-            <input class="form-check-input mt-1 ms-auto" type="checkbox" id="dark-version" onclick="darkMode(this)">
-          </div>
-        </div>
-        <hr class="horizontal dark my-sm-4">
-        <a class="btn bg-gradient-info w-100" href="https://www.creative-tim.com/product/material-dashboard-pro">Free Download</a>
-        <a class="btn btn-outline-dark w-100" href="https://www.creative-tim.com/learning-lab/bootstrap/overview/material-dashboard">View documentation</a>
-        <div class="w-100 text-center">
-          <a class="github-button" href="https://github.com/creativetimofficial/material-dashboard" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star creativetimofficial/material-dashboard on GitHub">Star</a>
-          <h6 class="mt-3">Thank you for sharing!</h6>
-          <a href="https://twitter.com/intent/tweet?text=Check%20Material%20UI%20Dashboard%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23bootstrap5&amp;url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fsoft-ui-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
-            <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
-          </a>
-          <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/material-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
-            <i class="fab fa-facebook-square me-1" aria-hidden="true"></i> Share
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
+  </div>
+</main>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
-
 <!-- Github buttons -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 
-<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 
 <script>
   document.querySelectorAll('.thumbnail img').forEach(img => {
@@ -272,9 +160,6 @@
       document.getElementById('mainImage').src = this.src;
     });
   });
-  function editProduct() {
-
-  }
   document.getElementById('addVariantBtn').addEventListener('click', function () {
     const variantContainer = document.getElementById('variantContainer');
 
@@ -333,7 +218,6 @@
 // Función para guardar variantes
 document.getElementById('saveVariantsBtn').addEventListener('click', function () {
     const variantContainer = document.getElementById('variantContainer');
-    // const productId = document.querySelector('input[name="product_id"]').value;
     // Obtener el id del producto desde la tarjeta
     const productId = document.querySelector('.card').getAttribute('data-product-id');
     const variants = [];
@@ -375,52 +259,64 @@ document.getElementById('saveVariantsBtn').addEventListener('click', function ()
     }
 });
 
-// Funcionalidad para agregar variantes
-$('#addVariantBtn').on('click', function() {
-  $('#variantContainer').append(`
-    <div class="form-group variant">
-      <input type="text" class="form-control border border-1 p-2" placeholder="Tamaño" required>
-      <input type="number" class="form-control border border-1 p-2" placeholder="Precio" required>
-      <input type="number" class="form-control border border-1 p-2" placeholder="Stock" required>
-      <button type="button" class="btn btn-danger removeVariantBtn">Eliminar</button>
-    </div>
-  `);
-});
+function editProduct() {
+  // Obtener los datos del producto desde el DOM o una llamada AJAX
+  const productData = {
+    variants: @json($product->variants) // Convertir a JSON los datos de las variantes
+  };
 
-// Eliminar variante
-$(document).on('click', '.removeVariantBtn', function() {
-  $(this).closest('.variant').remove();
-});
-
-// Guardar cambios
-$('#saveChangesBtn').on('click', function() {
-  // Crear un objeto FormData para enviar el formulario
-  const formData = new FormData(document.getElementById('editProductForm'));
-
-  // Añadir las variantes al FormData
-  $('#variantContainer .variant').each(function() {
-    const size = $(this).find('input').eq(0).val();
-    const price = $(this).find('input').eq(1).val();
-    const stock = $(this).find('input').eq(2).val();
-    formData.append('variants[]', JSON.stringify({ size, price, stock }));
+  // Precargar las variantes
+  const variantContainer = document.getElementById('variantContainer');
+  variantContainer.innerHTML = ''; // Limpiar variantes previas
+  productData.variants.forEach(variant => {
+    const variantDiv = document.createElement('div');
+    variantDiv.classList.add('row', 'mb-3');
+    variantDiv.innerHTML = `
+      <div class="col">
+        <label for="Nombre">Talla</label>
+        <input type="text" class="form-control border border-1 p-2" value="${variant.size}" placeholder="Nombre" name="variantName[]">
+      </div>
+      <div class="col">
+        <label for="Precio">Precio USD</label>
+        <input type="number" class="form-control border border-1 p-2" value="${variant.price}" placeholder="Precio" name="variantPrice[]">
+      </div>
+      <div class="col">
+        <label for="Stock">Stock</label>
+        <input type="number" class="form-control border border-1 p-2" value="${variant.stock}" placeholder="Stock" name="variantStock[]">
+      </div>
+    `;
+    variantContainer.appendChild(variantDiv);
   });
+}
 
-  // Enviar la solicitud para actualizar el producto
-  $.ajax({
-    url: '/api/products/' + productId, // Asegúrate de incluir el ID del producto
-    method: 'PUT',
-    data: formData,
-    processData: false,
-    contentType: false,
-    success: function(response) {
-      alert('Producto actualizado con éxito.');
-      $('#editProductModal').modal('hide');
-      location.reload(); // Recargar la página para ver los cambios
-    },
-    error: function(err) {
-      alert('Error al actualizar el producto.');
-    }
-  });
+document.getElementById('editProductForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Evitar que se recargue la página
+  console.log("Formulario enviado");
+    // Crear un objeto con los datos del formulario
+    let formData = new FormData(this);
+
+    const productId = document.querySelector('.card').getAttribute('data-product-id');
+    console.log("productId", productId);
+
+    // Realizar la solicitud fetch con el body en formato JSON
+    fetch(`/api/products/${productId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').value,
+        },
+        body: formData, // Convertir el objeto a JSON
+    })
+    .then(response => {
+        if (response.status === 201) { // Valida el código de estado HTTP
+          alert('Producto actualizado correctamente');
+          window.location.reload();
+        } else {
+          throw new Error('Error al crear la categoría');
+        }
+      })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 });
 
 </script>

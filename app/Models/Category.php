@@ -9,8 +9,19 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'is_active'];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::updated(function ($category) {
+            if ($category->isDirty('is_active') && !$category->is_active) {
+                // Inactivar todos los productos relacionados
+                $category->products()->update(['is_active' => false]);
+            }
+        });
+    }
     // Relación con productos
     public function products()
     {

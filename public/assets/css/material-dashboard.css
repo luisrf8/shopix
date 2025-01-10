@@ -25753,21 +25753,25 @@ hr.horizontal.gray-light {
 }
 
 @media (max-width: 1199.98px) {
-  .g-sidenav-show.rtl .sidenav {
+  /* .g-sidenav-show.rtl .sidenav {
     transform: translateX(15.5rem);
+  } */
+
+  #sidenav-main {
+    /* display: none; */
   }
 
   .g-sidenav-show:not(.rtl) .sidenav {
-    transform: translateX(-15.5rem);
+    /* transform: translateX(-15.5rem); */
   }
-
+/* 
   .g-sidenav-show .sidenav.fixed-start+.main-content {
     margin-left: 0 !important;
   }
 
   .g-sidenav-show.g-sidenav-pinned .sidenav {
     transform: translateX(0);
-  }
+  } */
 }
 
 .navbar-vertical.bg-white {

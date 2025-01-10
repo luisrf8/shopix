@@ -17,6 +17,7 @@ class CreateCurrenciesTable extends Migration
             $table->id();
             $table->string('code', 10)->unique(); // Ejemplo: USD, EUR, VES
             $table->string('name'); // Ejemplo: Dólar, Euro, Bolívar
+            $table->boolean('status')->default(true);  // Agregar la columna status
             $table->timestamps();
         });
     }

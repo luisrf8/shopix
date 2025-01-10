@@ -16,7 +16,9 @@ class CreatePaymentMethodsTable extends Migration
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->foreignId('currency_id')->constrained()->onDelete('cascade');
             $table->string('description')->nullable();
+            $table->boolean('status')->default(true);  // Agregar la columna status
             $table->timestamps();
         });
         

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Support\Facades\Storage;
@@ -25,8 +26,13 @@ class ProductController extends Controller
     public function index()
     {
         $categories = Category::all();
-        $productItems = Product::all();
+        $productItems = Product::with(['category', 'images', 'variants'])->get();
         return view('products', compact('categories', 'productItems')); // Asegúrate de tener una vista para mostrar las categorías.
+    }
+    public function getProducts()
+    {
+        $productItems = Product::with('variants')->get();
+        return response()->json($productItems);
     }
     public function categoriesIndex()
     {
@@ -41,48 +47,74 @@ class ProductController extends Controller
     
         return view('products', compact('productItems', 'category', 'categories'));
     }
+    public function showByCategoryEcomm($categoryId)
+    {
+        $category = Category::findOrFail($categoryId);
+        $categories = Category::all();
+        $productItems = Product::where('category_id', $category->id)
+        ->with(['images', 'variants'])
+        ->get();
+        return response()->json($productItems);
+    }
     public function showByProduct($id)
     {
-        $product = Product::findOrFail($id);
-
-        return view('productItem', compact('product'));
+        $product = Product::with(['variants', 'images', 'category'])->findOrFail($id);
+        $categories = Category::all();
+        return view('productItem', compact('product', 'categories'));
     }
     public function create(Request $request)
     {
-        // Validar los datos del producto y las imágenes
+        // dd($request);
+        // Validar los datos del producto y las variantes
         $request->validate([
-            'category_id' => 'required|numeric',
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'category_id' => 'required|numeric',
+            // 'productName' => 'required|string|max:255',
+            // 'productDescription' => 'required|string',
+            // 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'variants' => 'nullable|array',
+        ],
+         [
+            'productName.unique' => 'El nombre del producto ya está registrado. Por favor, elige otro.',
         ]);
-
+    
         // Crear el producto
         $product = Product::create([
             'category_id' => $request->category_id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
+            'name' => $request->productName,
+            'description' => $request->productDescription,
         ]);
-
-        // Guardar cada imagen en el almacenamiento local y en la base de datos
+        // Guardar cada imagen
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                // Guarda la imagen en el almacenamiento local (storage/app/public/products)
                 $path = $image->store('products', 'public');
-
-                // Crear un registro en la tabla de imágenes del producto con la ruta de la imagen
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'path' => $path, // Ruta de la imagen en el sistema de archivos
+                    'path' => $path,
                 ]);
             }
         }
+        $variants = $request->variants;
+        if (is_string($variants)) {
+            $variants = json_decode($variants, true);
+        }
+        // Crear las variantes con stock
+        if (!empty($variants) && is_array($variants)) {
+            foreach ($variants as $variant) {
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'size' => $variant['name'],
+                    'price' => $variant['price'],
+                    'stock' => $variant['stock'], // Agregar el stock aquí
+                ]);
+            }
+        }
+    
+        return response()->json(['success' => true, 'message' => 'Product created successfully']);
+        // return response()->json(['message' => 'Category created successfully', 'product' => $product], 201);
 
-        // Responder con éxito
-        return response()->json(['message' => 'Product created successfully', 'product' => $product], 201);
     }
+    
+    
     public function storeGoogle(Request $request)
     {
         $request->validate([
@@ -130,17 +162,17 @@ class ProductController extends Controller
 
     public function update1(Request $request, Product $product)
     {
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'price' => 'sometimes|required|numeric',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        // $request->validate([
+        //     'name' => 'sometimes|required|string|max:255',
+        //     'description' => 'sometimes|required|string',
+        //     'price' => 'sometimes|required|numeric',
+        //     'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        // ]);
 
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
-            'price' => $request->price,
+            'category_id' => $request->category,
         ]);
 
         if ($request->hasFile('images')) {
@@ -183,22 +215,21 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
     }
     public function show($id) {
-        $product = Product::with(['product_images', 'product_variants'])->find($id);
+        $product = Product::with(['images', 'variants', 'category'])->findOrFail($id);
+        dd($product); // Esto te mostrará los datos completos del producto
         return response()->json($product);
     }
     
     public function update(Request $request, $id) {
-        $product = Product::find($id);
-        $product->name = $request->input('name');
-        $product->description = $request->input('description');
-        $product->price = $request->input('price');
-        $product->category_id = $request->input('category_id');
+        $product = Product::findOrFail($id);
+        $product->name = $request->name;
+        $product->description = $request->description;
+        $product->category_id = $request->category;
         
-        // Manejar imágenes y variantes aquí
-        // ...
-    
         $product->save();
-        return response()->json(['message' => 'Producto actualizado con éxito.']);
+        return response()->json(['message' => 'Producto actualizado con éxito.', 'Producto' => $product], 201);
+
+
     }
     
 }

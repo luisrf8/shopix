@@ -23,9 +23,9 @@
 
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    @extends('layouts.navbar')
+<body class="g-sidenav-show  bg-gray-100" id="d-body">
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 d-none d-lg-block bg-white my-2" id="sidenav-main">
+    @include('layouts.navbar')
   </aside>
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
@@ -99,10 +99,12 @@
     <div class="pb-0 px-3">
       <h6 class="mb-0">Productos</h6>
     </div>
-    <div class="py-1 px-3 text-end" data-bs-toggle="modal" data-bs-target="#createProductModal" onclick="getSucursales()">
-      <label>
-        + Agregar Producto
-      </label>
+    <div class="py-1 px-3 text-end" onclick="getSucursales()">
+      <a class="nav-link text-dark" href="/createProduct">
+        <label>
+          + Agregar Producto
+        </label>
+      </a>
     </div>
     <!-- Modal para crear producto -->
     <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel" aria-hidden="true">
@@ -151,27 +153,54 @@
     <!-- Fin Modal para crear producto -->
     <div class="pt-4">
       <div class="row">
-        @foreach($productItems as $product)
-        <div class="col-md-4 mb-10">
-          <div class="card p-4 d-flex flex-row">
+      @foreach($productItems as $product)
+    <div class="col-md-4 mb-10">
+        <div class="card p-4 d-flex flex-row">
             <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
-              <!-- Si tienes una imagen para el producto, puedes usar $product->image -->
-              <!-- <img src="{{ $product->image }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> -->
-              <i class="material-symbols-rounded text-dark">photo_camera</i>
+                <i class="material-symbols-rounded text-dark">photo_camera</i>
             </a>
-            <!-- <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-info">Ver Producto</a> -->
+
             <div class="d-flex flex-column mx-3">
-              <h6 class="mb-2 text-sm">{{ $product->name }}</h6>
-              <span class="mb-2 text-xs">Tallas: <span class="text-dark font-weight-bold ms-sm-2">{{ $product->sizes }}</span></span>
-              <span class="text-xs">Precio: <span class="text-dark ms-sm-2 font-weight-bold">{{ $product->price }}$</span></span>
+                <h6 class="mb-2 text-sm">{{ $product->name }}</h6>
+
+                <!-- Mostrar las tallas -->
+                <span class="mb-2 text-xs">
+                    Tallas: 
+                    @php
+                        $sizes = $product->variants->pluck('size')->join(' / ');
+                    @endphp
+                    <span class="text-dark font-weight-bold ms-sm-2">{{ $sizes }}</span>
+                </span>
+
+                <!-- Mostrar el estado de stock -->
+                <span class="text-xs">
+                    Stock: 
+                    @php
+                        $allInStock = $product->variants->every(function ($variant) {
+                            return $variant->stock > 0;
+                        });
+                    @endphp
+                    @if($allInStock)
+                        <span class="text-success font-weight-bold ms-sm-2">Disponible</span>
+                    @else
+                        @foreach($product->variants as $variant)
+                            <div class="text-dark font-weight-bold ms-sm-2">
+                                Talla {{ $variant->size }}: {{ $variant->stock }} en stock
+                            </div>
+                        @endforeach
+                    @endif
+                </span>
+
             </div>
-          <div class="ms-auto text-end">
-            <a class="btn btn-link text-danger text-gradient" href="javascript:void(0);" onclick="deleteProduct({{ $product->id }})"><i class="material-symbols-rounded text-sm">delete</i>Delete</a>
-            <a class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Edit</a>
-          </div>
+
+            <div class="ms-auto text-end">
+                <!-- <a class="btn btn-link text-danger text-gradient" href="javascript:void(0);" onclick="deleteProduct({{ $product->id }})"><i class="material-symbols-rounded text-sm">delete</i>Delete</a> -->
+                <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Edit</a>
+            </div>
         </div>
-      </div>
-        @endforeach
+    </div>
+@endforeach
+
     </div>
   </div>
 </div>

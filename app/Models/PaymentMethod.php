@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class PaymentMethod extends Model
 {
     use HasFactory;
+    
+    protected $fillable = ['name', 'currency_id'];
+    
+    public function currency()
+        {
+            return $this->belongsTo(Currency::class);
+        }
 }

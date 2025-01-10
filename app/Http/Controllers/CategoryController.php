@@ -55,13 +55,27 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string',
         ]);
-
+    
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
         ]);
+    
+        // Recargar la categoría con los datos actualizados
+        $category->refresh();
+        return response()->json([
+            'message' => 'Categoría actualizada con éxito.',
+            'category' => $category
+        ], 200); // Cambié el código de estado a 200 para indicar éxito en una actualización
+    }
 
-        return redirect()->route('categories.index')->with('success', 'Categoría actualizada con éxito.');
+    public function toggleStatus($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->is_active = !$category->is_active; // Cambia el estado
+        $category->save();
+
+        return response()->json(['status' => 'success', 'new_status' => $category->is_active], 200);
     }
 
     public function destroy(Category $category)

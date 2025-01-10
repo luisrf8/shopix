@@ -36,7 +36,7 @@
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
+<body class="bg-gray-100">
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
@@ -68,9 +68,23 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link text-dark" href="/paymentMethods">
+            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+            <!-- <i class="bi bi-bag"></i> -->
+            <span class="nav-link-text ms-1">Métodos de Pago</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link text-dark" href="/sales">
             <i class="material-symbols-rounded opacity-5">receipt_long</i>
             <span class="nav-link-text ms-1">Ventas</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/purchase">
+            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+            <!-- <i class="bi bi-bag"></i> -->
+            <span class="nav-link-text ms-1">Compras</span>
           </a>
         </li>
         <!-- <li class="nav-item">
@@ -92,18 +106,19 @@
           </a>
         </li> -->
         <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages</h6>
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Usuarios</h6>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/profile.html">
-            <i class="material-symbols-rounded opacity-5">person</i>
-            <span class="nav-link-text ms-1">Profile</span>
-          </a>
-        </li> -->
         <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/sign-in.html">
-            <i class="material-symbols-rounded opacity-5">login</i>
-            <span class="nav-link-text ms-1">Log Out</span>
+          <a class="nav-link text-dark" href="/users">
+            <i class="material-symbols-rounded opacity-5">person</i>
+            <span class="nav-link-text ms-1">Gestión de usuarios</span>
+          </a>
+        </li>
+        <li class="nav-item d-flex" onclick="logOut()">
+          <a class="nav-link text-dark">
+            <!-- <i class="bi bi-person-circle"></i> -->
+            <i class="material-symbols-rounded opacity-5">supervised_user_circle</i>
+            <span class="nav-link-text ms-1">Cerrar Sesión</span>
           </a>
         </li>
         <!-- <li class="nav-item">
@@ -162,6 +177,7 @@
 </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <script src="{{ asset('assets/js/navbar.js') }}"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 </body>
 
