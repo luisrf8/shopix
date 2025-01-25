@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PaymentMethodController;
 // use App\Http\Controllers\IndexController;
 // use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\UserController;
@@ -36,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users');
     Route::get('/products', [ProductController::class, 'index'])->name('products');
     Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
+    Route::get('/paymentMethods', [PaymentMethodController::class, 'index'])->name('paymentMethods');
     Route::get('/products/{category}', [ProductController::class, 'showByCategory'])->name('products.byCategory');
     Route::get('/products/product/{id}', [ProductController::class, 'showByProduct'])->name('productItem');
     Route::get('/createProduct', function () {

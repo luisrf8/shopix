@@ -49,9 +49,9 @@
                 <h6 class="mb-0">Monedas</h6>
               </div>
               <div class="col-6 text-end">
-                <button class="btn bg-gradient-info mb-0" data-bs-toggle="modal" data-bs-target="#createCurrencyModal">
+                <!-- <button class="btn bg-gradient-info mb-0" data-bs-toggle="modal" data-bs-target="#createCurrencyModal">
                   <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Nueva Moneda
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
@@ -62,7 +62,7 @@
                 <div class="col-md-6 mb-md-0 mb-4">
                   <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
                     <h6 class="mb-0">{{ $currency->name }} / {{$currency->code}}</h6>
-                    <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Moneda">edit</i>
+                    <!-- <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Moneda">edit</i> -->
                   </div>
                 </div>
               @endforeach
@@ -80,21 +80,21 @@
                 <h6 class="mb-0">Métodos de Pago</h6>
               </div>
               <div class="col-6 text-end">
-                <button class="btn bg-gradient-info mb-0" data-bs-toggle="modal" data-bs-target="#createPaymentMethodModal">
+                <!-- <button class="btn bg-gradient-info mb-0" data-bs-toggle="modal" data-bs-target="#createPaymentMethodModal">
                   <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Nuevo Método de Pago
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
           <div class="card-body p-3">
             @foreach($groupedPaymentMethods as $currencyName => $methods)
-              <h6 class="mb-0">{{ $currencyName }}</h6>
+              <h6 class="mb-2">{{ $currencyName }}</h6>
               <div class="row">
                 @foreach($methods as $method)
                   <div class="col-md-6 mb-md-0 mb-4">
-                    <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                    <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row mb-4">
                       <h6 class="mb-0">{{ $method->name }}</h6>
-                      <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Método">edit</i>
+                      <!-- <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Método">edit</i> -->
                     </div>
                   </div>
                 @endforeach
