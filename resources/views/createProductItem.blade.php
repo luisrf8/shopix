@@ -3,57 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Product</title>
+    <title>Crear Producto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="g-sidenav-show  bg-gray-100" id="d-body">
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
     @extends('layouts.navbar')
   </aside>
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
   @include('layouts.head')
 
     <div class="container">
-        <h1 class="text-center">Create Product</h1>
+        <h1 class="text-center">Crear Producto</h1>
 
         <form id="createProductForm" enctype="multipart/form-data">
             @csrf
             <!-- Product Name -->
             <div class="mb-3">
-                <label for="productName" class="form-label">Product Name</label>
-                <input type="text" id="productName" name="productName" class="form-control border border-radius-lg p-2" placeholder="Enter product name" required>
+                <label for="productName" class="form-label">Nombre del Producto</label>
+                <input type="text" id="productName" name="productName" class="form-control border border-radius-lg p-2" placeholder="Ingrese el nombre del producto" required>
             </div>
 
             <!-- Product Category -->
             <div class="mb-3">
-                <label for="categorySelector" class="form-label">Category</label>
+                <label for="categorySelector" class="form-label">Categoría</label>
                 <select id="categorySelector" name="category_id" class="form-select border border-radius-lg p-2" required>
-                    <option value="">Select a category</option>
+                    <option value="">Seleccione una categoría</option>
                 </select>
             </div>
 
             <!-- Product Description -->
             <div class="mb-3">
-                <label for="productDescription" class="form-label">Description</label>
-                <textarea id="productDescription" name="productDescription" class="form-control border border-radius-lg p-2" rows="3" placeholder="Enter product description" required></textarea>
+                <label for="productDescription" class="form-label">Descripcion</label>
+                <textarea id="productDescription" name="productDescription" class="form-control border border-radius-lg p-2" rows="3" placeholder="Ingrese la descripcion del producto"></textarea>
             </div>
 
             <!-- Product Images -->
             <div class="mb-3">
-                <label for="productImages" class="form-label">Images</label>
+                <label for="productImages" class="form-label">Imagenes</label>
                 <input type="file" id="productImages" name="images[]" class="form-control border border-radius-lg p-2" multiple accept="image/*">
                 <div id="imagePreview" class="mt-3 d-flex flex-wrap"></div>
             </div>
 
             <!-- Product Variants -->
             <div class="mb-3">
-                <label class="form-label">Variants</label>
+                <label class="form-label">Variantes</label>
                 <div id="variantContainer"></div>
-                <button type="button" id="addVariantBtn" class="btn btn-secondary mt-2">Add Variant +</button>
+                <button type="button" id="addVariantBtn" class="btn btn-secondary mt-2">Agregar Variante +</button>
             </div>
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-info">Create Product</button>
+            <div class="text-end">
+                <button type="submit" class="btn btn-info">Crear Producto</button>
+            </div>
         </form>
     </div>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

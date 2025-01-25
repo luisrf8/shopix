@@ -113,7 +113,40 @@ class ProductController extends Controller
         // return response()->json(['message' => 'Category created successfully', 'product' => $product], 201);
 
     }
+        // Función para agregar una imagen
+        public function addImage(Request $request, $productId)
+        {
+            $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
     
+            // Guardar la imagen en el almacenamiento
+            $path = $request->file('image')->store('products', 'public');
+    
+            // Asociar la imagen al producto
+            ProductImage::create([
+                'product_id' => $productId,
+                'path' => $path,
+            ]);
+    
+            return redirect()->back()->with('success', 'Imagen agregada correctamente.');
+        }
+    
+        // Función para eliminar una imagen
+        public function removeImage($imageId)
+        {
+            $image = ProductImage::findOrFail($imageId);
+    
+            // Eliminar la imagen del almacenamiento
+            if (Storage::disk('public')->exists($image->path)) {
+                Storage::disk('public')->delete($image->path);
+            }
+    
+            // Eliminar el registro de la base de datos
+            $image->delete();
+    
+            return response()->json(['success' => true, 'message' => 'Imagen eliminada correctamente.']);
+        }
     
     public function storeGoogle(Request $request)
     {

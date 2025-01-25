@@ -52,11 +52,16 @@ class ProductVariantController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer',
         ]);
-
-        $productVariant->update($request->all());
-
-        return redirect()->route('products.show', $productVariant->product_id)
-                         ->with('success', 'Variante actualizada exitosamente.');
+    
+        // Actualizar la variante con los datos proporcionados
+        $productVariant->update($request->only(['size', 'price', 'stock']));
+    
+        // Responder con JSON para las solicitudes AJAX
+        return response()->json([
+            'success' => true,
+            'message' => 'Variante actualizada exitosamente.',
+            'variant' => $productVariant
+        ]);
     }
 
     public function destroy(ProductVariant $productVariant)

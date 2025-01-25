@@ -56,14 +56,10 @@
         })
         .then(response => {
             return response.json().then(data => {
-                if (response.ok) {
+                console.log("response", data)
                     // Almacena el token y redirige al dashboard
-                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('authToken', data.token);
                     window.location.href = '/dashboard'; // Redirección al dashboard
-                } else {
-                    console.error(data.message);
-                    alert(data.message); // Muestra el mensaje de error
-                }
             });
         })
         .catch(error => {

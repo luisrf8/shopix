@@ -1,57 +1,60 @@
 <?php
-
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\PurchaseOrderController;
-use App\Http\Controllers\PaymentMethodController;
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\AuthenticatedSessionController;
+// use App\Http\Controllers\IndexController;
+// use App\Http\Controllers\AlmacenController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
-/*
-|----------------------------------------------------------------------
-| Web Routes
-|----------------------------------------------------------------------
-*/
-
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+         ->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    
+    Route::get('register', [RegisteredUserController::class, 'create'])
+    ->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+});
+// web.php
 Route::get('/', function () {
     return view('ecommerce');
 });
 
-// Rutas sin autenticación
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
-
-Route::get('/register', function () {
-    return view('register');
-});
-
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-->name('logout');
-// Rutas protegidas por el middleware 'auth'
-Route::middleware(['auth'])->group(function () {
+// Route::middleware('auth')->get('/dashboard', function () {
+    //     return view('dashboard');
+    // });
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-    Route::get('/users', [UserController::class, 'index'])->name('products');
-    Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
-    Route::post('/categories/{category}', [CategoryController::class, 'update']);
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    // Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
+    Route::get('/users', [UserController::class, 'index'])->name('users');
     Route::get('/products', [ProductController::class, 'index'])->name('products');
+    Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
     Route::get('/products/{category}', [ProductController::class, 'showByCategory'])->name('products.byCategory');
     Route::get('/products/product/{id}', [ProductController::class, 'showByProduct'])->name('productItem');
-    Route::get('/purchase', [PurchaseOrderController::class, 'index'])->name('purchase');
-    Route::get('/profile', function () {
-        return view('profile');
-    });
     Route::get('/createProduct', function () {
         return view('createProductItem');
     })->name('createProduct');
-    // Nueva ruta para ventas
-    Route::get('/sales', [SaleController::class, 'index'])->name('sales');
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile');
 
-    Route::get('/paymentMethods', [PaymentMethodController::class, 'index'])->name('paymentMethods');
+    // Nuevas rutas para ventas y compras
+    Route::get('/sales', function () {
+        return view('sales');
+    })->name('sales');
+
+    Route::get('/purchase', [PurchaseOrderController::class, 'index'])->name('purchase');
+    Route::get('/purchase-orders', [PurchaseOrderController::class, 'viewOrders'])->name('purchase.orders');
+    Route::get('/order/{id}', [PurchaseOrderController::class, 'showByOrder'])->name('showByOrder');
 
 });
 
+
+require __DIR__.'/auth.php';

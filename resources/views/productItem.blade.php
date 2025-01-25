@@ -47,30 +47,45 @@
               <!-- <div class="card"> -->
               <div class="card" data-product-id="{{ $product->id }}">
                   <div class="card-body d-flex flex-row">
-                    
-                    <!-- Column for thumbnails -->
-                    <div class="d-flex flex-column me-3 gap-2">
-                      <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
-                        <i class="material-symbols-rounded text-dark">photo_camera</i>
-                        <!-- <img src="{{ $product->image1 }}" alt="{{ $product->name }} image 1" style="width: 5rem; height: 5rem; object-fit: cover; cursor: pointer; border: 1px solid #ddd;"> -->
-                      </div>
-                      <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
-                        <i class="material-symbols-rounded text-dark">photo_camera</i>
-                        <!-- <img src="{{ $product->image2 }}" alt="{{ $product->name }} image 2" style="width: 5rem; height: 5rem; object-fit: cover; cursor: pointer; border: 1px solid #ddd;"> -->
-                      </div>
-                      <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
-                        <i class="material-symbols-rounded text-dark">photo_camera</i>
-                        <!-- <img src="{{ $product->image3 }}" alt="{{ $product->name }} image 3" style="width: 5rem; height: 5rem; object-fit: cover; cursor: pointer; border: 1px solid #ddd;"> -->
-                      </div>
-                      <div class="text-info">
-                        <p class="text-info">Add img +</p>
-                        <!-- <img src="{{ $product->image2 }}" alt="{{ $product->name }} image 2" style="width: 5rem; height: 5rem; object-fit: cover; cursor: pointer; border: 1px solid #ddd;"> -->
+                    <div class="position-relative" style="width: 25rem; height: 25rem;">
+                      <p class="text-info position-absolute top-0 end-0 m-2">
+                        @if(isset($product->images) && count($product->images) > 0)
+                          <button class="btn btn-danger btn-sm" onclick="confirmRemoveImage({{ $product->images[0]->id }})">Eliminar imagen</button>
+                        @else
+                          <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addImageModal">Agregar imagen +</button>
+                        @endif
+                      </p>
+                      <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg w-100 h-100">
+                        @if(isset($product->images) && count($product->images) > 0)
+                          <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                        @else
+                          <i class="material-symbols-rounded text-dark" style="font-size: 5rem;">photo_camera</i>
+                        @endif
                       </div>
                     </div>
-                    <!-- Main image display -->
-                    <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 25rem; height: 25rem;">
-                      <i class="material-symbols-rounded text-dark">photo_camera</i>
-                      <!-- <img id="mainImage" src="{{ $product->image1 }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;"> -->
+                    <!-- Modal para agregar imagen -->
+                    <div class="modal fade" id="addImageModal" tabindex="-1" aria-labelledby="addImageModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <form id="addImageForm" method="POST" action="{{ route('product.addImage', $product->id) }}" enctype="multipart/form-data">
+                          @csrf
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="addImageModalLabel">Agregar imagen</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <div class="mb-3">
+                                <label for="image" class="form-label">Seleccionar imagen</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                              <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                     <!-- Product details -->
                     <div class="mx-4">
@@ -81,7 +96,7 @@
                       <p><strong>Tallas:</strong>
                         <ul>
                           @foreach ($product->variants as $variant)
-                              <li>{{ $variant->size }} - {{ $variant->price }} $</li>
+                              <li>Talla: {{ $variant->size }} - Precio: {{ $variant->price }} $ - {{$variant->stock}} unidades disponibles</li>
                           @endforeach
                         </ul>
                       </p>
@@ -126,14 +141,13 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                         <button type="submit" class="btn btn-primary" id="saveChangesBtn">Guardar Cambios</button>
                     </form>
                     <div class="form-group">
                       <label for="productVariants">Variedades</label>
                       <div id="variantContainer"></div>
                       <button type="button" class="btn btn-secondary mt-3" id="addVariantBtn">Agregar Variante</button>
-                      <button type="button" class="btn btn-primary mt-3" id="saveVariantsBtn">Guardar Variantes</button>
+                      <button type="button" class="btn btn-primary mt-3" id="saveVariantsBtn">Guardar Variantes Creadas</button>
                     </div>
                   </div>
                 </div>
@@ -165,16 +179,16 @@
 
     // Crear un nuevo div para la variante
     const variantDiv = document.createElement('div');
-    variantDiv.classList.add('col-6', 'mb-3');
+    variantDiv.classList.add('col', 'mb-3');
 
     // Crear contenedor para inputs
     const inputContainer = document.createElement('div');
-    inputContainer.classList.add('input-group', 'gap-2');
+    inputContainer.classList.add('input-group', 'gap-4');
 
     // Input para el nombre de la variante
     const variantInput = document.createElement('input');
     variantInput.type = 'text';
-    variantInput.placeholder = 'Nombre';
+    variantInput.placeholder = 'Talla';
     variantInput.classList.add('form-control', 'border', 'border-1', 'p-2');
     variantInput.name = 'size';
 
@@ -195,7 +209,7 @@
     // Botón para eliminar la variante
     const deleteBtn = document.createElement('button');
     deleteBtn.innerText = 'Eliminar';
-    deleteBtn.classList.add('btn', 'btn-danger', 'mt-2');
+    deleteBtn.classList.add('btn', 'btn-danger', 'mt-2', 'ms-auto');
 
     // Funcionalidad para eliminar la variante
     deleteBtn.addEventListener('click', function () {
@@ -284,11 +298,67 @@ function editProduct() {
         <label for="Stock">Stock</label>
         <input type="number" class="form-control border border-1 p-2" value="${variant.stock}" placeholder="Stock" name="variantStock[]">
       </div>
+      <div class="col pt-2">
+        <button type="button" class="btn btn-primary mt-4 editVariantBtn" data-id="${variant.id}">Editar</button>
+      </div>
     `;
     variantContainer.appendChild(variantDiv);
   });
-}
 
+  // Agregar evento al botón "Editar"
+  document.querySelectorAll('.editVariantBtn').forEach(button => {
+    button.addEventListener('click', function () {
+      const variantId = this.getAttribute('data-id');
+      const variantRow = this.closest('.row');
+      const size = variantRow.querySelector('input[name="variantName[]"]').value;
+      const price = variantRow.querySelector('input[name="variantPrice[]"]').value;
+      const stock = variantRow.querySelector('input[name="variantStock[]"]').value;
+
+      // Realizar una solicitud AJAX para actualizar la variante
+      fetch(`/api/variants/${variantId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ size, price, stock })
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Variante actualizada exitosamente.');
+            window.location.reload()
+          } else {
+            throw new Error('Error al actualizar la variante.');
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert('Hubo un problema al actualizar la variante.');
+        });
+    });
+  });
+}
+function confirmRemoveImage(imageId) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
+      fetch(`/api/product/remove-image/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Imagen eliminada correctamente');
+          location.reload();
+        } else {
+          alert('Error al eliminar la imagen');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  }
 document.getElementById('editProductForm').addEventListener('submit', function(event) {
   event.preventDefault(); // Evitar que se recargue la página
   console.log("Formulario enviado");

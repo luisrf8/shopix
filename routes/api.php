@@ -47,10 +47,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Ruta para crear el producto
     Route::post('/create-product', [ProductController::class, 'create']);
-
+    Route::post('/addImage/{productId}', [ProductController::class, 'addImage'])->name('product.addImage');
+    Route::delete('/product/remove-image/{imageId}', [ProductController::class, 'removeImage'])->name('product.removeImage');
     
     // Variantes de productos
     Route::post('/variants/store', [ProductVariantController::class, 'store'])->name('variants.store');
+    Route::put('/variants/{productVariant}', [ProductVariantController::class, 'update'])->name('variants.update');
 
     Route::prefix('payment-methods')->group(function () {
         Route::post('/create', [PaymentMethodController::class, 'create']);
