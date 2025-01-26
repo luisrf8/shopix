@@ -81,7 +81,7 @@ input[type="checkbox"]:checked + .position-absolute {
                 <!-- Input para el nombre del proveedor -->
                 <div class="mb-3">
                     <label for="providerName" class="form-label">Nombre del Proveedor</label>
-                    <input type="text" id="providerName" class="form-control" placeholder="Escribe el nombre del proveedor">
+                    <input type="text" id="providerName" class="form-control border border-1 p-2" placeholder="Escribe el nombre del proveedor">
                 </div>
                 <button type="button" class="btn btn-secondary mt-3" id="backToStep2">Atrás</button>
                 <button type="button" class="btn btn-info mt-3" id="toStep4" disabled>Siguiente</button>
@@ -137,7 +137,7 @@ input[type="checkbox"]:checked + .position-absolute {
                     alert('Por favor selecciona al menos un producto');
                     return;
                 }
-                fetch('api/get-variants', {
+                fetch('api/sales/get-variants', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -154,21 +154,20 @@ input[type="checkbox"]:checked + .position-absolute {
                 })
                 // Loop through variants
                 .then((data) => {
+                console.log("data", data)
                     const variantContainer = document.getElementById('variantContainer');
                     variantContainer.innerHTML = ''; // Limpiar contenido previo
                     variantContainer.className = 'row row-cols-1 row-cols-md-3 g-3 gap-4';
 
                     // Mostrar variantes agrupadas por producto
                     data.forEach((product) => {
-                        const matchedItem = selectedItems.find(item => item.id === product.product_id.toString());
-
                         // Crear una tarjeta para cada producto
                         const productCard = document.createElement('div');
                         productCard.classList.add('card', 'mb-4', 'shadow', 'col-4', 'p-0', 'w-20', 'h-100');
 
                         const productHeader = document.createElement('div');
                         productHeader.classList.add('card-header', 'bg-info', 'text-white', 'fw-bold');
-                        productHeader.textContent = `Producto: ${matchedItem ? matchedItem.name : 'Desconocido'}`;
+                        productHeader.textContent = `Producto: ${product.product_name}`;
                         productCard.appendChild(productHeader);
 
                         const productBody = document.createElement('div');
@@ -180,27 +179,20 @@ input[type="checkbox"]:checked + .position-absolute {
                             variantRow.classList.add('mb-2', 'border-bottom', 'pb-2');
 
                             const variantLabel = document.createElement('div');
-                            variantLabel.textContent = `Variante: ${variant.type || 'Sin nombre'}`;
+                            variantLabel.textContent = `Talla: ${variant.size || 'Sin nombre'}`;
                             variantLabel.classList.add('me-3', 'fw-bold');
 
                             const sizeLabel = document.createElement('div');
-                            sizeLabel.textContent = `Tamaño: ${variant.size || 'Sin nombre'}`;
+                            sizeLabel.textContent = `Stock: ${variant.stock || 'Sin nombre'}`;
                             sizeLabel.classList.add('me-3');
 
-                            const storageLabel = document.createElement('div');
-                            storageLabel.textContent = `Almacenaje: ${variant.storage_description || 'Sin nombre'}`;
-                            storageLabel.classList.add('me-3');
-
-                            const lifeLabel = document.createElement('div');
-                            lifeLabel.textContent = `Vida útil: ${variant.shelf_life_description || 'Sin nombre'}`;
-                            lifeLabel.classList.add('me-3', 'mb-3');
-        // Crear el campo de precio como un input (similar a la cantidad)
+                        // Crear el campo de precio como un input (similar a la cantidad)
                             const priceInput = document.createElement('input');
                             priceInput.type = 'number'; // Usamos number para que el usuario pueda ingresar un valor numérico
                             priceInput.placeholder = 'Precio';
                             priceInput.min = 1; // El precio no puede ser negativo
                             priceInput.id = `inputPrice_${product.product_id}_${variant.id}`;
-                            priceInput.classList.add('form-control', 'w-auto', 'border', 'border-1', 'p-2', 'bg-white', 'input-price'); // Estilos
+                            priceInput.classList.add('form-control', 'w-auto', 'border', 'border-1', 'p-2', 'bg-white', 'input-price', 'mb-2'); // Estilos
 
                             const quantityInput = document.createElement('input');
                             quantityInput.type = 'number';
@@ -216,7 +208,7 @@ input[type="checkbox"]:checked + .position-absolute {
                                 if (quantity > 0 && price > 0) {
                                     const selectedProduct = {
                                         product_id: product.product_id,
-                                        name: matchedItem ? matchedItem.name : 'Desconocido',
+                                        name: product.product_name,
                                         variant: variant, // Guardamos la variante específica
                                         quantity: quantity,
                                         price: price
@@ -242,8 +234,6 @@ input[type="checkbox"]:checked + .position-absolute {
                             // Agregar la variante a la tarjeta del producto
                             variantRow.appendChild(variantLabel);
                             variantRow.appendChild(sizeLabel);
-                            variantRow.appendChild(storageLabel);
-                            variantRow.appendChild(lifeLabel);
                             variantRow.appendChild(priceInput); 
                             variantRow.appendChild(quantityInput);
 
@@ -309,21 +299,25 @@ input[type="checkbox"]:checked + .position-absolute {
                     dataRow.classList.add('d-flex', 'align-items-center', 'mb-2');
 
                     const productLabel = document.createElement('span');
-                    productLabel.textContent = `Producto: ${data.product_id || 'Sin nombre'}`;
+                    productLabel.textContent = `Producto: ${data.name || 'Sin nombre'}`;
                     productLabel.classList.add('me-3');
 
                     const variantLabel = document.createElement('span');
-                    variantLabel.textContent = `Variante: ${data.variant_id || 'Sin nombre'}`;
+                    variantLabel.textContent = `Variante: ${data.variant.size || 'Sin nombre'}`;
                     variantLabel.classList.add('me-3');
 
                     const quantityLabel = document.createElement('span');
                     quantityLabel.textContent = `Cantidad: ${data.quantity || 'Sin nombre'}`;
                     quantityLabel.classList.add('me-3');
 
+                    const priceLabel = document.createElement('span');
+                    priceLabel.textContent = `Precio: ${data.price || 'Sin nombre'} USD`;
+                    priceLabel.classList.add('me-3');
+
                     if (Array.isArray(data.providers) && data.providers.length > 0) {
                         data.providers.forEach(provider => {
                             const providerLabel = document.createElement('span');
-                            providerLabel.textContent = `Proveedor ID: ${provider}`;
+                            providerLabel.textContent = `Proveedor: ${provider}`;
                             providerLabel.classList.add('me-3');
                             dataRow.appendChild(providerLabel);
                         });
@@ -334,6 +328,7 @@ input[type="checkbox"]:checked + .position-absolute {
                     dataRow.appendChild(productLabel);
                     dataRow.appendChild(variantLabel);
                     dataRow.appendChild(quantityLabel);
+                    dataRow.appendChild(priceLabel);
 
                     // Agregar la fila al contenedor de proveedores
                     providerContainer.appendChild(dataRow);

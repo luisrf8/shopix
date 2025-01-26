@@ -90,7 +90,13 @@
           <a class="nav-link text-dark" href="/purchase">
             <i class="material-symbols-rounded opacity-5">view_in_ar</i>
             <!-- <i class="bi bi-bag"></i> -->
-            <span class="nav-link-text ms-1">Compras</span>
+            <span class="nav-link-text ms-1">Realizar Compra</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/purchase-orders">
+            <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
+            <span class="nav-link-text ms-1">Compras Realizadas</span>
           </a>
         </li>
         <!-- <li class="nav-item">

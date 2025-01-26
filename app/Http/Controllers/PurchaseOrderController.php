@@ -141,7 +141,7 @@ class PurchaseOrderController extends Controller
     public function viewOrders()
     {
         // Obtener las órdenes de compra ordenadas por fecha
-        $purchaseOrders = PurchaseOrder::with('provider', 'detalles')
+        $purchaseOrders = PurchaseOrder::with('detalles')
         ->orderBy('date', 'desc')
         ->get();
         foreach ($purchaseOrders as $order) {
@@ -154,7 +154,7 @@ class PurchaseOrderController extends Controller
     public function showByOrder($id)
     {
         // Busca la orden con sus relaciones
-        $order = PurchaseOrder::with(['detalles', 'provider', 'detalles.productVariant', 'detalles.productVariant.product'])->find($id);
+        $order = PurchaseOrder::with(['detalles', 'detalles.productVariant', 'detalles.productVariant.product'])->find($id);
         // Devuelve la vista con los datos de la orden
         return view('orderDetail', compact('order'));
     }

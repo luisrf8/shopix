@@ -6,7 +6,6 @@ use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use App\Models\ProductInventory;
 use App\Models\Product;
-use App\Models\Provider;
 use App\Models\PurchaseOrder;
 use App\Models\DollarRate;
 use Carbon\Carbon;
@@ -31,11 +30,6 @@ class IndexController extends Controller
                 'name' => 'Productos',
                 'count' => ProductInventory::count(),
                 'link' => '/products' // Enlace al inventario de productos
-            ],
-            [
-                'name' => 'Proveedores',
-                'count' => Provider::count(),
-                'link' => '/providers' // Enlace a la lista de proveedores
             ],
             [
                 'name' => 'Órdenes de Compra',
