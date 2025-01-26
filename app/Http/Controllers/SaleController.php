@@ -58,10 +58,9 @@ class SaleController extends Controller
                     'amount' => $variant['price'] * $item['quantity'],
                 ];
         }
-    
         // Crear orden de venta
         $salesOrder = SalesOrder::create([
-            'customer_id' => $customerId,
+            'user_id' => $customerId,
             'date' => now()->toDateString(),
         ]);
     
@@ -112,7 +111,7 @@ class SaleController extends Controller
 
     public function viewOrders()
     {
-        $salesOrders = SalesOrder::with('details')->orderBy('date', 'desc')->get();
+        $salesOrders = SalesOrder::with(['user','details', 'details.productVariant'])->orderBy('date', 'desc')->get();
         foreach ($salesOrders as $order) {
             $order->total_items = $order->details->sum('quantity');
         }

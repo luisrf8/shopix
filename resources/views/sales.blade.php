@@ -52,7 +52,7 @@ input[type="checkbox"]:checked + .position-absolute {
                         onkeyup="filterProducts()">
                 </div>
                 <div id="itemSelector" class="row row-cols-1 row-cols-md-3 g-3">
-                    @foreach ($productItems as $item)
+                    @foreach($productItems as $item)
                         <div class="col position-relative product-item" data-name="{{ strtolower($item->name) }}">
                             <label class="card h-100" for="item_{{ $item->id }}" style="cursor: pointer;">
                                 <input type="checkbox" class="form-check-input d-none" id="item_{{ $item->id }}" value="{{ $item->id }}" name="selectedItems[]">
@@ -452,15 +452,17 @@ input[type="checkbox"]:checked + .position-absolute {
 
                 // Mostrar cada método de pago con su nombre, moneda y monto
                 paymentDetails.forEach((payment) => {
-                    const paymentRow = document.createElement('div');
-                    paymentRow.classList.add('mb-2');
-
-                    const paymentText = document.createElement('span');
-                    paymentText.textContent = `${payment.name || 'Sin nombre'} - ${payment.amount || '0.00'} ${payment.currency || 'Sin moneda'}`;
-                    paymentRow.appendChild(paymentText);
-
-                    // Agregar la fila de pago al contenedor de métodos de pago seleccionados
-                    paymentMethodsSelectedContainer.appendChild(paymentRow);
+                    if(payment.amount > 0) {
+                        const paymentRow = document.createElement('div');
+                        paymentRow.classList.add('mb-2');
+    
+                        const paymentText = document.createElement('span');
+                        paymentText.textContent = `${payment.name || 'Sin nombre'} - ${payment.amount || '0.00'} ${payment.currency || 'Sin moneda'}`;
+                        paymentRow.appendChild(paymentText);
+    
+                        // Agregar la fila de pago al contenedor de métodos de pago seleccionados
+                        paymentMethodsSelectedContainer.appendChild(paymentRow);
+                    }
                 });
                 // Mostrar el paso 4 y ocultar el paso 3
                 step4.classList.remove('d-none');

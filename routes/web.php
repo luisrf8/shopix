@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PaymentMethodController;
 // use App\Http\Controllers\IndexController;
 // use App\Http\Controllers\AlmacenController;
@@ -48,9 +49,10 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     // Nuevas rutas para ventas y compras
-    Route::get('/sales', function () {
-        return view('sales');
-    })->name('sales');
+    Route::get('/sales', [SaleController::class, 'index'])->name('sales');
+    Route::get('/sales-orders', [SaleController::class, 'viewOrders'])->name('sales.orders');
+    Route::get('/sales/{id}', [SaleController::class, 'showByOrder'])->name('sales.showByOrder');
+
 
     Route::get('/purchase', [PurchaseOrderController::class, 'index'])->name('purchase');
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'viewOrders'])->name('purchase.orders');

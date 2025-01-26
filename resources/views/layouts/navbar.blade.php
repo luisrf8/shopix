@@ -77,7 +77,13 @@
         <li class="nav-item">
           <a class="nav-link text-dark" href="/sales">
             <i class="material-symbols-rounded opacity-5">receipt_long</i>
-            <span class="nav-link-text ms-1">Ventas</span>
+            <span class="nav-link-text ms-1">Realizar Venta</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/sales-orders">
+            <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
+            <span class="nav-link-text ms-1">Ventas Realizadas</span>
           </a>
         </li>
         <li class="nav-item">
