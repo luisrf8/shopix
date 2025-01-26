@@ -9,6 +9,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoogleDriveController;
 
 
@@ -18,7 +19,8 @@ Route::post('login', [AuthController::class, 'login']);
 
 // Endpoint para obtener el token CSRF
 Route::post('/create-user', [UserController::class, 'store']);
-Route::patch('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+Route::post('/user/{id}', [UserController::class, 'update']);
+Route::post('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
 // Rutas públicas para Google OAuth
 Route::get('/auth/google', [GoogleDriveController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleDriveController::class, 'handleGoogleCallback']);

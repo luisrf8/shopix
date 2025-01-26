@@ -10,7 +10,7 @@
 <body>
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="col-md-4">
-            <!-- <h3 class="text-center mb-4">Grupo Ecosta</h3> -->
+            <h3 class="text-center mb-4">Hombre Casual</h3>
             <form>
                 @csrf
                 <div class="form-group">
@@ -23,9 +23,9 @@
                 </div>
                 <button type="submit" class="btn btn-info btn-block">Ingresar</button>
             </form>
-            <div class="text-center mt-3">
+            <!-- <div class="text-center mt-3">
                 <a>¿Olvidaste tu contraseña?</a>
-            </div>
+            </div> -->
             <!-- <div class="text-center mt-2">
                 <small>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></small>
             </div> -->

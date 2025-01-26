@@ -52,7 +52,7 @@ class UserController extends Controller
         ]);
 
         // return redirect()->route('users')->with('success', 'Usuario creado correctamente.');
-        return response()->json(['message' => 'Category created successfully', 'category' => $category], 201);
+        return response()->json(['message' => 'Usuario creado correctamente.'], 201);
 
     }
 
@@ -71,25 +71,25 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-
+    
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'role_id' => 'required|exists:roles,id',
         ]);
-
+    
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-
+    
+        // Actualizar datos básicos del usuario
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'role_id' => $request->role_id,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
-
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+        return response()->json(['status' => 'success'], 200);
     }
 
     /**
@@ -98,11 +98,10 @@ class UserController extends Controller
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
-        $user->update([
-            'active' => !$user->active,
-        ]);
+        $user->is_active = !$user->is_active; // Cambia el estado
+        $user->save();
 
-        $status = $user->active ? 'activado' : 'inactivado';
-        return redirect()->route('users.index')->with('success', "Usuario {$status} correctamente.");
+        return response()->json(['status' => 'success', 'new_status' => $user->is_active], 200);
+    
     }
 }

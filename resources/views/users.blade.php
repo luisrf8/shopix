@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Productos
+    Usuarios
   </title>
   <!--     Fonts and icons     -->
   <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
@@ -86,11 +86,11 @@
       </div>
       <!-- Modal para crear usuario -->
       <div class="row">
-        <div class="col-lg-8">
+        <div class="col-12">
           <div class="row">
           @foreach($users as $user)
             <div class="col-md-4 col-4">
-                <div class="card">
+                <div class="card mb-4">
                     <!-- Ícono -->
                     <div class="card-header mx-4 p-3 text-center">
                         <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
@@ -101,25 +101,34 @@
                     <div class="card-body pt-0 p-3 text-center">
                         <!-- Nombre del usuario -->
                         <h6 class="text-center mb-0 opacity-9">{{ $user['name'] }}</h6>
-                        <!-- <span class="text-xs">{{ $user['description'] }}</span> -->
                         
-                        <!-- Inventario -->
                         <div class="mt-4">
-                            <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
                             <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
                                 <div class="text-start column">
-                                    <!-- <span class="d-block"><strong>{{ $user['inventory_code'] }}</strong> - {{ $user['location'] }}</span> -->
-                                    <div class="text-xs text-bold mb-2">Descripcion:</div>
-                                    <div class="text-xs text-bold mb-2">Identificacion:</div>
-                                    <div class="text-xs text-bold">Categoria:</div>
+                                    <div class="text-xs text-bold">Rol:</div>
                                 </div>
                                 <div class="text-end column">
-                                    <div class="text-xs mb-2">{{ $user['description'] }}</div>
-                                    <div class="text-xs mb-2">{{ $user['user_type'] }} - {{ $user['user_dni'] }}</div>
-                                    <!-- <div class="text-xs">{{ $user['category_id'] }}</div> -->
-                                    <div class="text-xs">{{ $user->category->name ?? 'Sin usuario' }}</div>
+                                    <div class="text-xs ">{{ $user['role']['name'] }}</div>
                                 </div>
                             </div>
+                        </div>
+                        <!-- Acciones -->
+                        <div class="mt-3">
+                            <button 
+                              class="btn btn-sm btn-outline-info btn-edit-user" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#editUserModal" 
+                              data-user-id="{{ $user['id'] }}"
+                              data-name="{{ $user['name'] }}"
+                              data-email="{{ $user['email'] }}"
+                              data-role="{{ $user['role']['id'] }}">
+                              Editar
+                            </button>
+                            <button class="btn btn-sm toggle-status-btn {{ $user->is_active ? 'btn-outline-danger' : 'btn-outline-success'}}" 
+                              data-id="{{ $user->id }}" 
+                              data-status="{{ $user->is_active ? 'active' : 'inactive' }}">
+                              {{ $user->is_active ? 'Inactivar' : 'Activar' }}
+                            </button>
                         </div>
                         <!-- Modal para editar usuario -->
                         <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
@@ -130,27 +139,26 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
                               <div class="modal-body">
-                                <form id="editUserForm" enctype="multipart/form-data">
+                                <form id="editUserForm" class="text-start" enctype="multipart/form-data">
                                   @csrf
                                   <input type="hidden" id="editUserId" name="id">
                                   <div class="mb-3">
                                     <label for="editUserName" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" id="editUserName" name="name" required>
+                                    <input type="text" class="form-control border border-1 p-2" id="editUserName" name="name" required>
                                   </div>
                                   <div class="mb-3">
-                                    <label for="editCategorySelector" class="form-label">Usuario</label>
-                                    <select id="editCategorySelector" name="category_id" class="form-control" required>
-                                      <option value="">Selecciona una usuario</option>
-                                      <!-- Se llenará con las usuarios disponibles -->
+                                    <label for="editUserEmail" class="form-label">Correo Electrónico</label>
+                                    <input type="email" class="form-control border border-1 p-2" id="editUserEmail" name="email" placeholder="Ingrese el correo electrónico" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="editUserRoleSelector" class="form-label">Rol</label>
+                                    <select id="editUserRoleSelector" name="role_id" class="form-control border border-1 p-2" required>
+                                      <option value="">Seleccione un rol</option>
+                                      <!-- Aquí se cargarán los roles dinámicamente -->
+                                      @foreach($roles as $role)
+                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                      @endforeach
                                     </select>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="editUserDni" class="form-label">Identificación</label>
-                                    <input type="text" class="form-control" id="editUserDni" name="user_dni" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="editUserDescription" class="form-label">Descripción</label>
-                                    <textarea class="form-control" id="editUserDescription" name="description" rows="3" required></textarea>
                                   </div>
                                   <div class="d-flex flex-row-reverse">
                                     <button type="submit" class="btn btn-info">Guardar</button>
@@ -161,22 +169,13 @@
                           </div>
                         </div>
 
-                        <!-- Acciones -->
-                        <div class="mt-3">
-                            <!-- <button class="btn btn-sm btn-outline-info">Editar</button> -->
-                            <button class="btn btn-sm btn-outline-info btn-edit-user" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user-id="{{ $user->id }}" onclick="getSucursales()">Editar</button>
-                            <button class="btn btn-sm btn-outline-danger">Inactivar</button>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
             @endforeach
           </div>
         </div>
-      </div>
-      <div class="row">
-      <div class="col-md-12 mt-4">
-</div>
       </div>
     </div>
   </main>
@@ -190,65 +189,98 @@
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script>
-document.getElementById('createUserForm').addEventListener('submit', function(event) {
-  event.preventDefault(); // Evita el envío normal del formulario
+    document.getElementById('createUserForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Evita el envío normal del formulario
 
-  let formData = new FormData(this); // Crear un FormData con los datos del formulario
+      let formData = new FormData(this); // Crear un FormData con los datos del formulario
 
-  fetch('api/create-user', {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-    },
-    body: formData
-  })
-  .then(response => {
-        if (response.status === 201) { // Valida el código de estado HTTP
-          alert('Usuario creado correctamente');
+      fetch('api/create-user', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+        },
+        body: formData
+      })
+      .then(response => {
+            if (response.status === 201) { // Valida el código de estado HTTP
+              alert('Usuario creado correctamente');
+              window.location.reload();
+            } else {
+              throw new Error('Error al crear');
+            }
+          })
+      .catch(error => console.error('Error:', error));
+    });
+    document.querySelectorAll('.btn-edit-user').forEach(button => {
+      button.addEventListener('click', function () {
+        const userId = this.getAttribute('data-user-id');
+        const userName = this.getAttribute('data-name');
+        const userEmail = this.getAttribute('data-email');
+        const userRoleId = this.getAttribute('data-role');
+
+        document.getElementById('editUserId').value = userId;
+        document.getElementById('editUserName').value = userName;
+        document.getElementById('editUserEmail').value = userEmail;
+        document.getElementById('editUserRoleSelector').value = userRoleId;
+      });
+    });
+        // Enviar la actualización al servidor
+    document.getElementById('editUserForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Evita el envío normal del formulario
+
+      const formData = new FormData(this);
+      const userId = formData.get('id');
+
+      fetch(`api/user/${userId}`, {
+        method: 'POST', // Usa 'PUT' si tu API lo requiere
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+        },
+        body: formData
+      })
+      .then(response => {
+        if (response.status === 200) { // Valida el código de estado HTTP
+          alert('Usuario actualizado correctamente');
           window.location.reload();
         } else {
-          throw new Error('Error al crear');
+          throw new Error('Error al actualizar Usuario');
         }
       })
-  .catch(error => console.error('Error:', error));
-});
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al actualizar Usuario');
+      });
+    });
+    document.querySelectorAll('.toggle-status-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        console.log("hola")
+        const userId = this.getAttribute('data-id');
+        const currentStatus = this.getAttribute('data-status');
+        // Alternar el estado
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
-    function getSucursales() {
-      fetch('api/categories', {
-          method: 'post',
+        // Hacer la petición AJAX para cambiar el estado
+        fetch(`api/users/${userId}/toggle-status`, {
+          method: 'POST',
           headers: {
-              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+          },
+          body: { is_active: newStatus === 'active' ? 1 : 0 } // Enviar el estado como JSON
+        })
+        .then(response => {
+          if (response.status === 200) { // Valida el código de estado HTTP
+            alert('Usuario actualizado correctamente');
+            window.location.reload();
+          } else {
+            throw new Error('Error al actualizar Usuario');
           }
-      })
-      .then(response => response.json())
-      .then(data => {
-          const categorySelector = document.getElementById('categorySelector');
-          
-          // Limpiamos las opciones actuales
-          categorySelector.innerHTML = '<option value="">Selecciona una usuario</option>';
-          
-          // Agregamos cada usuario al selector
-          data.forEach(category => {
-              const option = document.createElement('option');
-              option.value = category.id;
-              option.textContent = category.name;
-              categorySelector.appendChild(option);
-          });
-          const editCategorySelector = document.getElementById('editCategorySelector');
-          
-          // Limpiamos las opciones actuales
-          editCategorySelector.innerHTML = '<option value="">Selecciona una usuario</option>';
-          
-          // Agregamos cada usuario al selector
-          data.forEach(category => {
-              const option = document.createElement('option');
-              option.value = category.id;
-              option.textContent = category.name;
-              editCategorySelector.appendChild(option);
-          });
-      })
-      .catch(error => console.error('Error:', error));
-  }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Ocurrió un error al actualizar Usuario');
+        });
+        })
+      });
   </script>
 
 </body>
