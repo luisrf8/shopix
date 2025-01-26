@@ -1,17 +1,3 @@
-<!--
-=========================================================
-* Material Dashboard 3 - v3.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard
-* Copyright 2024 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://www.creative-tim.com/license)
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +26,7 @@
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand px-4 py-3 m-0" href=" https://demos.creative-tim.com/material-dashboard/pages/dashboard " target="_blank">
+      <a class="navbar-brand px-4 py-3 m-0" href="/dashboard" target="_blank">
         <img src="../../assets/img/logo-ct-dark.png" class="navbar-brand-img" width="26" height="26" alt="main_logo">
         <span class="ms-1 text-sm text-dark">El Hombre Casual</span>
       </a>
@@ -99,24 +85,6 @@
             <span class="nav-link-text ms-1">Compras Realizadas</span>
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/virtual-reality.html">
-            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-            <span class="nav-link-text ms-1">Virtual Reality</span>
-          </a>
-        </li> -->
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/rtl.html">
-            <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
-            <span class="nav-link-text ms-1">RTL</span>
-          </a>
-        </li> -->
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/notifications.html">
-            <i class="material-symbols-rounded opacity-5">notifications</i>
-            <span class="nav-link-text ms-1">Notifications</span>
-          </a>
-        </li> -->
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Usuarios</h6>
         </li>
@@ -133,12 +101,6 @@
             <span class="nav-link-text ms-1">Cerrar Sesión</span>
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/sign-up.html">
-            <i class="material-symbols-rounded opacity-5">assignment</i>
-            <span class="nav-link-text ms-1">Sign Up</span>
-          </a>
-        </li> -->
       </ul>
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0 ">
@@ -167,25 +129,20 @@
     }
   </script>
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Obtener la URL actual
-    const currentUrl = window.location.pathname;
+document.addEventListener("DOMContentLoaded", function () {
+    const currentUrl = window.location.pathname; // Obtén la ruta actual sin el dominio
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link'); // Selecciona los enlaces
 
-    // Seleccionar todos los enlaces de navegación
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-
-    // Iterar sobre cada enlace de navegación
     navLinks.forEach(link => {
-      // Comprobar si el href del enlace coincide con la URL actual
-      if (currentUrl.includes(link.getAttribute('href').split('/').pop())) {
-        link.classList.add("bg-gradient-info");
-        link.classList.add("text-white");
-      } else {
-        link.classList.remove("bg-gradient-info");
-        link.classList.remove("text-white");
-      }
+        const linkHref = link.getAttribute('href');
+        if (currentUrl === linkHref) { // Compara la ruta actual con el href
+            link.classList.add("bg-gradient-info", "text-white");
+        } else {
+            link.classList.remove("bg-gradient-info", "text-white");
+        }
     });
-  });
+});
+
   function logOut() {
     fetch("/logout", { // Ajusta a `/api/logout` si es una ruta API.
         method: 'POST',

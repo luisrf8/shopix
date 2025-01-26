@@ -31,7 +31,7 @@ class ProductController extends Controller
     }
     public function getProducts()
     {
-        $productItems = Product::with('variants')->get();
+        $productItems = Product::with(['category', 'images', 'variants'])->get();
         return response()->json($productItems);
     }
     public function categoriesIndex()
@@ -249,7 +249,7 @@ class ProductController extends Controller
     }
     public function show($id) {
         $product = Product::with(['images', 'variants', 'category'])->findOrFail($id);
-        dd($product); // Esto te mostrará los datos completos del producto
+        // dd($product); // Esto te mostrará los datos completos del producto
         return response()->json($product);
     }
     

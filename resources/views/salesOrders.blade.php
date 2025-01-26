@@ -32,7 +32,7 @@
     <!-- End Navbar -->
     <div class="container-fluid py-2">
       <div class="pb-0 px-3">
-        <h6 class="mb-0">Ordenes Realizadas</h6>
+        <h6 class="mb-0">Ventas Realizadas</h6>
       </div>
       <div class="row">
         <div class="col-12">
@@ -43,7 +43,7 @@
                 <a href="" class="text-decoration-none">
                   <div class="card">
                     <div class="card-header mx-4 p-3 text-center">
-                      <h6 class="text-center mb-0 opacity-9">Orden de Compra Nro {{ $order->id }}</h6>
+                      <h6 class="text-center mb-0 opacity-9">Orden de Venta Nro {{ $order->id }}</h6>
                     </div>
                     <div class="card-body pt-0 p-3 text-center">
                       <div class="mt-2">

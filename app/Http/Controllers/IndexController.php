@@ -6,6 +6,8 @@ use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use App\Models\ProductInventory;
 use App\Models\Product;
+use App\Models\SalesOrder;
+use App\Models\User;
 use App\Models\PurchaseOrder;
 use App\Models\DollarRate;
 use Carbon\Carbon;
@@ -14,22 +16,35 @@ class IndexController extends Controller
     public function index()
     {
         $currentDate = Carbon::now();
-    
-        // Definir el rango de fechas (por ejemplo, una semana antes y después)
-        $startDate = $currentDate->copy()->subWeek(); // Una semana antes
-        $endDate = $currentDate->copy()->addWeek();  // Una semana después
-    
-        // Filtrar productos en inventario con arrival_date cercana a la fecha actual
-        $productInventories = ProductInventory::with(['productVariant.product', 'warehouse'])
-            ->whereBetween('arrival_date', [$startDate, $endDate])
+        $users = User::with('role')->get();
+        $productItems = Product::with(['category', 'images', 'variants'])->get();
+        // Últimas 3 SalesOrders
+        $salesOrders = SalesOrder::with(['user', 'details', 'details.productVariant'])
+            ->latest('date') // Ordena por la columna 'date' de forma descendente
+            ->take(3) // Obtiene solo los 3 más recientes
             ->get();
-    
+
+        // Últimas 3 PurchaseOrders
+        $purchaseOrders = PurchaseOrder::with(['detalles'])
+            ->latest('date') // Ordena por la columna 'date' de forma descendente
+            ->take(3) // Obtiene solo los 3 más recientes
+            ->get();
         // Crear un arreglo con las estadísticas
         $stats = [
             [
+                'name' => 'Usuarios',
+                'count' => User::count(),
+                'link' => '/users' // Enlace a las órdenes de compra
+            ],
+            [
                 'name' => 'Productos',
-                'count' => ProductInventory::count(),
+                'count' => Product::count(),
                 'link' => '/products' // Enlace al inventario de productos
+            ],
+            [
+                'name' => 'Órdenes de Venta',
+                'count' => SalesOrder::count(),
+                'link' => '/sales-orders' // Enlace a las órdenes de compra
             ],
             [
                 'name' => 'Órdenes de Compra',
@@ -39,7 +54,7 @@ class IndexController extends Controller
         ];
     
         // Retornar la vista con los datos
-        return view('dashboard', compact('stats', 'productInventories'));
+        return view('dashboard', compact('stats', 'purchaseOrders', 'salesOrders'));
     }
     
     public function head()
