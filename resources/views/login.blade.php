@@ -23,9 +23,9 @@
                 </div>
                 <button type="submit" class="btn btn-info btn-block">Ingresar</button>
             </form>
-            <!-- <div class="text-center mt-3">
+            <div class="text-center mt-3">
                 <a>¿Olvidaste tu contraseña?</a>
-            </div> -->
+            </div>
             <!-- <div class="text-center mt-2">
                 <small>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></small>
             </div> -->

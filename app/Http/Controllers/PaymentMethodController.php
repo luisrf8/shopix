@@ -32,6 +32,11 @@ class PaymentMethodController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'currency' => 'required|exists:currencies,id',
+            'admin_name' => 'nullable|string',
+            'dni' => 'nullable|string',
+            'bank' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -41,7 +46,22 @@ class PaymentMethodController extends Controller
         $paymentMethod = PaymentMethod::create([
             'name' => $request->name,
             'currency_id' => $request->currency,
+            'admin_name' => $request->admin_name,
+            'dni' => $request->dni,
+            'bank' => $request->bank,
+            'image' => $request->image,
         ]);
+        if ($request->hasFile('image')) {
+            // Guardar la imagen en la carpeta `qr_images/` en el almacenamiento público
+            $path = $request->file('image')->store('qr_images', 'public');
+
+            // Convertir la ruta al formato requerido
+            $formattedPath = json_encode([$path]);
+
+            // Guardar la ruta en el campo correspondiente
+            $paymentMethod->qr_image = $formattedPath;
+            $paymentMethod->save();
+        }
 
         return response()->json(['message' => 'Método de pago creado exitosamente', 'data' => $paymentMethod], 201);
     }
@@ -64,35 +84,50 @@ class PaymentMethodController extends Controller
 
         return response()->json(['message' => 'Método de pago creado exitosamente', 'data' => $currency], 201);
     }
-    // Editar un método de pago
-    public function edit($id, Request $request)
+    public function edit(Request $request, $id)
     {
-        $paymentMethod = PaymentMethod::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|boolean',  // Activo o inactivo
+        // Validar los datos del formulario
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'currency' => 'required|exists:currencies,id',
+            'admin_name' => 'nullable|string',
+            'dni' => 'nullable|string',
+            'bank' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+        // Buscar el método de pago
+        $paymentMethod = PaymentMethod::findOrFail($id);
+        $paymentMethod->update($validated);
+
+        // Procesar la imagen QR si se envía
+        if ($request->hasFile('image')) {
+            // Guardar la imagen en la carpeta `qr_images/` en el almacenamiento público
+            $path = $request->file('image')->store('qr_images', 'public');
+
+            // Convertir la ruta al formato requerido
+            $formattedPath = json_encode([$path]);
+
+            // Guardar la ruta en el campo correspondiente
+            $paymentMethod->qr_image = $formattedPath;
+            $paymentMethod->save();
         }
 
-        $paymentMethod->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'status' => $request->status,
+        // Respuesta con la ruta del QR
+        return response()->json([
+            'success' => true,
+            'message' => 'Método de pago actualizado correctamente.',
+            'qr_image' => $paymentMethod->qr_image, // Aquí se devuelve en el formato correcto
         ]);
-
-        return response()->json(['message' => 'Método de pago actualizado exitosamente', 'data' => $paymentMethod], 200);
     }
+
+    
 
     public function toggleStatus($id, Request $request)
     {
-        // Validar el parámetro de estado (status)
+        // Validar el parámetro de estado (is_active)
         $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',  // true para activar, false para inactivar
+            'is_active' => 'required|boolean',  // true para activar, false para inactivar
         ]);
     
         if ($validator->fails()) {
@@ -103,12 +138,12 @@ class PaymentMethodController extends Controller
         $paymentMethod = PaymentMethod::findOrFail($id);
     
         // Actualizar el estado
-        $paymentMethod->status = $request->status;
+        $paymentMethod->status = $request->is_active;
         $paymentMethod->save();
     
         // Responder con un mensaje de éxito
-        $message = $request->status ? 'Método de pago activado exitosamente' : 'Método de pago inactivado exitosamente';
-        
+        $message = $request->is_active ? 'Método de pago activado exitosamente' : 'Método de pago inactivado exitosamente';
+    
         return response()->json(['message' => $message], 200);
     }
 
@@ -182,4 +217,21 @@ class PaymentMethodController extends Controller
     
         return response()->json(['message' => 'Tasa del dólar actualizada exitosamente', 'data' => $rate], 201);
     }
+    // Función para eliminar una imagen
+    public function removeQrImage($methodId)
+    {
+        $paymentMethod = PaymentMethod::findOrFail($methodId);
+    
+        // Verificar si existe una imagen QR en el almacenamiento y eliminarla
+        if ($paymentMethod->qr_image && Storage::disk('public')->exists($paymentMethod->qr_image)) {
+            Storage::disk('public')->delete($paymentMethod->qr_image);
+        }
+    
+        // Actualizar el campo `qr_image` a null
+        $paymentMethod->qr_image = null;
+        $paymentMethod->save();
+    
+        return response()->json(['success' => true, 'message' => 'QR eliminado correctamente.']);
+    }
+
 }

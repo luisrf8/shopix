@@ -193,8 +193,7 @@
                 </span>
             </div>
             <div class="ms-auto text-end">
-                <!-- <a class="btn btn-link text-danger text-gradient" href="javascript:void(0);" onclick="deleteProduct({{ $product->id }})"><i class="material-symbols-rounded text-sm">delete</i>Delete</a> -->
-                <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Editar</a>
+              <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Editar</a>
             </div>
           </div>
         </div>

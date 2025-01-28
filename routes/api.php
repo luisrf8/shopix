@@ -58,9 +58,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('payment-methods')->group(function () {
         Route::post('/create', [PaymentMethodController::class, 'create']);
-        Route::put('/{id}/edit', [PaymentMethodController::class, 'edit']);
-        Route::patch('/{id}/toggleStatus', [PaymentMethodController::class, 'deactivate']);
+        Route::post('/{id}/edit', [PaymentMethodController::class, 'edit']);
+        Route::post('/{id}/toggleStatus', [PaymentMethodController::class, 'toggleStatus']);
     });
+    Route::post('/payment-methods/update-qr/{id}', [PaymentMethodController::class, 'updateQrImage'])->name('payment-methods.update-qr');
+    Route::post('/payment-methods/remove-qr/{id}', [PaymentMethodController::class, 'removeQrImage'])->name('payment-methods.remove-qr');
+
     
     Route::post('currencies/create', [PaymentMethodController::class, 'currencyCreate']);
     Route::prefix('')->group(function () {

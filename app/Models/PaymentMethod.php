@@ -9,7 +9,7 @@ class PaymentMethod extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name', 'currency_id'];
+    protected $fillable = ['name', 'currency_id', 'admin_name', 'dni', 'bank', 'status'];
     
     public function currency()
         {

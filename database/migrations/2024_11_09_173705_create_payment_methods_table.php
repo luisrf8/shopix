@@ -17,7 +17,9 @@ class CreatePaymentMethodsTable extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('currency_id')->constrained()->onDelete('cascade');
+            $table->string('admin_name')->nullable();
             $table->string('description')->nullable();
+            $table->string('bank')->nullable();
             $table->boolean('status')->default(true);  // Agregar la columna status
             $table->timestamps();
         });
