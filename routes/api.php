@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\PurchaseOrderController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\GoogleDriveController;
 // Rutas públicas
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('loginEcomm', [AuthenticatedSessionController::class, 'store']);
 
 // Endpoint para obtener el token CSRF
 Route::post('/create-user', [UserController::class, 'store']);
@@ -33,6 +35,9 @@ Route::get('/get-products', [ProductController::class, 'getProducts']);
 Route::get('/products/{id}', [ProductController::class, 'showByCategoryEcomm']);
 Route::get('/getProduct/{id}', [ProductController::class, 'show']);
 
+Route::middleware('auth.jwt')->group(function () {
+    Route::get('/user', [AuthenticatedSessionController::class, 'getUserFromToken']);
+});
 
 Route::middleware(['auth'])->group(function () {
     // Categorías
