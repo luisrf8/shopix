@@ -57,10 +57,10 @@
           </div>
           <div class="card-body p-3">
             <!-- Lista de Monedas -->
-            <div class="row">
+            <div class="row d-flex flex-wrap">
               @foreach($currencies as $currency)
-                <div class="col-md-6 mb-md-0 mb-4">
-                  <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
+                <div class="col-6">
+                  <div class="card card-body border card-plain border-radius-lg d-flex justify-content-between align-items-center flex-row py-0">
                     <h6 class="mb-0">{{ $currency->name }} / {{$currency->code}}</h6>
                     <button class="btn btn-sm toggle-status-currency-btn pt-4 {{ $currency->status ? 'text-danger' : 'text-success'}}" 
                         data-id="{{ $currency->id }}" 
@@ -74,12 +74,12 @@
                     data-name="{{ $currency->name }}"
                     data-code="{{ $currency->code }}"
                     title="Editar Moneda">edit</i>
-                    </div>
                   </div>
                 </div>
               @endforeach
             </div>
           </div>
+
         </div>
       </div>
 
