@@ -66,9 +66,9 @@ Route::middleware(['auth'])->group(function () {
 
     
     Route::post('currencies/create', [PaymentMethodController::class, 'currencyCreate']);
-    Route::prefix('')->group(function () {
-        Route::post('/update', [PaymentMethodController::class, 'updateCurrency']);
-        Route::patch('/{id}/currencyToggleStatus', [PaymentMethodController::class, 'deactivate']);
+    Route::prefix('currencies')->group(function () {
+        Route::post('/{id}/update', [PaymentMethodController::class, 'updateCurrency']);
+        Route::post('/{id}/currencyToggleStatus', [PaymentMethodController::class, 'currencyToggleStatus']);
     });
     
     Route::prefix('dollar-rate')->group(function () {

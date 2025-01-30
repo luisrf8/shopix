@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class CategoryController extends Controller
 {
@@ -71,12 +72,24 @@ class CategoryController extends Controller
 
     public function toggleStatus($id)
     {
+        // Buscar la categoría
         $category = Category::findOrFail($id);
-        $category->is_active = !$category->is_active; // Cambia el estado
+    
+        // Cambiar el estado de la categoría
+        $category->is_active = !$category->is_active;
         $category->save();
-
-        return response()->json(['status' => 'success', 'new_status' => $category->is_active], 200);
+    
+        // Si la categoría se desactiva, desactivar también sus productos
+        if ($category->is_active == 0) {
+            Product::where('category_id', $category->id)->update(['is_active' => 0]);
+        }
+    
+        return response()->json([
+            'status' => 'success',
+            'new_status' => $category->is_active
+        ], 200);
     }
+    
 
     public function destroy(Category $category)
     {

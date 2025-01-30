@@ -126,19 +126,19 @@ class PaymentMethodController extends Controller
     public function toggleStatus($id, Request $request)
     {
         // Validar el parámetro de estado (is_active)
-        $validator = Validator::make($request->all(), [
-            'is_active' => 'required|boolean',  // true para activar, false para inactivar
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'is_active' => 'required|boolean',  // true para activar, false para inactivar
+        // ]);
     
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json(['errors' => $validator->errors()], 400);
+        // }
     
         // Buscar el método de pago
         $paymentMethod = PaymentMethod::findOrFail($id);
     
         // Actualizar el estado
-        $paymentMethod->status = $request->is_active;
+        $paymentMethod->status = !$paymentMethod->status;
         $paymentMethod->save();
     
         // Responder con un mensaje de éxito
@@ -149,49 +149,39 @@ class PaymentMethodController extends Controller
 
     public function currencyToggleStatus($id, Request $request)
     {
-        // Validar el parámetro de estado (status)
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',  // true para activar, false para inactivar
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
-    
-        // Buscar el método de pago
+        // Buscar la moneda
         $currency = Currency::findOrFail($id);
     
-        // Actualizar el estado
-        $currency->status = $request->status;
+        // Cambiar el estado de la moneda
+        $currency->status = !$currency->status;
         $currency->save();
     
+        // Si la moneda se desactiva, desactivar también sus métodos de pago
+        if ($currency->status == 0) {
+            PaymentMethod::where('currency_id', $currency->id)->update(['status' => 0]);
+        }
+    
         // Responder con un mensaje de éxito
-        $message = $request->status ? 'Método de pago activado exitosamente' : 'Método de pago inactivado exitosamente';
+        $message = $currency->status ? 'Moneda activada exitosamente' : 'Moneda inactivada exitosamente, junto con sus métodos de pago.';
         
         return response()->json(['message' => $message], 200);
     }
+    
     // Crear o editar una moneda
-    public function updateCurrency(Request $request)
+    public function updateCurrency(Currency $id, Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'currency_code' => 'required|string|max:3',
-            'currency_name' => 'required|string|max:255',
-            'symbol' => 'required|string|max:5',
+        $request->validate([
+            'name' => 'required|string|max:255|unique:currencies,name,' . $id->id,
+            'code' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
+        $id->update([
+            'name' => $request->name,
+            'code' => $request->code,
+        ]);
+        $id->refresh();
 
-        $currency = Currency::updateOrCreate(
-            ['currency_code' => $request->currency_code],
-            [
-                'currency_name' => $request->currency_name,
-                'symbol' => $request->symbol,
-            ]
-        );
-
-        return response()->json(['message' => 'Moneda actualizada o creada exitosamente', 'data' => $currency], 200);
+        return response()->json(['message' => 'Moneda actualizada o creada exitosamente', 'data' => $id], 200);
     }
 
     // Actualizar la tasa del dólar

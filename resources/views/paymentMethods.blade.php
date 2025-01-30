@@ -62,7 +62,19 @@
                 <div class="col-md-6 mb-md-0 mb-4">
                   <div class="card card-body border card-plain border-radius-lg d-flex align-items-center flex-row">
                     <h6 class="mb-0">{{ $currency->name }} / {{$currency->code}}</h6>
-                    <i class="material-symbols-rounded ms-auto text-dark cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Moneda">edit</i>
+                    <button class="btn btn-sm toggle-status-currency-btn pt-4 {{ $currency->status ? 'text-danger' : 'text-success'}}" 
+                        data-id="{{ $currency->id }}" 
+                        data-status="{{ $currency->status ? 'active' : 'inactive' }}">
+                          {{ $currency->status ? 'Inactivar' : 'Activar' }}
+                    </button>
+                    <i class="material-symbols-rounded ms-auto text-dark cursor-pointer btn-edit-currency" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#editCurrency" 
+                    data-method-id="{{ $currency->id }}"
+                    data-name="{{ $currency->name }}"
+                    data-code="{{ $currency->code }}"
+                    title="Editar Moneda">edit</i>
+                    </div>
                   </div>
                 </div>
               @endforeach
@@ -281,7 +293,34 @@
           </div>
         </div>
       </div>
-
+      <!-- Modal para editar Moneda -->
+      <div class="modal fade" id="editCurrency" tabindex="-1" aria-labelledby="editCurrency" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editCurrencyModalLabel">Editar Moneda</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="editCurrencyForm" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" id="editCurrencyId" name="id">
+                <div class="mb-3">
+                  <label for="editCurrencyName" class="form-label">Nombre</label>
+                  <input type="text" class="form-control border border-1 p-2" id="editCurrencyName" name="name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editCurrencyCode" class="form-label">Código</label>
+                  <input type="text" class="form-control border border-1 p-2" id="editCurrencyCode" name="code" required>
+                </div>
+                <div class="d-flex flex-row-reverse">
+                  <button type="submit" class="btn btn-info">Guardar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   <!-- Core JS Files -->
@@ -411,7 +450,102 @@
           }
         });
       });
+      // Evento para llenar el modal con los datos de la categoría seleccionada
+      document.querySelectorAll('.btn-edit-currency').forEach(button => {
+        button.addEventListener('click', function () {
+          const methodId = this.getAttribute('data-method-id');
+          const methodName = this.getAttribute('data-name') || '';
+          const methodBank = this.getAttribute('data-code') || '';
+          document.getElementById('editCurrencyId').value = methodId;
+          document.getElementById('editCurrencyName').value = methodName;
+          document.getElementById('editCurrencyCode').value = methodBank;
+        });
+      });
+      document.getElementById('editCurrencyForm').addEventListener('submit', function (e) {
+        e.preventDefault();
 
+        const id = document.getElementById('editCurrencyId').value;
+        let formData = new FormData(this);
+        console.log("formData",formData)
+        fetch(`/api/currencies/${id}/update`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+          },
+          body: formData,
+        })
+          .then(data => {
+            if (data.status === 200) {
+              alert('moneda actualizada');
+              window.location.reload();
+            } else {
+              alert('Hubo un problema al actualizar.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+      document.querySelectorAll('.toggle-status-currency-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        console.log("hola")
+        const categoryId = this.getAttribute('data-id');
+        const currentStatus = this.getAttribute('data-status');
+        // Alternar el estado
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+        // Hacer la petición AJAX para cambiar el estado
+        fetch(`api/currencies/${categoryId}/currencyToggleStatus`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+          },
+          body: { is_active: newStatus === 'active' ? 1 : 0 } // Enviar el estado como JSON
+        })
+        .then(response => {
+          if (response.status === 200) { // Valida el código de estado HTTP
+            alert('Categoría actualizada correctamente');
+            window.location.reload();
+          } else {
+            throw new Error('Error al actualizar la categoría');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Ocurrió un error al actualizar la Categoría');
+        });
+        })
+      });
+      document.querySelectorAll('.toggle-status-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        console.log("hola")
+        const categoryId = this.getAttribute('data-id');
+        const currentStatus = this.getAttribute('data-status');
+        // Alternar el estado
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+        // Hacer la petición AJAX para cambiar el estado
+        fetch(`api/payment-methods/${categoryId}/toggleStatus`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+          },
+          body: { is_active: newStatus === 'active' ? 1 : 0 } // Enviar el estado como JSON
+        })
+        .then(response => {
+          if (response.status === 200) { // Valida el código de estado HTTP
+            alert('Categoría actualizada correctamente');
+            window.location.reload();
+          } else {
+            throw new Error('Error al actualizar la categoría');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Ocurrió un error al actualizar la Categoría');
+        });
+        })
+      });
       document.getElementById('btnRemoveQrImage').addEventListener('click', function () {
         const methodId = document.getElementById('editMethodId').value;
 
@@ -472,37 +606,7 @@
             console.error('Error:', error);
           });
       });
-      document.querySelectorAll('.toggle-status-btn').forEach(button => {
-  button.addEventListener('click', function () {
-    const methodId = this.getAttribute('data-id');
-    const currentStatus = this.getAttribute('data-status');
 
-    // Alternar el estado
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-
-    // Hacer la petición AJAX para cambiar el estado
-    fetch(`/api/payment-methods/${methodId}/toggleStatus`, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ is_active: newStatus === 'active' ? 1 : 0 }) // Enviar el estado correctamente
-    })
-      .then(response => {
-        if (response.ok) { // Validar si la respuesta es exitosa
-          alert('Método de pago actualizado correctamente');
-          window.location.reload();
-        } else {
-          throw new Error('Error al actualizar el método de pago');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Ocurrió un error al actualizar el método de pago');
-      });
-  });
-});
 
   </script>
 </body>
