@@ -134,6 +134,32 @@ class SaleController extends Controller
         
         return response()->json($paymentMethods, 200);
     }
+    public function getPaymentMethodsEcomm()
+    {
+        // Obtener los métodos de pago que están activos (por ejemplo, con status = 1)
+        $paymentMethods = PaymentMethod::with('currency')
+            ->where('status', 1) // Filtrar por métodos de pago activos
+            ->get();
+    
+        // Filtrar los métodos de pago para excluir "Efectivo" y "Punto de Venta"
+        $filteredPaymentMethods = $paymentMethods->filter(function ($paymentMethod) {
+            return !in_array($paymentMethod->name, ['Efectivo', 'Punto de Venta']);
+        });
+    
+        // Agrupar los métodos de pago filtrados por la moneda
+        $groupedPaymentMethods = $filteredPaymentMethods->groupBy(function ($paymentMethod) {
+            return $paymentMethod->currency->name; // Agrupar por el nombre de la moneda
+        });
+    
+        // Convertir la colección agrupada a un array
+        $formattedPaymentMethods = $groupedPaymentMethods->mapWithKeys(function ($group, $key) {
+            return [$key => $group]; // Asignar la moneda como clave y los métodos de pago como valor
+        });
+    
+        // Devolver la respuesta JSON con los métodos de pago agrupados por moneda
+        return response()->json($formattedPaymentMethods, 200);
+    }
+
     public function getVariants(Request $request)
     {
         $itemIds = $request->input('item_ids');

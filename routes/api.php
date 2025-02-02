@@ -28,7 +28,8 @@ Route::post('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])
 Route::get('/auth/google', [GoogleDriveController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleDriveController::class, 'handleGoogleCallback']);
 
-// Rutas protegidas por el middleware 'auth:sanctum'
+Route::get('/payment-methods/ecomm', [SaleController::class, 'getPaymentMethodsEcomm']);
+
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/get-variants', [PurchaseOrderController::class, 'getVariants']);
 Route::get('/categories', [CategoryController::class, 'getCategories']);
