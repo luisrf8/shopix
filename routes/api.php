@@ -18,6 +18,7 @@ use App\Http\Controllers\GoogleDriveController;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('loginEcomm', [AuthenticatedSessionController::class, 'store']);
+Route::post('/registerEcomm', [AuthenticatedSessionController::class, 'registerEcomm']);
 
 // Endpoint para obtener el token CSRF
 Route::post('/create-user', [UserController::class, 'store']);

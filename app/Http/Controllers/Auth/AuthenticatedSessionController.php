@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -89,21 +91,49 @@ class AuthenticatedSessionController extends Controller
     public function getUserFromToken(Request $request)
     {
         try {
-            // Obtener el token desde el header de autorización o desde el cuerpo de la solicitud
-            $token = $request->bearerToken();
-            
-            // Verificar si el token es válido y obtener el usuario
-            if ($user = JWTAuth::authenticate($token)) {
-                return response()->json([
-                    'user' => $user
-                ], 200);
+            // Intentar obtener el usuario autenticado desde el token
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
-            
-            // Si no se encuentra el usuario
-            return response()->json(['error' => 'Usuario no encontrado o token inválido'], 401);
+    
+            return response()->json([
+                'user' => $user
+            ], 200);
         } catch (JWTException $e) {
-            // En caso de error al autenticar el token
-            return response()->json(['error' => 'No se pudo procesar el token'], 500);
+            return response()->json(['error' => 'Token inválido o expirado'], 401);
         }
+    }
+    public function registerEcomm(Request $request)
+    {
+        // Validación de los datos
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+    
+        // Crear el usuario
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),  // Hashear la contraseña
+            'role_id' => 3,  // Puedes asignar un rol por defecto o según tus necesidades
+        ]);
+    
+        // Generar el token JWT para el usuario recién creado
+        try {
+            // Intentar generar el token para el usuario
+            $token = JWTAuth::fromUser($user);
+        } catch (JWTException $e) {
+            // En caso de error al generar el token
+            return response()->json(['error' => 'No se pudo crear el token'], 500);
+        }
+    
+        // Responder con el usuario creado y el token JWT
+        return response()->json([
+            'message' => 'Usuario creado con éxito',
+            'user' => $user,
+            'token' => $token,  // El token JWT generado
+        ], 201);
     }
 }

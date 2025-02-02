@@ -89,7 +89,7 @@
         <div class="col-12">
           <div class="row">
           @foreach($users as $user)
-            <div class="col-md-4 col-4">
+            <div class="col-md-3 col-3">
                 <div class="card mb-4">
                     <!-- Ícono -->
                     <div class="card-header mx-4 p-3 text-center">
