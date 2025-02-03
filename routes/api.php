@@ -39,6 +39,7 @@ Route::get('/getProduct/{id}', [ProductController::class, 'show']);
 
 Route::middleware('auth.jwt')->group(function () {
     Route::get('/user', [AuthenticatedSessionController::class, 'getUserFromToken']);
+    Route::post('/create-sale/ecomm', [SaleController::class, 'storeEcommerceSale']);
 });
 
 Route::middleware(['auth'])->group(function () {

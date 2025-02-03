@@ -388,6 +388,33 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
         console.error('Error:', error);
     });
 });
+  // Añadir un evento al formulario para cuando se envíe
+  document.getElementById('addImageForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Evitar el envío del formulario para inspeccionar los datos primero
+
+    // Crear un FormData con los datos del formulario
+    const formData = new FormData(this);
+
+    // Registrar los datos del FormData en la consola
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    // Si quieres, puedes enviar el formulario aquí usando fetch o axios si no quieres usar el envío tradicional
+    // fetch(this.action, {
+    //   method: 'POST',
+    //   body: formData,
+    // }).then(response => {
+    //   return response.json();
+    // }).then(data => {
+    //   console.log(data);
+    // }).catch(error => {
+    //   console.log(error);
+    // });
+
+    // Si todo es correcto, puedes permitir que el formulario se envíe normalmente
+    // this.submit();  // Descomentar esta línea para enviar el formulario
+  });
 
 </script>
 

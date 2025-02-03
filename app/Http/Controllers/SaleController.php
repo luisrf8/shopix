@@ -8,6 +8,7 @@ use App\Models\SalesOrderDetail;
 use App\Models\ProductVariant;
 use App\Models\PaymentMethod;
 use App\Models\Payment;
+use App\Models\Currency;
 use App\Models\Category;
 use App\Models\Product;
 
@@ -62,6 +63,9 @@ class SaleController extends Controller
         $salesOrder = SalesOrder::create([
             'user_id' => $customerId,
             'date' => now()->toDateString(),
+            'status' => 1, // Aprobado
+            'address' => 'Tienda',
+            'preference' => 'Tienda',
         ]);
     
         // Crear detalles de la venta y actualizar stock
@@ -106,6 +110,101 @@ class SaleController extends Controller
         }
     
         return response()->json(['message' => 'Venta registrada exitosamente.'], 200);
+    }
+    public function storeEcommerceSale(Request $request)
+    {
+        // Validar los datos recibidos
+        $itemsSelected = json_decode($request->itemsSelected, true); // Convertir JSON a arreglo
+        $paymentDetails = $request->paymentDetails;
+        $totalAmount = $request->totalAmount;
+        $customerId = $request->customer_id;
+        $preference = $request->preference;
+        $address = $request->direccion;
+    
+        // Validación de productos
+        if (empty($itemsSelected) || !is_array($itemsSelected)) {
+            return response()->json(['error' => 'No se enviaron productos válidos.'], 400);
+        }
+    
+        // Validación de pagos
+        if (empty($paymentDetails) || !is_array($paymentDetails)) {
+            return response()->json(['error' => 'No se enviaron detalles de pago válidos.'], 400);
+        }
+    
+        // Agrupar y procesar datos de productos
+        $groupedData = [];
+        foreach ($itemsSelected as $item) {
+            $variant = $item['item']; // Accedemos a la información del producto
+            $groupedData[] = [
+                'product_variant_id' => $variant['id'],
+                'quantity' => $item['quantity'],
+                'price' => $variant['price'],
+                'amount' => $variant['price'] * $item['quantity'],
+            ];
+        }
+    
+        // Crear orden de venta con status en 0 (pendiente)
+        $salesOrder = SalesOrder::create([
+            'user_id' => $customerId,
+            'date' => now()->toDateString(),
+            'status' => 0, // Pendiente por defecto en eCommerce
+            'address' => $address ?? 'Tienda',
+            'preference' => $preference,
+        ]);
+    
+        // Crear detalles de la venta y actualizar stock
+        foreach ($groupedData as $detail) {
+            SalesOrderDetail::create([
+                'sales_order_id' => $salesOrder->id,
+                'product_variant_id' => $detail['product_variant_id'],
+                'quantity' => $detail['quantity'],
+                'price' => $detail['price'],
+                'amount' => $detail['amount'],
+            ]);
+    
+            // Actualizar el stock
+            $productVariant = ProductVariant::find($detail['product_variant_id']);
+            if ($productVariant && $productVariant->stock >= $detail['quantity']) {
+                $productVariant->stock -= $detail['quantity'];
+                $productVariant->save();
+            } else {
+                return response()->json(['error' => 'Stock insuficiente para el producto: ' . $productVariant->id], 400);
+            }
+        }
+    
+        // Crear pagos
+        foreach ($paymentDetails as $paymentDetail) {
+            $paymentDetailMethod = json_decode($paymentDetail['method'], true);// Convertir JSON a arreglo
+            $currencyCode = Currency::where('name', $paymentDetail['currency'])->value('code');
+            $payment = Payment::create([
+                'sales_order_id' => $salesOrder->id,
+                'payment_method' => $paymentDetailMethod['id'], // Se usa referencia en eCommerce
+                'amount' => $paymentDetail['amount'],
+                'reference' => $paymentDetail['reference'],
+                'currency' => $currencyCode, // Se usa el código de la moneda
+                'payment_date' => $paymentDetail['paymentDate'],
+            ]);
+    
+            // Subir imagen (comprobante de pago) si existe
+            if ($request->hasFile('paymentDetails.*.img')) {
+                // Iterar sobre el arreglo de detalles de pago
+                foreach ($paymentDetails as $key => $paymentDetail) {
+                    // Comprobar si existe un archivo 'img'
+                    if ($request->hasFile("paymentDetails.$key.img")) {
+                        $image = $request->file("paymentDetails.$key.img");
+                        $path = $image->store('payment_images', 'public');
+                        
+                        // Guardar la ruta de la imagen asociada al pago
+                        PaymentImage::create([
+                            'payment_id' => $payment->id,
+                            'image_path' => $path,
+                        ]);
+                    }
+                }
+            }
+        }
+    
+        return response()->json(['message' => 'Venta en eCommerce registrada exitosamente.'], 200);
     }
     
 

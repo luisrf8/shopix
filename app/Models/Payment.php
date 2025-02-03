@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     protected $fillable = [
-        'sales_order_id', 'payment_method', 'amount', 'currency',
+        'sales_order_id', 'payment_method', 'amount', 'currency', 'reference'
     ];
 
     public function salesOrder()
     {
         return $this->belongsTo(SalesOrder::class);
+    }
+    public function images()
+    {
+        return $this->hasMany(PaymentImage::class);
     }
 }
