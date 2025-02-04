@@ -31,55 +31,52 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-      <div class="pb-0 px-3">
+    <div class="pb-0 px-3">
         <h6 class="mb-0">Ventas Realizadas</h6>
-      </div>
-      <div class="row">
-        <div class="col-12">
-          <div class="row">
-            <div class="container-fluid py-4 row">
-              @foreach($salesOrders as $order)
-              <div class="col-md-4 col-4 mb-4">
-                <a href="" class="text-decoration-none">
-                  <div class="card">
-                    <div class="card-header mx-4 p-3 text-center">
-                      <h6 class="text-center mb-0 opacity-9">Orden de Venta Nro {{ $order->id }}</h6>
-                    </div>
-                    <div class="card-body pt-0 p-3 text-center">
-                      <div class="mt-2">
-                        <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
-                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
-                            <div class="text-start column">
-                                <div class="text-xs text-bold mb-2">Total de Productos:</div>
-                                <div class="text-xs text-bold mb-2">Usuario:</div>
-                            </div>
-                            <div class="text-end column">
-                                <div class="text-xs mb-2">{{ $order->total_items }}</div>
-                                <div class="text-xs mb-2">
-                                    @if ($order->user)
-                                        {{ $order->user->name }}
-                                    @else
-                                        Usuario no asignado
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Acciones -->
-                    <div class="mt-3 d-flex justify-content-center mx-4 ">
-                        <a class="btn btn-sm btn-outline-info btn-edit-provider" href="/sales/{{ $order->id }}">Ver Detalles</a>
-                    </div>
-                  </div>
-                </a>
-              </div>
-              @endforeach
-            </div>
-
-          </div>
-        </div>
-      </div>
     </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th># Orden</th>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Entrega</th>
+                                    <th># Productos</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($salesOrders as $order)
+                                <!-- {{$order}} -->
+                                    <tr>
+                                        <td>{{ $order->id }}</td>
+                                        <td>{{ $order->date }}</td>
+                                        <td>{{ $order->user ? $order->user->name : 'Usuario no asignado' }}</td>
+                                        <td>{{ $order->preference}}</td>
+                                        <td>{{ $order->total_items }}</td>
+                                        <td>
+                                          {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : ($order->status == 2 ? 'Negado' : '')) }}
+                                        </td>
+                                        <td>
+                                            <a href="/sales/{{ $order->id }}" class="btn btn-sm btn-outline-info">Ver Detalles</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
   </main>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>

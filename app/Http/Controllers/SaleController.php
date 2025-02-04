@@ -210,17 +210,33 @@ class SaleController extends Controller
 
     public function viewOrders()
     {
-        $salesOrders = SalesOrder::with(['user','details', 'details.productVariant'])->orderBy('date', 'desc')->get();
+        $salesOrders = SalesOrder::with([
+            'user', 
+            'details', 
+            'details.variant', 
+            'payments' // Agregamos la relación de pagos
+        ])->orderBy('date', 'desc')->get();
+    
         foreach ($salesOrders as $order) {
             $order->total_items = $order->details->sum('quantity');
         }
+    
         return view('salesOrders', compact('salesOrders'));
     }
 
     public function showByOrder($id)
     {
-        $order = SalesOrder::with(['details', 'details.productVariant'])->find($id);
-        return view('salesOrderDetail', compact('order'));
+        $order = SalesOrder::with(['user', 'details', 'details.variant','details.variant.product', 'payments', 'payments.payment'])->find($id);
+        // Calcular el total de la orden
+        $totalOrden = $order->details->sum(function ($detalle) {
+            return $detalle->amount;
+        });
+        // Calcular el total pagado
+        $totalPagado = $order->payments->sum(function ($payment) {
+            return $payment->amount;
+        });
+
+        return view('salesOrderDetail', compact('order', 'totalOrden', 'totalPagado'));
     }
 
     public function getPaymentMethods()
@@ -296,5 +312,31 @@ class SaleController extends Controller
         // Devolver solo los datos esperados
         return response()->json($groupedVariants, 200);
     }
+    public function orderToggleStatus($id, Request $request)
+    {
+
+        $order = SalesOrder::findOrFail($id);
     
+        $order->status = $request->status;
+        $order->save();
+    
+        return response()->json([
+            'status' => 'success',
+            'new_status' => $order->status
+        ], 200);
+    }
+    public function paymentToggleStatus($id, Request $request)
+    {
+        // Buscar la categoría
+        $payment = Payment::findOrFail($id);
+    
+        // Cambiar el estado de la categoría
+        $payment->status = $request->status;
+        $payment->save();
+    
+        return response()->json([
+            'status' => 'success',
+            'new_status' => $payment->status
+        ], 200);
+    }
 }

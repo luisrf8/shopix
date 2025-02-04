@@ -18,4 +18,8 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentImage::class);
     }
+    public function payment()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method', 'id');
+    }
 }

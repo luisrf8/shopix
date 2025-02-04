@@ -19,7 +19,7 @@ class IndexController extends Controller
         $users = User::with('role')->get();
         $productItems = Product::with(['category', 'images', 'variants'])->get();
         // Últimas 3 SalesOrders
-        $salesOrders = SalesOrder::with(['user', 'details', 'details.productVariant'])
+        $salesOrders = SalesOrder::with(['user', 'details', 'details.variant'])
             ->latest('date') // Ordena por la columna 'date' de forma descendente
             ->take(3) // Obtiene solo los 3 más recientes
             ->get();

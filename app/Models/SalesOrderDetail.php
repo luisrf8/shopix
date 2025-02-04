@@ -11,8 +11,10 @@ class SalesOrderDetail extends Model
 
     protected $fillable = ['sales_order_id', 'product_variant_id', 'quantity', 'price', 'amount'];
 
-    public function productVariant()
+    // En el modelo SalesOrderDetail
+    public function variant()
     {
-        return $this->belongsTo(ProductVariant::class);
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
+
 }

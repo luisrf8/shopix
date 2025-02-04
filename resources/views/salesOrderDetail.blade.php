@@ -4,23 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <title>
-    Orden de Venta
-  </title>
-  <!--     Fonts and icons     -->
-  <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
-  <!-- Nucleo Icons -->
+  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
+  <title>Orden de Venta</title>
   <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/842bd4ebad.js" crossorigin="anonymous"></script>
-  <!-- Material Icons -->
-  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" /> -->
-  <!-- CSS Files -->
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
-
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -31,36 +19,105 @@
     <!-- Navbar -->
     @include('layouts.head')
     <!-- End Navbar -->
-    <div class="container-fluid py-2">
-      <div class="row">
-        <div class="col-md-12 mt-4">
-        <div class="">
-            <div class="pb-0 px-3">
-              <!-- <h6 class="mb-0">Productos En Inventario</h6> -->
-              <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
-            </div>
-            <div class="pt-4">
-              <div class="row">
-              @foreach($order->details as $detalle)
-                <div class="col-md-4 mb-4">
-                    <div class="card p-4 d-flex flex-row">
-                        <div class="d-flex flex-column mx-3">
-                            <h6 class="mb-2 text-sm">{{ $detalle->productVariant->product->name ?? 'Sin nombre' }}</h6>
-                            <span class="mb-2 text-xs">Cantidad: 
-                                <span class="text-dark font-weight-bold ms-sm-2">{{ $detalle->quantity }}</span>
-                            </span>
-                            <span class="mb-2 text-xs">Talla: 
-                                <span class="text-dark font-weight-bold ms-sm-2">{{ $detalle->productVariant->size ?? '' }}</span>
-                            </span>
-                            <span class="mb-2 text-xs">Precio de Venta: 
-                                <span class="text-dark font-weight-bold ms-sm-2">{{ $detalle->price ?? '' }} $</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-              @endforeach
-              </div>
+    <div class="container-fluid">
+      <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
+      <input type="text" id="user-name" class="d-none" value="{{ $order->user->name }}" readonly>
+
+      <input type="text" id="user-phone" class="d-none" value="{{ $order->user->phone_number ?? 'No registrado' }}" readonly>
+
+      <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
+      <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
+      <div class="d-flex gap-2">
+        <div>
+          <p><strong>Fecha:</strong> {{ $order->date }} |
+        </div> 
+        <div>
+          <div class="d-flex aling-items-center gap-2">
+            <strong>Estado:</strong>
+            <select id="order-status" class="btn btn-sm toggle-status-btn 
+              {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
+              " onchange="updateOrderStatus({{ $order->id }})">
+              <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
+              <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Aprobado ↓</option>
+              <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Negado ↓</option>
+            </select>
           </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Detalles de la Orden -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h6 class="mb-0">Productos en la Orden</h6>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Talla</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($order->details as $detalle)
+              <tr>
+                <td>{{ $detalle->variant->product->name ?? 'Sin nombre' }}</td>
+                <td>{{ $detalle->quantity }}</td>
+                <td>{{ $detalle->variant->size ?? '' }}</td>
+                <td>${{ number_format($detalle->price, 2) }}</td>
+                <td>${{ number_format($detalle->amount, 2) }}</td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+          <p><strong>Total Orden:</strong> ${{ number_format($totalOrden, 2) }}</p>
+        </div>
+      </div>
+
+      <!-- Tabla de Pagos -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h6 class="mb-0">Pagos Registrados</h6>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Moneda</th>
+                <th>Método de Pago</th>
+                <th>Monto</th>
+                <th>Beneficiario</th>
+                <th>Banco</th>
+                <th>Referencia</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($order->payments as $payment)
+              <tr>
+                <td>{{ $payment->currency }}</td>
+                <td>{{ $payment->payment->name}}</td>
+                <td>${{ number_format($payment->amount, 2) }}</td>
+                <td>{{ $payment->payment->admin_name }}</td>
+                <td>{{ $payment->payment->bank }}</td>
+                <td>{{ $payment->reference ?? 'N/A' }}</td>
+                <td>
+                  <select class="btn btn-sm toggle-status-btn 
+              {{ $payment->status == 0 ? 'btn-outline-warning' : ($payment->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
+              " onchange="updatePaymentStatus({{ $payment->id }})">
+                    <option value="0" {{ $payment->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
+                    <option value="1" {{ $payment->status == 1 ? 'selected' : '' }}>Pagado ↓</option>
+                    <option value="3" {{ $payment->status == 3 ? 'selected' : '' }}>Cancelado ↓</option>
+                  </select>
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+          <p><strong>Total Pagado:</strong> ${{ number_format($totalPagado, 2) }}</p>
         </div>
       </div>
     </div>
@@ -75,30 +132,49 @@
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 <script>
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
+    function updateOrderStatus(orderId) {
+      const status = document.getElementById('order-status').value;
+      fetch(`/order/${orderId}/status/update`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        location.reload();
+      })
+      .catch(error => console.error("Error:", error));
+    }
 
-            let formData = new FormData(form);
-            
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value,
-                },
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                // Opcional: actualizar la interfaz de usuario o limpiar los campos
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error al registrar la llegada.');
-            });
-        });
-    });
+    function updatePaymentStatus(paymentId) {
+      const status = event.target.value;
+      const userName = document.getElementById('user-name').value;  // Si usas un input
+      const userPhone = document.getElementById('user-phone').value;  // Si usas un input
+      const message = encodeURIComponent(`Hola ${userName} ¡Tu pago ha sido confirmado y aprobado!`);
+
+      fetch(`/api/payment/${paymentId}/status/update`, {
+        method: "POST",
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({ status: status })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        if (status == 1) {
+          if (userPhone) {
+            window.open(`https://wa.me/${userPhone}?text=${message}`, '_blank');
+          }
+        }
+        location.reload();
+      })
+      .catch(error => console.error("Error:", error));
+    }
 </script>
 
 </body>

@@ -13,10 +13,14 @@ class SalesOrder extends Model
 
     public function details()
     {
-        return $this->hasMany(SalesOrderDetail::class);
+        return $this->hasMany(SalesOrderDetail::class, 'sales_order_id');
     }
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'sales_order_id'); // Asegúrate de que la clave foránea sea la correcta
     }
 }

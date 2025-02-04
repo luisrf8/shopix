@@ -85,4 +85,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment-methods', [SaleController::class, 'getPaymentMethods']);
     Route::post('/sales/get-variants', [SaleController::class, 'getVariants']);
     Route::post('/create-sale', [SaleController::class, 'store']);
+    Route::post('/payment/{id}/status/update', [SaleController::class, 'paymentToggleStatus']);
 });
