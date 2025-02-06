@@ -11,6 +11,12 @@ use App\Models\Payment;
 use App\Models\Currency;
 use App\Models\Category;
 use App\Models\Product;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+use App\Mail\OrderPdfMail;  // Importa la clase correctamente
+use Illuminate\Support\Facades\Mail;
 
 class SaleController extends Controller
 {
@@ -314,17 +320,49 @@ class SaleController extends Controller
     }
     public function orderToggleStatus($id, Request $request)
     {
-
-        $order = SalesOrder::findOrFail($id);
-    
+        $order = SalesOrder::with([
+            'user', 
+            'details', 
+            'details.variant.product', 
+            'payments.payment'
+        ])->findOrFail($id);
+        
+        // Actualizar el estado de la orden
         $order->status = $request->status;
         $order->save();
     
+        // Calcular totales
+        $totalOrden = $order->details->sum('amount');
+        $totalPagado = $order->payments->sum('amount');
+    
+        // Generar el HTML para el PDF
+        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado'))->render();
+    
+        // Configuración de Dompdf
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($pdfContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+    
+        // Guardar el PDF en storage/app/public/orders/
+        $fileName = 'orden-' . $order->id . '.pdf';
+        Storage::disk('public')->put('orders/' . $fileName, $dompdf->output());
+        $filePath = storage_path('app/public/orders/' . $fileName);
+
+        // URL accesible del PDF
+        $pdfUrl = asset('storage/orders/' . $fileName);
+        Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
+
         return response()->json([
-            'status' => 'success',
-            'new_status' => $order->status
-        ], 200);
+            'success' => true,
+            'message' => 'Orden actualizada y PDF generado.',
+            'pdf_url' => $pdfUrl
+        ]);
     }
+    
     public function paymentToggleStatus($id, Request $request)
     {
         // Buscar la categoría

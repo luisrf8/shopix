@@ -1895,7 +1895,7 @@
         <div class="col-md-3 mb-4 ms-auto">
           <div>
             <a href="https://www.creative-tim.com/product/material-dashboard">
-              <img src="../assets/img/logo-ct-dark.png" class="mb-3 footer-logo" alt="main_logo">
+              <img src="../assets/img/hc.png" class="mb-3 footer-logo" alt="main_logo">
             </a>
             <!-- <h6 class="font-weight-bolder mb-4">Material Dashboard 3</h6> -->
           </div>

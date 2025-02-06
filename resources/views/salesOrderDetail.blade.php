@@ -27,6 +27,17 @@
 
       <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
       <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
+      <div class="d-flex aling-items-center gap-2">
+            <strong>Entregado:</strong>
+            <select id="order-status" class="btn btn-sm toggle-status-btn 
+              {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
+              " onchange="updateOrderStatus({{ $order->id }})">
+              <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
+              <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Entregado ↓</option>
+              <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
+              <option value="3" {{ $order->deliver_status == 3 ? 'selected' : '' }}>Devolucion ↓</option>
+            </select>
+          </div>
       <div class="d-flex gap-2">
         <div>
           <p><strong>Fecha:</strong> {{ $order->date }} |
@@ -132,22 +143,37 @@
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 <script>
-    function updateOrderStatus(orderId) {
-      const status = document.getElementById('order-status').value;
-      fetch(`/order/${orderId}/status/update`, {
-        method: "PUT",
+function updateOrderStatus(orderId) {
+    const status = document.getElementById('order-status').value;
+    const userName = document.getElementById('user-name').value;
+    const userPhone = document.getElementById('user-phone').value;
+
+    fetch(`/api/order/${orderId}/status/update`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: status })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert(data.message);
-        location.reload();
-      })
-      .catch(error => console.error("Error:", error));
-    }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+
+            // Descargar el PDF automáticamente
+            const link = document.createElement("a");
+            link.href = data.pdf_url;
+            link.download = `orden-${orderId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // location.reload();
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
 
     function updatePaymentStatus(paymentId) {
       const status = event.target.value;

@@ -3914,8 +3914,8 @@ fieldset:disabled .btn {
 
 .btn-info {
   --bs-btn-color: #fff;
-  --bs-btn-bg: #1A73E8;
-  --bs-btn-border-color: #1A73E8;
+  --bs-btn-bg: #124783;
+  --bs-btn-border-color: #124783;
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: rgb(22.1, 97.75, 197.2);
   --bs-btn-hover-border-color: rgb(20.8, 92, 185.6);
@@ -22028,14 +22028,14 @@ fieldset:disabled .btn {
 
 .btn-info:hover,
 .btn.bg-gradient-info:hover {
-  background-color: #1A73E8;
-  border-color: #1A73E8;
+  background-color: #0e3263;
+  border-color: #0e3263;
   box-shadow: 0 8px 14px -8px rgba(26, 115, 232, 0.3), 0 3px 18px 0 rgba(26, 115, 232, 0.1), 0 7px 8px -4px rgba(26, 115, 232, 0.18);
 }
 
 .btn-info .btn.bg-outline-info,
 .btn.bg-gradient-info .btn.bg-outline-info {
-  border: 1px solid #1A73E8;
+  border: 1px solid #0e3263;
 }
 
 .btn-info:not(:disabled):not(.disabled).active,
@@ -22045,7 +22045,7 @@ fieldset:disabled .btn {
 .btn.bg-gradient-info:not(:disabled):not(.disabled):active,
 .show>.btn.bg-gradient-info.dropdown-toggle {
   color: color-yiq(#1A73E8);
-  background-color: #1A73E8;
+  background-color: #0e3263;
 }
 
 .btn-info.focus,

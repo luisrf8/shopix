@@ -100,18 +100,32 @@
                           <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
                           <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
                               <div class="text-start column">
+                                <div class="text-xs text-bold mb-2">Usuario:</div>
+                                <div class="text-xs text-bold mb-2">Fecha:</div>
                                   <div class="text-xs text-bold mb-2">Total de Productos:</div>
-                                  <div class="text-xs text-bold mb-2">Usuario:</div>
+                                  <div class="text-xs text-bold mb-2">Entrega:</div>
+                                  <div class="text-xs text-bold ">Estatus:</div>
                               </div>
                               <div class="text-end column">
-                                  <div class="text-xs mb-2">{{ $order->total_items }}</div>
-                                  <div class="text-xs mb-2">
-                                      @if ($order->user)
-                                          {{ $order->user->name }}
-                                      @else
-                                          Usuario no asignado
-                                      @endif
-                                  </div>
+                                <div class="text-xs mb-2">
+                                    @if ($order->user)
+                                        {{ $order->user->name }}
+                                    @else
+                                        Usuario no asignado
+                                    @endif
+                                </div>
+                                <div class="text-xs mb-2">{{ $order->date }}</div>
+                                <div class="text-xs mb-2">{{ $order->details->sum('quantity') }}</div>
+                                <div class="text-xs mb-2">{{ $order->preference }}</div>
+                                <div class="text-xs">
+                                    @if ($order->status == 0)
+                                        En Proceso
+                                    @elseif ($order->status == 1)
+                                        Aprobado
+                                    @elseif ($order->status == 2)
+                                        Negado
+                                    @endif
+                                </div>
                               </div>
                           </div>
                       </div>

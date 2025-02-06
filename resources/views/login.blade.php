@@ -7,11 +7,25 @@
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<style>
+        body {
+            background: url("../../assets/img/fondo.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+</style>
 <body>
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="col-md-4">
-            <h3 class="text-center mb-4">Hombre Casual</h3>
-            <form>
+    <div class="container d-flex justify-content-center flex-column align-items-center vh-100">
+        <img src="../../assets/img/hc.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+        <!-- <img src="../../assets/img/fondo.jpg" class="navbar-brand-img" width="150" height="150" alt="main_logo"> -->
+
+        <div class="col-md-4 d-flex justify-content-center flex-column login-container">
+            <form class="d-flex flex-column">
                 @csrf
                 <div class="form-group">
                     <label for="email">Correo Electrónico</label>
@@ -21,7 +35,7 @@
                     <label for="password">Contraseña</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Ingresa tu contraseña" required>
                 </div>
-                <button type="submit" class="btn btn-info btn-block">Ingresar</button>
+                <button type="submit" class="btn btn-info btn-block" style="background-color: #124783; border-color: #124783">Ingresar</button>
             </form>
             <div class="text-center mt-3">
                 <a>¿Olvidaste tu contraseña?</a>
