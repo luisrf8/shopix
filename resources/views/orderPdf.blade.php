@@ -5,11 +5,15 @@
     <title>Orden de Venta</title>
 </head>
 <body>
+    <!-- Mostrar la imagen en base64 -->
+    <img src="{{ $imageBase64 }}" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+
     <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
     <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
     <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
     <p><strong>Fecha:</strong> {{ $order->date }} | <strong>Estado:</strong> {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : 'Negado') }}</p>
 
+    <!-- Detalles de productos -->
     <h2>Productos en la Orden</h2>
     <table border="1">
         <thead>
@@ -33,8 +37,10 @@
             @endforeach
         </tbody>
     </table>
+
     <p><strong>Total Orden:</strong> ${{ number_format($totalOrden, 2) }}</p>
 
+    <!-- Detalles de pagos -->
     <h2>Pagos Registrados</h2>
     <table border="1">
         <thead>
@@ -62,6 +68,9 @@
             @endforeach
         </tbody>
     </table>
+
     <p><strong>Total Pagado:</strong> ${{ number_format($totalPagado, 2) }}</p>
+    <img src="{{ $qrCodeBase64 }}" alt="Código QR">
+
 </body>
 </html>

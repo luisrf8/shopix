@@ -25,6 +25,10 @@ Route::middleware('guest')->group(function () {
 Route::get('/', function () {
     return view('ecommerce');
 });
+Route::get('/publicOrder/{id}', function () {
+    return view('ecommerce');
+});
+// Route::post('/publicOrder/{id}', [AuthenticatedSessionController::class, 'store']);
 
 // Route::middleware('auth')->get('/dashboard', function () {
     //     return view('dashboard');

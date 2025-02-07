@@ -492,6 +492,28 @@ input[type="checkbox"]:checked + .position-absolute {
                     customer_id: authenticatedUserId
                 };
                 console.log("orderData", orderData)
+                fetch('api/create-sale', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    },
+                    body: JSON.stringify({ orderData }),
+                })
+                .then((response) => {
+                    if (response.status === 200) { // Valida el código de estado HTTP
+                        alert('Compra creada correctamente');
+                        window.location.href = '/products';
+                    }
+                    // Verificar si la respuesta tiene un código de estado exitoso
+                    if (!response.ok) {
+                        throw new Error(`Error en la respuesta: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .catch((error) => {
+                    console.log("err", error)
+                })
             })
         });
         function filterProducts() {

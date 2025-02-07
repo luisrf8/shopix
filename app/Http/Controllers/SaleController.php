@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use App\Mail\OrderPdfMail;  // Importa la clase correctamente
 use Illuminate\Support\Facades\Mail;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\Label;
+use Endroid\QrCode\Logo\Logo;
+use Endroid\QrCode\RoundBlockSizeMode;
 
 class SaleController extends Controller
 {
@@ -318,14 +325,22 @@ class SaleController extends Controller
         // Devolver solo los datos esperados
         return response()->json($groupedVariants, 200);
     }
+
     public function orderToggleStatus($id, Request $request)
     {
+        // Recuperar la orden con sus relaciones
         $order = SalesOrder::with([
             'user', 
             'details', 
             'details.variant.product', 
             'payments.payment'
-        ])->findOrFail($id);
+            ])->findOrFail($id);
+            
+            $serverIp = request()->getHost(); // Obtiene la IP o dominio del servidor
+        // Cargar la imagen y convertirla a base64
+        $imagePath = storage_path('app/public/products/hc.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $imageBase64 = 'data:image/png;base64,' . $imageData;
         
         // Actualizar el estado de la orden
         $order->status = $request->status;
@@ -335,8 +350,20 @@ class SaleController extends Controller
         $totalOrden = $order->details->sum('amount');
         $totalPagado = $order->payments->sum('amount');
     
-        // Generar el HTML para el PDF
-        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado'))->render();
+        // Generar el código QR correctamente con Endroid QR Code
+        $qrUrl = "http://{$serverIp}/publicOrder/{$order->id}";
+        
+        $qrCode = QrCode::create($qrUrl)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setSize(250)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $qrCodeImage = $writer->write($qrCode);
+        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeImage->getString());
+    
+        // Generar el HTML para el PDF con el QR y otros datos
+        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado', 'imageBase64', 'qrCodeBase64'))->render();
     
         // Configuración de Dompdf
         $options = new Options();
@@ -351,18 +378,19 @@ class SaleController extends Controller
         $fileName = 'orden-' . $order->id . '.pdf';
         Storage::disk('public')->put('orders/' . $fileName, $dompdf->output());
         $filePath = storage_path('app/public/orders/' . $fileName);
-
+    
         // URL accesible del PDF
         $pdfUrl = asset('storage/orders/' . $fileName);
+    
+        // Enviar el correo con el PDF generado
         Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
-
+    
         return response()->json([
             'success' => true,
             'message' => 'Orden actualizada y PDF generado.',
             'pdf_url' => $pdfUrl
         ]);
     }
-    
     public function paymentToggleStatus($id, Request $request)
     {
         // Buscar la categoría
