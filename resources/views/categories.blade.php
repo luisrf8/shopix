@@ -229,18 +229,18 @@
           },
           body: { is_active: newStatus === 'active' ? 1 : 0 } // Enviar el estado como JSON
         })
-        .then(response => {
-          if (response.status === 200) { // Valida el código de estado HTTP
-            alert('Categoría actualizada correctamente');
-            window.location.reload();
-          } else {
-            throw new Error('Error al actualizar la categoría');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Ocurrió un error al actualizar la Categoría');
-        });
+          .then(response => {
+            if (response.status === 200) { // Valida el código de estado HTTP
+              alert('Categoría actualizada correctamente');
+              window.location.reload();
+            } else {
+              throw new Error('Error al actualizar la categoría');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al actualizar la Categoría');
+          });
         })
       });
 

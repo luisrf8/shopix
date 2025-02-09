@@ -17,6 +17,10 @@ use App\Http\Controllers\GoogleDriveController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+// Route::post('login', [AuthenticatedSessionController::class, 'store']);
+Route::middleware('auth:sanctum')->post('/adminUser', function (Request $request) {
+    return response()->json($request->user());
+});
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy']);
 Route::post('loginEcomm', [AuthenticatedSessionController::class, 'store']);
 Route::post('/registerEcomm', [AuthenticatedSessionController::class, 'registerEcomm']);

@@ -115,7 +115,26 @@ input[type="checkbox"]:checked + .position-absolute {
             var itemsSelected= [];
             var paymentDetails= [];
             var totalAmount = 0;
-            const authenticatedUserId = {{ auth()->user()->id }};
+            let authenticatedUserId = {{ optional(auth()->user())->id ?? 'null' }};
+            const token = localStorage.getItem('authToken');
+            if(authenticatedUserId == null) {
+                fetch("/api/adminUser", {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                })
+                .then(response => response.json())  // Convertimos la respuesta a JSON
+                .then(data => {
+                    console.log("Usuario autenticado:", data.id);  // Mostramos los datos del usuario
+                    authenticatedUserId = data.id
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Ocurrió un error");
+                });
+            }
             console.log("authenticatedUserId", authenticatedUserId)
             const itemSelector = document.getElementById('itemSelector');
             const toStep2 = document.getElementById('toStep2');

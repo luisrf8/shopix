@@ -69,13 +69,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims()
     {
-        if ($user) {
-            $name = $user->name; // Solo accede a 'name' si $user no es null
-        } else {
-            // Lógica en caso de que el usuario no exista
-        }
         return [
-            'role' => $this->role->name, // Agrega el rol del usuario, puedes personalizar esto
+            'role' => $this->role->name, // Accede correctamente al rol del usuario
+            'name' => $this->name, // Agrega el nombre del usuario si es necesario
         ];
     }
 }

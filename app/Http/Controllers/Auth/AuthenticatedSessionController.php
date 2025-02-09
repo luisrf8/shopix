@@ -34,29 +34,23 @@ class AuthenticatedSessionController extends Controller
     {
         // Obtener las credenciales desde el request
         $credentials = $request->only('email', 'password');
-        
+    
         // Intentar la autenticación tradicional
         $request->authenticate();
-        
+    
         // Regenerar la sesión después de la autenticación para evitar el secuestro de sesión
         $request->session()->regenerate();
-        
+    
         // Obtener el usuario autenticado
-        $user = auth()->user();
-
-        try {
-            // Verificar si las credenciales son válidas con JWT
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Credenciales inválidas'], 401);
-            }
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'No se pudo crear el token'], 500);
-        }
-
-        // Retornar tanto el token como la información del usuario
+        $user = Auth::user();
+    
+        // Generar el token usando el usuario autenticado
+        $token = JWTAuth::fromUser($user, ['custom_claim' => 'value']);
+    
+        // Retornar el token y la información del usuario
         return response()->json([
             'token' => $token,
-            'user'  => $user, // Agregamos los datos del usuario autenticado
+            'user'  => $user,
         ], 200);
     }
 
