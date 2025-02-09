@@ -72,7 +72,7 @@
             return response.json().then(data => {
                 console.log("response", data)
                     // Almacena el token y redirige al dashboard
-                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('authToken', data.access_token);
                     window.location.href = '/dashboard'; // Redirección al dashboard
             });
         })

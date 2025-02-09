@@ -25,27 +25,27 @@ Route::middleware('guest')->group(function () {
 Route::get('/', function () {
     return view('ecommerce');
 });
-Route::get('/publicOrder/{id}', function () {
-    return view('ecommerce');
-});
+Route::get('/publicOrder/{id}', [SaleController::class, 'showPublicOrder']);
+
 // Route::post('/publicOrder/{id}', [AuthenticatedSessionController::class, 'store']);
 
 // Route::middleware('auth')->get('/dashboard', function () {
     //     return view('dashboard');
     // });
-Route::middleware('auth')->group(function () {
+// Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    // Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
-    Route::get('/users', [UserController::class, 'index'])->name('users');
-    Route::get('/products', [ProductController::class, 'index'])->name('products');
-    Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories');
-    Route::get('/paymentMethods', [PaymentMethodController::class, 'index'])->name('paymentMethods');
+    Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories.index');
+
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/{category}', [ProductController::class, 'showByCategory'])->name('products.byCategory');
     Route::get('/products/product/{id}', [ProductController::class, 'showByProduct'])->name('productItem');
     Route::get('/createProduct', function () {
         return view('createProductItem');
     })->name('createProduct');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::get('/paymentMethods', [PaymentMethodController::class, 'index'])->name('paymentMethods.index');
     Route::get('/profile', function () {
         return view('profile');
     })->name('profile');
@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'viewOrders'])->name('purchase.orders');
     Route::get('/order/{id}', [PurchaseOrderController::class, 'showByOrder'])->name('showByOrder');
 
-});
+// });
 
 
 require __DIR__.'/auth.php';

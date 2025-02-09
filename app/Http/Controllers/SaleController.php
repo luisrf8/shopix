@@ -251,6 +251,20 @@ class SaleController extends Controller
 
         return view('salesOrderDetail', compact('order', 'totalOrden', 'totalPagado'));
     }
+    public function showPublicOrder($id)
+    {
+        $order = SalesOrder::with(['user', 'details', 'details.variant','details.variant.product', 'payments', 'payments.payment'])->find($id);
+        // Calcular el total de la orden
+        $totalOrden = $order->details->sum(function ($detalle) {
+            return $detalle->amount;
+        });
+        // Calcular el total pagado
+        $totalPagado = $order->payments->sum(function ($payment) {
+            return $payment->amount;
+        });
+
+        return view('orderInfoQr', compact('order', 'totalOrden', 'totalPagado'));
+    }
 
     public function getPaymentMethods()
     {
@@ -334,63 +348,73 @@ class SaleController extends Controller
             'details', 
             'details.variant.product', 
             'payments.payment'
-            ])->findOrFail($id);
-            
-            $serverIp = request()->getHost(); // Obtiene la IP o dominio del servidor
-        // Cargar la imagen y convertirla a base64
-        $imagePath = storage_path('app/public/products/hc.png');
-        $imageData = base64_encode(file_get_contents($imagePath));
-        $imageBase64 = 'data:image/png;base64,' . $imageData;
-        
+        ])->findOrFail($id);
+    
         // Actualizar el estado de la orden
         $order->status = $request->status;
         $order->save();
     
-        // Calcular totales
-        $totalOrden = $order->details->sum('amount');
-        $totalPagado = $order->payments->sum('amount');
+        // Si el nuevo estado es 1, generar el PDF y enviar el correo
+        if ($order->status == 1) {
+            $serverIp = request()->getHost(); // Obtiene la IP o dominio del servidor
+            
+            // Cargar la imagen y convertirla a base64
+            $imagePath = storage_path('app/public/products/hc.png');
+            $imageData = base64_encode(file_get_contents($imagePath));
+            $imageBase64 = 'data:image/png;base64,' . $imageData;
     
-        // Generar el código QR correctamente con Endroid QR Code
-        $qrUrl = "http://{$serverIp}/publicOrder/{$order->id}";
-        
-        $qrCode = QrCode::create($qrUrl)
-            ->setEncoding(new Encoding('UTF-8'))
-            ->setSize(250)
-            ->setMargin(10);
-
-        $writer = new PngWriter();
-        $qrCodeImage = $writer->write($qrCode);
-        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeImage->getString());
+            // Calcular totales
+            $totalOrden = $order->details->sum('amount');
+            $totalPagado = $order->payments->sum('amount');
     
-        // Generar el HTML para el PDF con el QR y otros datos
-        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado', 'imageBase64', 'qrCodeBase64'))->render();
+            // Generar el código QR correctamente con Endroid QR Code
+            $qrUrl = "http://{$serverIp}:8000/publicOrder/{$order->id}";
+            
+            $qrCode = QrCode::create($qrUrl)
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setSize(250)
+                ->setMargin(10);
     
-        // Configuración de Dompdf
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($pdfContent);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
+            $writer = new PngWriter();
+            $qrCodeImage = $writer->write($qrCode);
+            $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeImage->getString());
     
-        // Guardar el PDF en storage/app/public/orders/
-        $fileName = 'orden-' . $order->id . '.pdf';
-        Storage::disk('public')->put('orders/' . $fileName, $dompdf->output());
-        $filePath = storage_path('app/public/orders/' . $fileName);
+            // Generar el HTML para el PDF con el QR y otros datos
+            $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado', 'imageBase64', 'qrCodeBase64'))->render();
     
-        // URL accesible del PDF
-        $pdfUrl = asset('storage/orders/' . $fileName);
+            // Configuración de Dompdf
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($pdfContent);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
     
-        // Enviar el correo con el PDF generado
-        Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
+            // Guardar el PDF en storage/app/public/orders/
+            $fileName = 'orden-' . $order->id . '.pdf';
+            Storage::disk('public')->put('orders/' . $fileName, $dompdf->output());
+            $filePath = storage_path('app/public/orders/' . $fileName);
+    
+            // URL accesible del PDF
+            $pdfUrl = asset('storage/orders/' . $fileName);
+    
+            // Enviar el correo con el PDF generado
+            Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden actualizada, PDF generado y correo enviado.',
+                'pdf_url' => $pdfUrl
+            ]);
+        }
     
         return response()->json([
             'success' => true,
-            'message' => 'Orden actualizada y PDF generado.',
-            'pdf_url' => $pdfUrl
+            'message' => 'Orden actualizada, pero no se generó PDF ni se envió correo.'
         ]);
     }
+    
     public function paymentToggleStatus($id, Request $request)
     {
         // Buscar la categoría

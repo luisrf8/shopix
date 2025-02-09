@@ -62,6 +62,19 @@ class ProductController extends Controller
         $categories = Category::all();
         return view('productItem', compact('product', 'categories'));
     }
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'required',
+        ]);
+
+        // Crear el producto
+        Product::create($validatedData);
+        return response()->json(['success' => true, 'message' => 'Product created successfully'], 200);
+
+    }
     public function create(Request $request)
     {
         // dd($request);
@@ -193,60 +206,6 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product created successfully', 'product' => $product], 201);
     }
 
-    public function update1(Request $request, Product $product)
-    {
-        // $request->validate([
-        //     'name' => 'sometimes|required|string|max:255',
-        //     'description' => 'sometimes|required|string',
-        //     'price' => 'sometimes|required|numeric',
-        //     'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        // ]);
-
-        $product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'category_id' => $request->category,
-        ]);
-
-        if ($request->hasFile('images')) {
-            // Eliminar imágenes existentes
-            foreach ($product->images as $image) {
-                // Asumiendo que la ruta de la imagen es la URL completa de Google Drive
-                // Extraer el ID del archivo de la URL
-                $fileId = basename(parse_url($image->path, PHP_URL_PATH));
-                $service->files->delete($fileId);
-                $image->delete();
-            }
-
-            // Guardar nuevas imágenes
-            foreach ($request->file('images') as $image) {
-                $filePath = $image->getPathName();
-                $fileName = $image->getClientOriginalName();
-                $fileMetadata = new Drive\DriveFile([
-                    'name' => $fileName,
-                    'parents' => ['your-folder-id']
-                ]);
-
-                $content = file_get_contents($filePath);
-                $file = $service->files->create($fileMetadata, [
-                    'data' => $content,
-                    'mimeType' => $image->getMimeType(),
-                    'uploadType' => 'multipart',
-                    'fields' => 'id'
-                ]);
-
-                $fileId = $file->id;
-                $fileUrl = "https://drive.google.com/uc?export=view&id={$fileId}";
-
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'path' => $fileUrl,
-                ]);
-            }
-        }
-
-        return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
-    }
     public function show($id) {
         $product = Product::with(['images', 'variants', 'category'])->findOrFail($id);
         // dd($product); // Esto te mostrará los datos completos del producto

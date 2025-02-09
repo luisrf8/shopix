@@ -144,12 +144,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
   function logOut() {
-    fetch("/logout", { // Ajusta a `/api/logout` si es una ruta API.
+    fetch("/api/logout", { // Ajusta a `/api/logout` si es una ruta API.
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Obtener el token CSRF de la meta etiqueta
-        }
+        // headers: {
+        //     'Content-Type': 'application/json',
+        //     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Obtener el token CSRF de la meta etiqueta
+        // }
     })
     .then(response => {
         if (response.ok) {
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(data => {
         console.log("Logged out successfully:", data);
-        localStorage.removeItem('authToken');
+        // localStorage.removeItem('authToken');
         window.location.href = '/login'; // Redirigir a la página de inicio de sesión.
     })
     .catch(error => {
