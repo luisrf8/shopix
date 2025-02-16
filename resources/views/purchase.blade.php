@@ -29,12 +29,14 @@ input[type="checkbox"]:checked + .position-absolute {
 
 </style>
 </head>
-<body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    @extends('layouts.navbar')
+<body class="g-sidenav-show  bg-gray-100" id="d-body">
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 d-none d-lg-block bg-white my-2" id="sidenav-main">
+    @include('layouts.navbar')
   </aside>
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-  @include('layouts.head')
+    <!-- Navbar -->
+    @include('layouts.head')
+    <!-- End Navbar -->
     <div class="m-5">
         <h1>Flujo de Compra</h1>
         <form id="purchaseForm">
