@@ -56,6 +56,24 @@ class ProductController extends Controller
         ->get();
         return response()->json($productItems);
     }
+    public function showByCategoryEcommAll()
+    {
+        try {
+            // Obtener todos los productos con sus imágenes y variantes
+            $productItems = Product::with(['images', 'variants'])->get();
+    
+            // Verificar si hay productos, de lo contrario devolver un mensaje adecuado
+            if ($productItems->isEmpty()) {
+                return response()->json(['message' => 'No products found'], 404);
+            }
+    
+            return response()->json($productItems);
+    
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        }
+    }
+    
     public function showByProduct($id)
     {
         $product = Product::with(['variants', 'images', 'category'])->findOrFail($id);

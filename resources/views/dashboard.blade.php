@@ -170,7 +170,7 @@
                         <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
                             <div class="text-start column">
                                 <div class="text-xs text-bold mb-2">Proveedor:</div>
-                                <div class="text-xs text-bold mb-2">Cantidad de productos:</div>
+                                <!-- <div class="text-xs text-bold mb-2">Cantidad de productos:</div> -->
                                 <div class="text-xs text-bold">Fecha de Creación:</div>
                             </div>
                             <div class="text-end column">

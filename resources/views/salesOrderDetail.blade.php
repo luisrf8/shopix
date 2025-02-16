@@ -22,20 +22,19 @@
     <div class="container-fluid">
       <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
       <input type="text" id="user-name" class="d-none" value="{{ $order->user->name }}" readonly>
-
+      <input type="text" id="user-email" class="d-none" value="{{ $order->user->email }}" readonly>
       <input type="text" id="user-phone" class="d-none" value="{{ $order->user->phone_number ?? 'No registrado' }}" readonly>
-
       <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
       <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
       <div class="d-flex aling-items-center gap-2">
             <strong>Entregado:</strong>
-            <select id="order-status" class="btn btn-sm toggle-status-btn 
-              {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
-              " onchange="updateOrderStatus({{ $order->id }})">
-              <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
-              <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Entregado ↓</option>
-              <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
-              <option value="3" {{ $order->deliver_status == 3 ? 'selected' : '' }}>Devolucion ↓</option>
+            <select id="deliver-status" class="btn btn-sm toggle-status-btn 
+              {{ $order->deliver_status == 0 ? 'btn-outline-warning' : ($order->deliver_status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
+              " onchange="updateDeliverStatus({{ $order->id }})">
+              <option value="0" {{ $order->deliver_status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
+              <option value="1" {{ $order->deliver_status == 1 ? 'selected' : '' }}>Entregado ↓</option>
+              <option value="2" {{ $order->deliver_status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
+              <!-- <option value="3" {{ $order->deliver_status == 3 ? 'selected' : '' }}>Devolucion ↓</option> -->
             </select>
           </div>
       <div class="d-flex gap-2">
@@ -175,13 +174,12 @@ function updateOrderStatus(orderId) {
     .catch(error => console.error("Error:", error));
 }
 
-    function updatePaymentStatus(paymentId) {
+function updateDeliverStatus(paymentId) {
       const status = event.target.value;
       const userName = document.getElementById('user-name').value;  // Si usas un input
       const userPhone = document.getElementById('user-phone').value;  // Si usas un input
-      const message = encodeURIComponent(`Hola ${userName} ¡Tu pago ha sido confirmado y aprobado!`);
 
-      fetch(`/api/payment/${paymentId}/status/update`, {
+      fetch(`/api/deliver/${paymentId}/status/update`, {
         method: "POST",
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -192,11 +190,29 @@ function updateOrderStatus(orderId) {
       .then(response => response.json())
       .then(data => {
         alert(data.message);
-        if (status == 1) {
-          if (userPhone) {
-            window.open(`https://wa.me/${userPhone}?text=${message}`, '_blank');
-          }
-        }
+        location.reload();
+      })
+      .catch(error => console.error("Error:", error));
+    }
+    function updatePaymentStatus(paymentId) {
+      const status = event.target.value;
+      const userName = document.getElementById('user-name').value;  // Si usas un input
+      const userPhone = document.getElementById('user-phone').value;  // Si usas un input
+      const userEmail = document.getElementById('user-email').value;  // Si usas un input
+      const message = encodeURIComponent(`Hola ${userName} ¡Tu pago ha sido confirmado y aprobado!`);
+
+      fetch(`/api/payment/${paymentId}/status/update`, {
+        method: "POST",
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({ status: status, email: userEmail })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("data", data)
+        alert(data.message);
         location.reload();
       })
       .catch(error => console.error("Error:", error));

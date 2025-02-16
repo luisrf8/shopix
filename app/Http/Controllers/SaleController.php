@@ -16,6 +16,8 @@ use Dompdf\Options;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use App\Mail\OrderPdfMail;  // Importa la clase correctamente
+use App\Mail\PaymentConfirmationMail;
+use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\Mail;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -236,6 +238,24 @@ class SaleController extends Controller
     
         return view('salesOrders', compact('salesOrders'));
     }
+    public function viewUserOrders($id)
+    {
+        $salesOrders = SalesOrder::with([
+            'user', 
+            'details', 
+            'details.variant', 
+            'payments'
+        ])->where('user_id', $id) // Filtrar por usuario específico
+        ->orderBy('date', 'desc')
+        ->get();
+
+        foreach ($salesOrders as $order) {
+            $order->total_items = $order->details->sum('quantity');
+        }
+
+        return response()->json($salesOrders);
+    }
+
 
     public function showByOrder($id)
     {
@@ -400,7 +420,7 @@ class SaleController extends Controller
             $pdfUrl = asset('storage/orders/' . $fileName);
     
             // Enviar el correo con el PDF generado
-            Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
+            // Mail::to($order->user->email)->send(new OrderPdfMail($order, $filePath));
     
             return response()->json([
                 'success' => true,
@@ -414,19 +434,59 @@ class SaleController extends Controller
             'message' => 'Orden actualizada, pero no se generó PDF ni se envió correo.'
         ]);
     }
+    public function orderDeliverToggleStatus($id, Request $request)
+    {
+        // Recuperar la orden con sus relaciones
+        $order = SalesOrder::with([
+            'user', 
+            'details', 
+            'details.variant.product', 
+            'payments.payment'
+        ])->findOrFail($id);
     
+        // Actualizar el estado de la orden
+        $order->deliver_status = $request->status;
+        $order->save();
+    
+        // Si el nuevo estado es 1, enviar el correo de confirmación
+        if ($order->status == 1 && $order->preference == "Envio") {
+            Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
+        
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden actualizada y correo de confirmación enviado.'
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Orden actualizada.'
+        ]);
+    }
+    
+
     public function paymentToggleStatus($id, Request $request)
     {
-        // Buscar la categoría
+        // Buscar el pago
         $payment = Payment::findOrFail($id);
-    
-        // Cambiar el estado de la categoría
+        // dd($payment);
+        // Cambiar el estado del pago
         $payment->status = $request->status;
         $payment->save();
-    
-        return response()->json([
-            'status' => 'success',
-            'new_status' => $payment->status
-        ], 200);
+        // dd($request->email);
+        // Enviar correo de confirmación si el pago es aprobado
+        if ($payment->status == 1) {
+            Mail::to($request->email)->send(new PaymentConfirmationMail($payment));
+            return response()->json([
+                'status' => 'success',
+                'new_status' => $payment->status,
+                'message' => 'Pago actualizado y correo enviado.'
+
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago actualizado, pero no se envió correo.'
+            ]);
+        }
     }
 }

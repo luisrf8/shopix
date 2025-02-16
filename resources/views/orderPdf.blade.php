@@ -3,19 +3,56 @@
 <head>
     <meta charset="utf-8" />
     <title>Orden de Venta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
 </head>
 <body>
-    <!-- Mostrar la imagen en base64 -->
-    <img src="{{ $imageBase64 }}" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+<table width="100%" style="border-collapse: collapse; border: none;">
+    <tr>
+        <td style="text-align: left; padding: 0; border: none;">
+            <h1>Inversiones el Hombre Casual C.A.</h1>
+            <p>RIF: 297236511-J</p>
+            <p>Calle Arriojas, Mini Centro Comercial Cappadoro, Local-21, Maturin edo. Monagas</p>
+        </td>
+        <td style="text-align: right; padding: 0; border: none;">
+            <img src="{{ $imageBase64 }}" alt="main_logo" style="width: 150px; height: 150px">
+        </td>
+    </tr>
+</table>
 
-    <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
+
+
+    <h2>Detalles de la Orden Nro {{ $order->id }}</h2>
     <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
     <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
     <p><strong>Fecha:</strong> {{ $order->date }} | <strong>Estado:</strong> {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : 'Negado') }}</p>
 
     <!-- Detalles de productos -->
     <h2>Productos en la Orden</h2>
-    <table border="1">
+    <table>
         <thead>
             <tr>
                 <th>Producto</th>
@@ -42,7 +79,7 @@
 
     <!-- Detalles de pagos -->
     <h2>Pagos Registrados</h2>
-    <table border="1">
+    <table>
         <thead>
             <tr>
                 <th>Moneda</th>

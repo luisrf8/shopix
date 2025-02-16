@@ -207,6 +207,11 @@ class PaymentMethodController extends Controller
     
         return response()->json(['message' => 'Tasa del dólar actualizada exitosamente', 'data' => $rate], 201);
     }
+    public function getDollarRate()
+    {
+        $dollarRate = DollarRate::latest('created_at')->first();
+        return response()->json(['message' => 'Tasa del dólar obtenida exitosamente', 'data' => $dollarRate], 201);
+    }
     // Función para eliminar una imagen
     public function removeQrImage($methodId)
     {

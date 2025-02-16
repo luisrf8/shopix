@@ -39,6 +39,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/get-products', [ProductController::class, 'getProducts'])->name('products.getProducts');
 Route::get('/categories', [CategoryController::class, 'getCategories'])->name('categories.getCategories');
 Route::get('/products/{id}', [ProductController::class, 'showByCategoryEcomm']);
+Route::get('/products/all', [ProductController::class, 'showByCategoryEcommAll']);
 Route::get('/getProduct/{id}', [ProductController::class, 'show']);
 Route::get('/payment-methods/ecomm', [SaleController::class, 'getPaymentMethodsEcomm']);
 
@@ -91,6 +92,7 @@ Route::prefix('currencies')->group(function () {
 Route::prefix('dollar-rate')->group(function () {
     Route::post('/update', [PaymentMethodController::class, 'updateDollarRate'])->name('paymentMethods.updateDollarRate');
 });
+Route::get('/dollarRate', [PaymentMethodController::class, 'getDollarRate']);
 
 // ------------------------ VENTAS ------------------------
 
@@ -98,7 +100,9 @@ Route::get('/payment-methods', [SaleController::class, 'getPaymentMethods']);
 Route::post('/sales/get-variants', [SaleController::class, 'getVariants']);
 Route::post('/create-sale', [SaleController::class, 'store']);
 Route::post('/payment/{id}/status/update', [SaleController::class, 'paymentToggleStatus']);
+Route::post('/deliver/{id}/status/update', [SaleController::class, 'orderDeliverToggleStatus']);
 Route::post('/order/{id}/status/update', [SaleController::class, 'orderToggleStatus']);
+Route::get('/orders/{id}', [SaleController::class, 'viewUserOrders']);
 
 // ------------------------ ÓRDENES DE COMPRA ------------------------
 
