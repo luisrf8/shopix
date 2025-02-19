@@ -86,7 +86,7 @@
                       <span class="text-xs">{{ $category['description'] }}</span>
                     </div>
                     <div class="d-flex w-100 justify-content-between align-items-center px-4">
-                      <button class="btn btn-sm toggle-status-btn {{ $category->is_active ? 'btn-outline-danger' : 'btn-outline-success'}}" 
+                      <button class="btn btn-sm toggle-status-btn {{ $category->is_active ? 'btn-outline-success' : 'btn-outline-danger'}}" 
                               data-id="{{ $category->id }}" 
                               data-status="{{ $category->is_active ? 'active' : 'inactive' }}">
                           {{ $category->is_active ? 'Inactivar' : 'Activar' }}

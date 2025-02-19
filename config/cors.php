@@ -3,7 +3,7 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*', 'http://192.168.1.104:8000'], // Cambia esto según la URL de tu frontend
+    'allowed_origins' => ['*', 'http://192.168.1.103:8000'], // Cambia esto según la URL de tu frontend
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

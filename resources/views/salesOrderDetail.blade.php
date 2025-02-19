@@ -168,7 +168,7 @@ function updateOrderStatus(orderId) {
             link.click();
             document.body.removeChild(link);
 
-            // location.reload();
+            location.reload();
         }
     })
     .catch(error => console.error("Error:", error));

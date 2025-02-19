@@ -35,7 +35,7 @@
       <div class="col-md-12 mt-4">
   <div class="">
     <div class="pb-0 px-3">
-      <a href="{{ route('products') }}">
+      <a href="{{ route('products.index') }}">
         <h6 class="mb-0"> <i class="material-symbols-rounded opacity-10">arrow_back_ios_new</i> Volver</h6>
       </a>
     </div>
@@ -66,7 +66,7 @@
                     <!-- Modal para agregar imagen -->
                     <div class="modal fade" id="addImageModal" tabindex="-1" aria-labelledby="addImageModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
-                        <form id="addImageForm" method="POST" action="{{ route('product.addImage', $product->id) }}" enctype="multipart/form-data">
+                        <form id="addImageForm" method="POST" action="{{ route('products.addImage', $product->id) }}" enctype="multipart/form-data">
                           @csrf
                           <div class="modal-content">
                             <div class="modal-header">

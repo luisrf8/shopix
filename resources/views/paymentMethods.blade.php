@@ -62,7 +62,7 @@
                 <div class="col-6">
                   <div class="card card-body border card-plain border-radius-lg d-flex justify-content-between align-items-center flex-row py-0">
                     <h6 class="mb-0">{{ $currency->name }} / {{$currency->code}}</h6>
-                    <button class="btn btn-sm toggle-status-currency-btn pt-4 {{ $currency->status ? 'text-danger' : 'text-success'}}" 
+                    <button class="btn btn-sm toggle-status-currency-btn pt-4 {{ $currency->status ? 'text-success' : 'text-danger'}}" 
                         data-id="{{ $currency->id }}" 
                         data-status="{{ $currency->status ? 'active' : 'inactive' }}">
                           {{ $currency->status ? 'Inactivar' : 'Activar' }}
@@ -127,7 +127,7 @@
                         data-dni="{{ $method->dni }}"
                         data-description="{{ $method->description }}">edit</i>
                     </div>
-                    <button class="btn btn-sm toggle-status-btn pt-4 {{ $method->status ? 'text-danger' : 'text-success'}}" 
+                    <button class="btn btn-sm toggle-status-btn pt-4 {{ $method->status ? 'text-success' : 'text-danger'}}" 
                         data-id="{{ $method->id }}" 
                         data-status="{{ $method->status ? 'active' : 'inactive' }}">
                           {{ $method->status ? 'Inactivar' : 'Activar' }}

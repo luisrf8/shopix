@@ -230,7 +230,7 @@ class SaleController extends Controller
             'details', 
             'details.variant', 
             'payments' // Agregamos la relación de pagos
-        ])->orderBy('date', 'desc')->get();
+        ])->orderBy('id', 'desc')->get();
     
         foreach ($salesOrders as $order) {
             $order->total_items = $order->details->sum('quantity');
@@ -450,7 +450,7 @@ class SaleController extends Controller
     
         // Si el nuevo estado es 1, enviar el correo de confirmación
         if ($order->status == 1 && $order->preference == "Envio") {
-            Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
+            // Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
         
             return response()->json([
                 'success' => true,
@@ -475,7 +475,7 @@ class SaleController extends Controller
         // dd($request->email);
         // Enviar correo de confirmación si el pago es aprobado
         if ($payment->status == 1) {
-            Mail::to($request->email)->send(new PaymentConfirmationMail($payment));
+            // Mail::to($request->email)->send(new PaymentConfirmationMail($payment));
             return response()->json([
                 'status' => 'success',
                 'new_status' => $payment->status,
