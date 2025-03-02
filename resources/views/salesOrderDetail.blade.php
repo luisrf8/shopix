@@ -26,33 +26,31 @@
       <input type="text" id="user-phone" class="d-none" value="{{ $order->user->phone_number ?? 'No registrado' }}" readonly>
       <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>
       <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
-      <div class="d-flex aling-items-center gap-2">
-            <strong>Entregado:</strong>
-            <select id="deliver-status" class="btn btn-sm toggle-status-btn 
-              {{ $order->deliver_status == 0 ? 'btn-outline-warning' : ($order->deliver_status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
-              " onchange="updateDeliverStatus({{ $order->id }})">
-              <option value="0" {{ $order->deliver_status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
-              <option value="1" {{ $order->deliver_status == 1 ? 'selected' : '' }}>Entregado ↓</option>
-              <option value="2" {{ $order->deliver_status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
-              <!-- <option value="3" {{ $order->deliver_status == 3 ? 'selected' : '' }}>Devolucion ↓</option> -->
-            </select>
-          </div>
+      <div class="d-flex align-items-center gap-2">
+        <strong>Entregado:</strong>
+        <select id="deliver-status" class="btn btn-sm toggle-status-btn 
+          {{ $order->deliver_status == 0 ? 'btn-outline-warning' : ($order->deliver_status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
+          onchange="updateDeliverStatus(this, {{ $order->id }})">
+            <option value="0" {{ $order->deliver_status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
+            <option value="1" {{ $order->deliver_status == 1 ? 'selected' : '' }}>Entregado ↓</option>
+            <option value="2" {{ $order->deliver_status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
+        </select>
+      </div>
+
       <div class="d-flex gap-2">
         <div>
           <p><strong>Fecha:</strong> {{ $order->date }} |
         </div> 
-        <div>
-          <div class="d-flex aling-items-center gap-2">
-            <strong>Estado:</strong>
-            <select id="order-status" class="btn btn-sm toggle-status-btn 
-              {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
-              " onchange="updateOrderStatus({{ $order->id }})">
-              <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
-              <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Aprobado ↓</option>
-              <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Negado ↓</option>
-            </select>
+          <div class="d-flex gap-2">
+              <strong>Estado:</strong>
+              <select id="order-status" class="btn btn-sm toggle-status-btn 
+                {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
+                onchange="updateOrderStatus(this, {{ $order->id }})">
+                  <option value="0" {{ $order->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
+                  <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Aprobado ↓</option>
+                  <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Negado ↓</option>
+              </select>
           </div>
-        </div>
       </div>
 
       <!-- Tabla de Detalles de la Orden -->
@@ -115,13 +113,13 @@
                 <td>{{ $payment->payment->bank }}</td>
                 <td>{{ $payment->reference ?? 'N/A' }}</td>
                 <td>
-                  <select class="btn btn-sm toggle-status-btn 
-              {{ $payment->status == 0 ? 'btn-outline-warning' : ($payment->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }} 
-              " onchange="updatePaymentStatus({{ $payment->id }})">
-                    <option value="0" {{ $payment->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
-                    <option value="1" {{ $payment->status == 1 ? 'selected' : '' }}>Pagado ↓</option>
-                    <option value="3" {{ $payment->status == 3 ? 'selected' : '' }}>Cancelado ↓</option>
-                  </select>
+                    <select class="btn btn-sm toggle-status-btn 
+                      {{ $payment->status == 0 ? 'btn-outline-warning' : ($payment->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
+                      onchange="updatePaymentStatus(this, {{ $payment->id }})">
+                        <option value="0" {{ $payment->status == 0 ? 'selected' : '' }}>En Proceso ↓</option>
+                        <option value="1" {{ $payment->status == 1 ? 'selected' : '' }}>Pagado ↓</option>
+                        <option value="3" {{ $payment->status == 3 ? 'selected' : '' }}>Cancelado ↓</option>
+                    </select>
                 </td>
               </tr>
               @endforeach
@@ -142,10 +140,21 @@
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 <script>
-function updateOrderStatus(orderId) {
-    const status = document.getElementById('order-status').value;
-    const userName = document.getElementById('user-name').value;
-    const userPhone = document.getElementById('user-phone').value;
+ function showLoading(selectElement) {
+    selectElement.disabled = true;
+    const originalText = selectElement.options[selectElement.selectedIndex].text;
+    selectElement.options[selectElement.selectedIndex].text = "Cargando...";
+    return originalText;
+}
+
+function restoreText(selectElement, originalText) {
+    selectElement.options[selectElement.selectedIndex].text = originalText;
+    selectElement.disabled = false;
+}
+
+function updateOrderStatus(selectElement, orderId) {
+    const status = selectElement.value;
+    const originalText = showLoading(selectElement);
 
     fetch(`/api/order/${orderId}/status/update`, {
         method: "POST",
@@ -158,65 +167,71 @@ function updateOrderStatus(orderId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            if(data.pdf_url) {
+              const link = document.createElement("a");
+              link.href = data.pdf_url;
+              link.download = `orden-${orderId}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
             alert(data.message);
-
-            // Descargar el PDF automáticamente
-            const link = document.createElement("a");
-            link.href = data.pdf_url;
-            link.download = `orden-${orderId}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
             location.reload();
+        } else {
+            restoreText(selectElement, originalText);
         }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        restoreText(selectElement, originalText);
+    });
 }
 
-function updateDeliverStatus(paymentId) {
-      const status = event.target.value;
-      const userName = document.getElementById('user-name').value;  // Si usas un input
-      const userPhone = document.getElementById('user-phone').value;  // Si usas un input
+function updateDeliverStatus(selectElement, paymentId) {
+    const status = selectElement.value;
+    const originalText = showLoading(selectElement);
 
-      fetch(`/api/deliver/${paymentId}/status/update`, {
+    fetch(`/api/deliver/${paymentId}/status/update`, {
         method: "POST",
         headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
         },
-        body:JSON.stringify({ status: status })
-      })
-      .then(response => response.json())
-      .then(data => {
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
         alert(data.message);
         location.reload();
-      })
-      .catch(error => console.error("Error:", error));
-    }
-    function updatePaymentStatus(paymentId) {
-      const status = event.target.value;
-      const userName = document.getElementById('user-name').value;  // Si usas un input
-      const userPhone = document.getElementById('user-phone').value;  // Si usas un input
-      const userEmail = document.getElementById('user-email').value;  // Si usas un input
-      const message = encodeURIComponent(`Hola ${userName} ¡Tu pago ha sido confirmado y aprobado!`);
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        restoreText(selectElement, originalText);
+    });
+}
 
-      fetch(`/api/payment/${paymentId}/status/update`, {
+function updatePaymentStatus(selectElement, paymentId) {
+    const status = selectElement.value;
+    const originalText = showLoading(selectElement);
+
+    fetch(`/api/payment/${paymentId}/status/update`, {
         method: "POST",
         headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
         },
-        body:JSON.stringify({ status: status, email: userEmail })
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log("data", data)
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
         alert(data.message);
         location.reload();
-      })
-      .catch(error => console.error("Error:", error));
-    }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        restoreText(selectElement, originalText);
+    });
+}
 </script>
 
 </body>

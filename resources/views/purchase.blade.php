@@ -8,7 +8,7 @@
     <title>Flujo de Compra</title>
   <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/842bd4ebad.js" crossorigin="anonymous"></script>
+  <!-- <script src="https://kit.fontawesome.com/842bd4ebad.js" crossorigin="anonymous"></script> -->
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
   <style>
 /* Indicador de selección (viñeta) */
@@ -103,7 +103,7 @@ input[type="checkbox"]:checked + .position-absolute {
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
 <!-- Github buttons -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+<!-- <script async defer src="https://buttons.github.io/buttons.js"></script> -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var itemsSelected= [];

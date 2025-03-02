@@ -60,7 +60,7 @@ Route::post('categories/{id}/toggle-status', [CategoryController::class, 'toggle
 
 Route::post('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 Route::post('/create-product', [ProductController::class, 'create']);
-Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
+// Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
 Route::post('/addImage/{productId}', [ProductController::class, 'addImage'])->name('products.addImage');
 Route::delete('/product/remove-image/{imageId}', [ProductController::class, 'removeImage'])->name('products.removeImage');
 
