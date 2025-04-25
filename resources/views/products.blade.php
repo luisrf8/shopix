@@ -9,16 +9,8 @@
   <title>
     Productos
   </title>
-  <!--     Fonts and icons     -->
-  <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
-  <!-- Nucleo Icons -->
   <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <!-- <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script> -->
-  <!-- Material Icons -->
-  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" /> -->
-  <!-- CSS Files -->
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
 
 </head>
@@ -36,9 +28,6 @@
         <label>
           + Agregar Categoría
         </label>
-        <!-- <label>
-          Editar Categoría
-        </label> -->
       </div>
       <!-- Modal para crear categoría -->
       <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
@@ -70,15 +59,34 @@
       </div>
       <!-- Modal para crear categoría -->
       <div class="row">
-        <div class="col-lg-8">
-          <div class="row">
+        <div class="col-lg-12">
+          <!-- Buscador -->
+          <div class="mb-3 px-2">
+            <input type="text" id="searchCategory" class="w-25 form-control border border-1 p-2 bg-white" placeholder="Buscar categoría...">
+          </div>
+          <!-- Carrusel scrollable -->
+          <div id="categoriesContainer" class="d-flex overflow-auto gap-3 px-2 py-3" style="scroll-snap-type: x mandatory;">
+            <div class=" flex-shrink-0" style="width: 200px; scroll-snap-align: start;">
+              <a  href="/products" class="text-decoration-none">
+                <div class="card h-100">
+                  <div class="card-header mx-3 p-3 text-center">
+                    <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
+                      <i class="material-symbols-rounded opacity-10">category</i>
+                    </div>
+                  </div>
+                  <div class="card-body pt-0 p-3 text-center">
+                    <h6 class="text-center mb-0 opacity-9">Todos</h6>
+                    <span class="text-xs"></span>
+                  </div>
+                </div>
+              </a>
+            </div>
             @foreach($categories as $category)
-              <div class="col-md-4 col-4">
+              <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-name="{{ strtolower($category['name']) }}">
                 <a href="{{ route('products.byCategory', $category->id) }}" class="text-decoration-none">
-                  <div class="card">
-                    <div class="card-header mx-4 p-3 text-center">
-                      <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
-                        <!-- Puedes cambiar el ícono dinámicamente si tienes un campo para eso -->
+                  <div class="card h-100">
+                    <div class="card-header mx-3 p-3 text-center">
+                      <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
                         <i class="material-symbols-rounded opacity-10">category</i>
                       </div>
                     </div>
@@ -151,12 +159,16 @@
       </div>
     </div>
     <!-- Fin Modal para crear producto -->
-    <div class="pt-4">
+    <div class="px-3">
+      <div class="mb-3">
+        <input type="text" id="searchProduct" class="w-25 form-control border border-1 p-2 bg-white" placeholder="Buscar producto...">
+      </div>
       <div class="row">
+        <!-- Buscador -->
       @foreach($productItems as $product)
-        <div class="col-md-4 mb-4">
-          <div class="card p-4 d-flex flex-row">
-          <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg" style="width: 100px; height: 100px;">
+      <div class="product-item col-md-4 mb-4" data-name="{{ strtolower($product->name) }}">
+      <div class="card p-4 d-flex flex-row">
+          <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-black text-info border-radius-lg" style="width: 100px; height: 100px;">
               @if(isset($product->images) && count($product->images) > 0)
                   <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
               @else
@@ -208,10 +220,6 @@
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
-<!-- Github buttons -->
-<!-- <script async defer src="https://buttons.github.io/buttons.js"></script> -->
-
-<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script>
     document.getElementById('createProductForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Evita el envío normal del formulario
@@ -289,6 +297,32 @@
       })
       .catch(error => console.error('Error:', error));
   }
+  document.getElementById('searchCategory').addEventListener('input', function () {
+    const searchValue = this.value.toLowerCase();
+    const items = document.querySelectorAll('.category-item');
+
+    items.forEach(item => {
+      const name = item.getAttribute('data-name');
+      if (name.includes(searchValue)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+  document.getElementById('searchProduct').addEventListener('input', function () {
+    const searchValue = this.value.toLowerCase();
+    const items = document.querySelectorAll('.product-item');
+
+    items.forEach(item => {
+      const name = item.getAttribute('data-name');
+      if (name.includes(searchValue)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
   </script>
 
 </body>

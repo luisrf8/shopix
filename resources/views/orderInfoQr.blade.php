@@ -14,11 +14,11 @@
 <body class="g-sidenav-show bg-gray-100 p-4">
     <div class="container-fluid">
         <div class="d-block d-md-none text-center">
-            <img src="../../assets/img/hc.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+            <img src="../../assets/img/inf.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
         </div>
         <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h1 class="text-center">Orden Nro {{ $order->id }}</h1>
-            <img src="../../assets/img/hc.png" class="navbar-brand-img d-none d-md-block" width="150" height="150" alt="main_logo">
+            <img src="../../assets/img/inf.png" class="navbar-brand-img d-none d-md-block" width="150" height="150" alt="main_logo">
         </div>
         
         <p><strong>Cliente:</strong> {{ $order->user->name }} | <strong>Teléfono:</strong> {{ $order->user->phone_number ?? 'No registrado' }}</p>

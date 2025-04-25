@@ -33,7 +33,7 @@
 <table width="100%" style="border-collapse: collapse; border: none;">
     <tr>
         <td style="text-align: left; padding: 0; border: none;">
-            <h1>Inversiones el Hombre Casual C.A.</h1>
+            <h1>Infinity Center C.A.</h1>
             <p>RIF: 297236511-J</p>
             <p>Calle Arriojas, Mini Centro Comercial Cappadoro, Local-21, Maturin edo. Monagas</p>
         </td>

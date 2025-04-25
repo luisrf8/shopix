@@ -8,26 +8,15 @@
     <title>Flujo de Compra</title>
   <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <!-- <script src="https://kit.fontawesome.com/842bd4ebad.js" crossorigin="anonymous"></script> -->
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
   <style>
-/* Indicador de selección (viñeta) */
-.indicator {
-    width: 20px;
-    height: 20px;
-    background-color: transparent;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Cambiar el estado de la viñeta si está seleccionado */
-input[type="checkbox"]:checked + .position-absolute {
-    background-color: #26a69a; /* Verde */
-    border-color: #26a69a;
-}
-
-</style>
+    .step {
+        display: none;
+    }
+    .step:not(.d-none) {
+        display: block;
+    }
+  </style>
 </head>
 <body class="g-sidenav-show  bg-gray-100" id="d-body">
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 d-none d-lg-block bg-white my-2" id="sidenav-main">
@@ -37,75 +26,165 @@ input[type="checkbox"]:checked + .position-absolute {
     <!-- Navbar -->
     @include('layouts.head')
     <!-- End Navbar -->
-    <div class="m-5">
-        <h1>Flujo de Venta</h1>
-        <form id="purchaseForm">
-            @csrf
-            <!-- Paso 1: Selección del Ítem -->
-            <div id="step1">
-                <h4>Paso 1: Selecciona uno o más productos.</h4>
-                <!-- Input de Búsqueda -->
-                <div class="mb-3">
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        class="form-control border border-1 p-2 bg-white" 
-                        placeholder="Buscar producto..." 
-                        onkeyup="filterProducts()">
-                </div>
-                <div id="itemSelector" class="row row-cols-1 row-cols-md-3 g-3">
-                    @foreach($productItems as $item)
-                        <div class="col position-relative product-item" data-name="{{ strtolower($item->name) }}">
-                            <label class="card h-100" for="item_{{ $item->id }}" style="cursor: pointer;">
-                                <input type="checkbox" class="form-check-input d-none" id="item_{{ $item->id }}" value="{{ $item->id }}" name="selectedItems[]">
-                                <div class="position-absolute top-0 end-0 m-2 indicator" id="indicator_{{ $item->id }}"></div>
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ $item->name }}</h5>
-                                    <p class="card-text">{{ $item->description }}</p>
+    <div class="mx-5 d-flex justify-content-between gap-4">
+        <div class="w-75">
+            <h1>Flujo de Venta</h1>
+            <form id="purchaseForm">
+                @csrf
+                <!-- Paso 1: Selección del Ítem -->
+                <div id="step1" class="step">
+                    <!-- Input de Búsqueda -->
+                    <div id="categoriesContainer" class="d-flex overflow-auto gap-3  py-3" style="scroll-snap-type: x mandatory;">
+                        <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="all">
+                            <a href="javascript:void(0)" class="text-decoration-none category-filter">
+                                <div class="card h-100">
+                                    <div class="card-header mx-3 p-3 text-center">
+                                        <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
+                                            <i class="material-symbols-rounded opacity-10">all_inclusive</i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body pt-0 p-3 text-center">
+                                        <h6 class="text-center mb-0 opacity-9">Todos</h6>
+                                    </div>
                                 </div>
-                            </label>
+                            </a>
                         </div>
-                    @endforeach
+                        @foreach($categories as $category)
+                            <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="{{ $category->id }}">
+                                <a href="javascript:void(0)" class="text-decoration-none category-filter">
+                                <div class="card h-100">
+                                    <div class="card-header mx-3 p-3 text-center">
+                                    <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
+                                        <i class="material-symbols-rounded opacity-10">category</i>
+                                    </div>
+                                    </div>
+                                    <div class="card-body pt-0 p-3 text-center">
+                                    <h6 class="text-center mb-0 opacity-9">{{ $category['name'] }}</h6>
+                                    </div>
+                                </div>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mb-3">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="form-control border border-1 p-2 bg-white" 
+                            placeholder="Buscar producto..." 
+                            onkeyup="filterProducts()">
+                    </div>
+                    <div id="itemSelector" class="row row-cols-1 row-cols-md-3 g-3">
+                        @foreach($productItems as $item)
+                            <div class="col product-item" data-category="{{ $item->category_id }}" data-name="{{ strtolower($item->name) }}">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex gap-4 align-items-center">
+                                            <!-- Contenedor de la imagen -->
+                                            <a href="{{ route('productItem', $item->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-black text-info border-radius-lg flex-shrink-0" style="width: 70px; height: 70px;">
+                                                @if(isset($item->images) && count($item->images) > 0)
+                                                    <img src="{{ asset('storage/' . $item->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                                                @else
+                                                    <i class="material-symbols-rounded text-dark">photo_camera</i>
+                                                @endif
+                                            </a>
+                                            <!-- Contenedor del texto -->
+                                            <div class="flex-grow-1">
+                                                <h5 class="text-truncate" style="max-width: calc(100% - 80px); overflow: hidden; white-space: nowrap;">{{ $item->name }}</h5>
+                                                <p class="text-truncate" style="max-width: calc(100% - 80px); overflow: hidden; white-space: nowrap;">{{ $item->description }}</p>
+                                            </div>
+                                        </div>
+                                        @foreach($item->variants as $variant)
+                                            @if($variant->stock > 0)
+                                            <div class="d-flex gap-5 justify-content-between align-items-center">
+                                                <label for="variant_{{ $variant->id }}" class="d-block mt-2 variant-label" style="cursor: pointer;" data-product-name="{{ $item->name }}">
+                                                    <input type="checkbox" class="form-check-input me-2 variant-checkbox" id="variant_{{ $variant->id }}" name="selectedVariants[]" value="{{ $variant->id }}"
+                                                    data-price="{{ $variant->price }}" data-stock="{{ $variant->stock }}"
+                                                    data-product-name="{{ $item->name }}"
+                                                    data-size="{{ $variant->size }}">
+                                                    <span>Talla: {{$variant->size}} | {{ $variant->price }} USD | Stock: {{ $variant->stock }}</span>
+                                                    <i class="check-icon d-none ms-2 text-success fas fa-check"></i>
+                                                </label>
+                                                <i class="material-symbols-rounded text-info" style="cursor: pointer"
+                                                    onclick="showProductDetails('{{ $item->name }}', '{{ $item->description }}', '{{ isset($item->images) && count($item->images) > 0 ? asset('storage/' . $item->images[0]->path) : '' }}', '{{ $variant->price }}', '{{ $variant->stock }}', '{{ $variant->size }}')">
+                                                    info
+                                                </i>
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <button type="button" class="btn btn-info mt-3" id="toStep2" disabled>Siguiente</button>
-            </div>
-            <!-- Paso 2: Selección de Variante y Cantidad -->
-            <div id="step2" class="d-none">
-                <h4>Paso 2: Selecciona Variante y Cantidad</h4>
-                <div id="variantContainer"></div>
-                <button type="button" class="btn btn-secondary mt-3" id="toStep1">Atrás</button>
-                <button type="button" class="btn btn-info mt-3" id="toStep3" disabled>Siguiente</button>
-            </div>
+                <div id="step2" class="step d-none">
+                    <h4>Paso 2: Selecciona Métodos de Pago</h4>
+                    <div id="totalAmountDisplay" class="mt-3 mb-3">
+                        <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>
+                    </div>
+                    <div id="paymentMethods" class="mb-3">
+                        <!-- Los métodos de pago se agregarán aquí dinámicamente -->
+                    </div>
+                    <div id="paymentSummary" class="mt-3">
+                        <strong>Total ingresado: </strong><span id="totalPaid">0.00</span><br>
+                        <span id="paymentMessage" class="text-danger"></span>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-3" id="backToStep1">Atrás</button>
+                    <button type="button" class="btn btn-info mt-3" id="toStep3" disabled>Siguiente</button>
+                </div>
 
-            <!-- Paso 3: Selección de Métodos de Pago -->
-            <div id="step3" class="d-none">
-                <h4>Paso 3: Selecciona Métodos de Pago</h4>
-                <div id="totalAmountDisplay" class="mt-3 mb-3">
-                    <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>
+                <div id="step3" class="step d-none">
+                    <!-- Contenido del paso 3 -->
+                    <h4>Paso 3: Confirmación</h4>
+                    <p>Resumen de la compra y confirmación.</p>
+                    <button type="button" class="btn btn-secondary mt-3" id="backToStep2">Atrás</button>
+                    <button type="button" class="btn btn-success mt-3" id="confirmPurchase">Confirmar</button>
                 </div>
-                <!-- Lista de métodos de pago -->
-                <div id="paymentMethods" class="mb-3">
-                    <!-- Los métodos de pago se agregarán aquí dinámicamente -->
-                </div>
-                <button type="button" class="btn btn-secondary mt-3" id="backToStep2">Atrás</button>
-                <button type="button" class="btn btn-info mt-3" id="toStep4" disabled>Siguiente</button>
+            </form>
+        </div>
+        <div class="w-25 card p-4 h-100">
+            <h1>Carrito</h1>
+            <ul id="cartList" class="list-group"></ul>
+            <div class="mt-3">
+                <strong>Total:</strong> $<span id="cartTotal">0.00</span>
             </div>
-
-            <!-- Paso 4: Confirmación -->
-            <div id="step4" class="d-none">
-                <h4>Paso 4: Confirmación</h4>
-                <div id="providerContainer"></div>
-                <div id="paymentMethodsSelected" class="mt-3 mb-3">
-                </div>
-                <div id="totalAmountToConfirm" class="mt-3 mb-3">
-                    <strong>Total a pagar: </strong><span id="totalAmountValueToConfirm">0.00</span> USD
-                </div>
-                <button type="button" class="btn btn-secondary mt-3" id="backToStep3">Atrás</button>
-                <button type="button" class="btn btn-info mt-3" id="createOrder">Continuar</button>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-dark mt-3" id="toStep2" disabled>Siguiente</button>
             </div>
-        </form>
+        </div>
     </div>
-  </main>
+</main>
+<!-- Modal para Detalles del Producto -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailModalLabel">Detalles del Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex gap-4">
+                    <!-- Imagen del producto -->
+                    <div style="width: 200px; height: 200px;">
+                        <img id="modalProductImage" src="" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    </div>
+                    <!-- Información del producto -->
+                    <div>
+                        <h5 id="modalProductName"></h5>
+                        <p id="modalProductDescription"></p>
+                        <p><strong>Precio:</strong> $<span id="modalProductPrice"></span></p>
+                        <p><strong>Stock:</strong> <span id="modalProductStock"></span></p>
+                        <p><strong>Talla:</strong> <span id="modalProductSize"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
@@ -113,180 +192,205 @@ input[type="checkbox"]:checked + .position-absolute {
 <!-- Github buttons -->
 <!-- <script async defer src="https://buttons.github.io/buttons.js"></script> -->
     <script>
+        var selectedItems = [];
+        var totalAmount = 0;
         document.addEventListener('DOMContentLoaded', function () {
-            var itemsSelected= [];
-            var paymentDetails= [];
-            var totalAmount = 0;
-            let authenticatedUserId = {{ optional(auth()->user())->id ?? 'null' }};
-            const token = localStorage.getItem('authToken');
-            if(authenticatedUserId == null) {
-                fetch("/api/adminUser", {
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                })
-                .then(response => response.json())  // Convertimos la respuesta a JSON
-                .then(data => {
-                    console.log("Usuario autenticado:", data.id);  // Mostramos los datos del usuario
-                    authenticatedUserId = data.id
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Ocurrió un error");
+            // Escuchar todos los checkboxes
+            const checkboxes = document.querySelectorAll('input[name="selectedVariants[]"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', handleCheckboxChange);
+            });
+        });
+        function handleCheckboxChange(e) {
+            const checkbox = e.target;
+            const id = checkbox.value;
+            const productName = checkbox.getAttribute('data-product-name');
+            const productSize = checkbox.getAttribute('data-size');
+            const stock = parseInt(checkbox.getAttribute('data-stock')) || 0; // Asegúrate de que sea un número
+            const price = parseFloat(checkbox.getAttribute('data-price')) || 0; // Asegúrate de que sea un número
+
+            if (checkbox.checked) {
+                selectedItems.push({
+                    id,
+                    productName,
+                    productSize,
+                    price,
+                    quantity: 1,
+                    stock
                 });
+                totalAmount += price;
+            } else {
+                const removedItem = selectedItems.find(item => item.id === id);
+                if (removedItem) totalAmount -= removedItem.price * removedItem.quantity;
+
+                selectedItems = selectedItems.filter(item => item.id !== id);
             }
-            console.log("authenticatedUserId", authenticatedUserId)
-            const itemSelector = document.getElementById('itemSelector');
-            const toStep2 = document.getElementById('toStep2');
-            const step1 = document.getElementById('step1');
-            const step2 = document.getElementById('step2');
-            const toStep1 = document.getElementById('toStep1');
-            const backToStep2 = document.getElementById('backToStep2');
-            const toStep3 = document.getElementById('toStep3');
-            const backToStep3 = document.getElementById('backToStep3');
-            const step3 = document.getElementById('step3');
-            const supplierSelector = document.getElementById('supplierSelector');
-            const step4 = document.getElementById('step4');
-            const providerInput = document.getElementById("providerName");
 
-            // Activar botón siguiente en el Paso 1
-            document.querySelectorAll('#itemSelector input[type="checkbox"]').forEach((checkbox) => {
-                checkbox.addEventListener('change', function () {
-                    const checkedBoxes = document.querySelectorAll('#itemSelector input[type="checkbox"]:checked');
-                    console.log("hola")
-                    console.log("checkboxes", checkedBoxes.length)
-                    document.getElementById('toStep2').disabled = checkedBoxes.length === 0; // Habilitar si hay al menos uno seleccionado
-                });
+            renderCart();
+        }
+
+        function updateQuantity(id, newQty) {
+            const item = selectedItems.find(item => item.id === id);
+            if (item) {
+                newQty = parseInt(newQty) || 1; // Asegúrate de que sea un número válido
+                if (newQty < 1) newQty = 1;
+                if (newQty > item.stock) newQty = item.stock;
+
+                totalAmount -= item.price * item.quantity; // Quita el anterior
+                item.quantity = newQty;
+                totalAmount += item.price * newQty;        // Agrega el nuevo
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const cartList = document.getElementById('cartList');
+            const cartTotal = document.getElementById('cartTotal');
+            const toStep2Btn = document.getElementById('toStep2');
+
+            cartList.innerHTML = '';
+
+            selectedItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-start flex-column mt-2';
+
+                const textDiv = document.createElement('div');
+                textDiv.innerHTML = `<strong>${item.productName}</strong><br>
+                <strong>Talla: ${item.productSize}</strong><br>
+                Precio: ${item.price.toFixed(2)} USD | Stock: ${item.stock}`;
+
+                const controlsDiv = document.createElement('div');
+                controlsDiv.className = 'd-flex align-items-center justify-content-between w-100 mt-2';
+
+                // Div para cantidad y el input con gap-2
+                const quantityDiv = document.createElement('div');
+                quantityDiv.className = 'd-flex align-items-center gap-2';
+
+                const quantityLabel = document.createElement('label');
+                quantityLabel.className = 'd-flex align-items-center mt-2';
+                quantityLabel.textContent = 'Cantidad: ';
+                // quantityLabel.className = 'me-2';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.max = item.stock;
+                quantityInput.value = item.quantity;
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.style.height = 'fit-content';
+                quantityInput.style.padding = '0.25rem 0.5rem';
+                quantityInput.style.border = '1px solid #ced4da';
+                quantityInput.oninput = () => updateQuantity(item.id, parseInt(quantityInput.value));
+
+                quantityDiv.appendChild(quantityLabel);
+                quantityDiv.appendChild(quantityInput);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-sm btn-danger mt-3';
+                removeBtn.innerText = 'X';
+                removeBtn.onclick = () => removeFromCart(item.id);
+
+                controlsDiv.appendChild(quantityDiv); // Agregar el div de cantidad e input
+                controlsDiv.appendChild(removeBtn);  // Botón de eliminar al extremo derecho
+
+                li.appendChild(textDiv);
+                li.appendChild(controlsDiv);
+                cartList.appendChild(li);
             });
-            // Transición de pasos
-            toStep2.addEventListener('click', function () {
-                const selectedItems = Array.from(document.querySelectorAll('#itemSelector input[type="checkbox"]:checked')).map(
-                    (checkbox) => checkbox.value
-                );
-                console.log("selectedItems", selectedItems)
-                if (selectedItems.length === 0) {
-                    alert('Por favor selecciona al menos un producto');
-                    return;
+
+            cartTotal.textContent = totalAmount.toFixed(2); // Asegúrate de mostrar un número válido
+            toStep2Btn.disabled = selectedItems.length === 0;
+        }
+
+        function removeFromCart(id) {
+            const item = selectedItems.find(item => item.id === id);
+            if (item) {
+                totalAmount -= item.price * item.quantity;
+                selectedItems = selectedItems.filter(i => i.id !== id);
+            }
+
+            const checkbox = document.getElementById(`variant_${id}`);
+            if (checkbox) checkbox.checked = false;
+
+            renderCart();
+        }
+
+        function filterProducts() {
+            const searchInput = document.getElementById('searchInput');
+            const filter = searchInput.value.toLowerCase();
+            const productItems = document.querySelectorAll('.product-item');
+
+            productItems.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if (name.includes(filter)) {
+                    item.style.display = 'block'; // Mostrar si coincide
+                } else {
+                    item.style.display = 'none'; // Ocultar si no coincide
                 }
-                fetch('api/sales/get-variants', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({ item_ids: selectedItems }),
-                })
-                .then((response) => {
-                    // Verificar si la respuesta tiene un código de estado exitoso
-                    if (!response.ok) {
-                        throw new Error(`Error en la respuesta: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                // Loop through variants
-                .then((data) => {
-                    const variantContainer = document.getElementById('variantContainer');
-                    variantContainer.innerHTML = ''; // Limpiar contenido previo
-                    variantContainer.className = 'row row-cols-1 row-cols-md-3 g-3 gap-4';
+            });
+        }
 
-                    // Mostrar variantes agrupadas por producto
-                    data.forEach((product) => {
-                        // Crear una tarjeta para cada producto
-                        const productCard = document.createElement('div');
-                        productCard.classList.add('card', 'mb-4', 'shadow', 'col-4', 'p-0', 'w-20', 'h-100');
+        function showProductDetails(name, description, imageUrl, price, stock, size) {
+            // Rellenar los datos del modal
+            document.getElementById('modalProductName').textContent = name;
+            document.getElementById('modalProductDescription').textContent = description;
+            document.getElementById('modalProductPrice').textContent = price;
+            document.getElementById('modalProductStock').textContent = stock;
+            document.getElementById('modalProductSize').textContent = size;
 
-                        const productHeader = document.createElement('div');
-                        productHeader.classList.add('card-header', 'bg-info', 'text-white', 'fw-bold');
-                        productHeader.textContent = `Producto: ${product.product_name}`;
-                        productCard.appendChild(productHeader);
+            const productImage = document.getElementById('modalProductImage');
+            if (imageUrl) {
+                productImage.src = imageUrl;
+                productImage.style.display = 'block';
+            } else {
+                productImage.style.display = 'none';
+            }
 
-                        const productBody = document.createElement('div');
-                        productBody.classList.add('card-body');
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+            modal.show();
+        }
 
-                        // Iterar a través de las variantes del producto
-                        product.variants.forEach((variant) => {
-                            const variantRow = document.createElement('div');
-                            variantRow.classList.add('mb-2', 'border-bottom', 'pb-2');
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            const productItems = document.querySelectorAll('.product-item');
 
-                            const variantLabel = document.createElement('div');
-                            variantLabel.textContent = `Talla: ${variant.size || 'Sin nombre'}`;
-                            variantLabel.classList.add('me-3', 'fw-bold');
+            // Filtrar productos por categoría
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', function () {
+                    const selectedCategory = this.closest('.category-item').getAttribute('data-category');
 
-                            const sizeLabel = document.createElement('div');
-                            sizeLabel.textContent = `Stock: ${variant.stock || 'Sin nombre'}`;
-                            sizeLabel.classList.add('me-3');
-
-                            const priceLabel = document.createElement('div');
-                            priceLabel.textContent = `Precio: ${variant.price || 'Sin nombre'} $`;
-                            priceLabel.classList.add('me-3');
-
-                            const quantityInput = document.createElement('input');
-                            quantityInput.type = 'number';
-                            quantityInput.placeholder = 'Cantidad';
-                            quantityInput.min = 1;
-                            quantityInput.id = `inputQuantity_${product.product_id}_${variant.id}`;
-                            quantityInput.classList.add('form-control', 'w-auto', 'border', 'border-1', 'p-2', 'bg-white', 'input-cantidad');
-
-                            quantityInput.addEventListener('input', function () {
-                                const quantity = parseInt(quantityInput.value) || 0; // Usar parseInt para asegurar que la cantidad sea un número
-
-                                if (quantity > 0) {
-                                    const selectedProduct = {
-                                        product_id: product.product_id,
-                                        name: product.product_name,
-                                        variant: variant, // Guardamos la variante específica
-                                        quantity: quantity,
-                                    };
-
-                                    const existingProductIndex = itemsSelected.findIndex(
-                                        (item) => item.product_id === selectedProduct.product_id && item.variant.id === selectedProduct.variant.id
-                                    );
-
-                                    if (existingProductIndex > -1) {
-                                        // Si ya existe, actualizamos la cantidad
-                                        itemsSelected[existingProductIndex].quantity = quantity;
-                                    } else {
-                                        // Si no existe, lo agregamos a la lista
-                                        itemsSelected.push(selectedProduct);
-                                    }
-                                }
-
-                                console.log("itemsSelected", itemsSelected);
-                                document.getElementById('toStep3').disabled = itemsSelected.length === 0; // Desactivar el paso 3 si no hay selección
-                            });
-
-                            // Agregar la variante a la tarjeta del producto
-                            variantRow.appendChild(variantLabel);
-                            variantRow.appendChild(sizeLabel);
-                            variantRow.appendChild(priceLabel);
-                            variantRow.appendChild(quantityInput);
-
-                            productBody.appendChild(variantRow);
-                        });
-
-                        productCard.appendChild(productBody);
-                        variantContainer.appendChild(productCard);
+                    productItems.forEach(item => {
+                        const itemCategory = item.getAttribute('data-category');
+                        if (selectedCategory === itemCategory || selectedCategory === 'all') {
+                            item.style.display = 'block'; // Mostrar si coincide
+                        } else {
+                            item.style.display = 'none'; // Ocultar si no coincide
+                        }
                     });
-                    // Transición a Step 2
-                    step1.classList.add('d-none');
-                    step2.classList.remove('d-none');
-                })
 
-                .catch((error) => {
-                    console.error('Error al obtener variantes:', error);
-                    alert('Hubo un error al obtener las variantes. Por favor, intenta nuevamente.');
+                    // Limpiar el input de búsqueda al cambiar de categoría
+                    searchInput.value = '';
                 });
-            
             });
-        
-            toStep1.addEventListener('click', function () {
-                step2.classList.add('d-none');
-                step1.classList.remove('d-none');
+
+            // Filtrar productos por búsqueda
+            searchInput.addEventListener('keyup', function () {
+                const filter = searchInput.value.toLowerCase();
+
+                productItems.forEach(item => {
+                    const name = item.getAttribute('data-name');
+                    if (name.includes(filter)) {
+                        item.style.display = 'block'; // Mostrar si coincide
+                    } else {
+                        item.style.display = 'none'; // Ocultar si no coincide
+                    }
+                });
             });
-            
-            toStep3.addEventListener('click', function () {
+        });
+        toStep3.addEventListener('click', function () {
                 step3.classList.remove('d-none');
                 step2.classList.add('d-none');
                 
@@ -423,135 +527,370 @@ input[type="checkbox"]:checked + .position-absolute {
                 });
             });
 
+    document.addEventListener('DOMContentLoaded', function () {
+        let currentStep = 1; // Contador para rastrear el paso actual
+        const totalSteps = 3; // Número total de pasos
 
-            backToStep2.addEventListener('click', function () {
-                step2.classList.remove('d-none');
-                step3.classList.add('d-none');
-            })
+        const steps = document.querySelectorAll('.step');
+        const toStep2Button = document.getElementById('toStep2');
+        const toStep3Button = document.getElementById('toStep3');
+        const backToStep1Button = document.getElementById('backToStep1');
+        const backToStep2Button = document.getElementById('backToStep2');
 
-            toStep4.addEventListener('click', function () {
-                const providerContainer = document.getElementById('providerContainer');
-                providerContainer.innerHTML = ''; // Limpiar contenido previo, si es necesario
-
-                itemsSelected.forEach((data) => {
-                    const dataRow = document.createElement('div');
-                    dataRow.classList.add('d-flex', 'align-items-center', 'mb-2');
-
-                    const productLabel = document.createElement('span');
-                    productLabel.textContent = `Producto: ${data.name || 'Sin nombre'}`;
-                    productLabel.classList.add('me-3');
-
-                    const variantLabel = document.createElement('span');
-                    variantLabel.textContent = `Talla: ${data.variant.size || 'Sin nombre'}`;
-                    variantLabel.classList.add('me-3');
-
-                    const quantityLabel = document.createElement('span');
-                    quantityLabel.textContent = `Cantidad: ${data.quantity || 'Sin nombre'}`;
-                    quantityLabel.classList.add('me-3');
-
-                    const priceLabel = document.createElement('span');
-                    priceLabel.textContent = `Precio: ${data.variant.price || 'Sin nombre'} USD`;
-                    priceLabel.classList.add('me-3');
-
-
-                    dataRow.appendChild(productLabel);
-                    dataRow.appendChild(variantLabel);
-                    dataRow.appendChild(quantityLabel);
-                    dataRow.appendChild(priceLabel);
-
-                    // Agregar la fila al contenedor de proveedores
-                    providerContainer.appendChild(dataRow);
-                });
-                // Mostrar los métodos de pago seleccionados
-                const paymentMethodsSelectedContainer = document.getElementById('paymentMethodsSelected');
-                paymentMethodsSelectedContainer.innerHTML = ''; // Limpiar contenido previo
-
-                // Crear una etiqueta para "Métodos de Pago"
-                const paymentTitle = document.createElement('h5');
-                paymentTitle.textContent = 'Métodos de Pago Seleccionados:';
-                paymentMethodsSelectedContainer.appendChild(paymentTitle);
-
-                // Mostrar cada método de pago con su nombre, moneda y monto
-                paymentDetails.forEach((payment) => {
-                    if(payment.amount > 0) {
-                        const paymentRow = document.createElement('div');
-                        paymentRow.classList.add('mb-2');
-    
-                        const paymentText = document.createElement('span');
-                        paymentText.textContent = `${payment.name || 'Sin nombre'} - ${payment.amount || '0.00'} ${payment.currency || 'Sin moneda'}`;
-                        paymentRow.appendChild(paymentText);
-    
-                        // Agregar la fila de pago al contenedor de métodos de pago seleccionados
-                        paymentMethodsSelectedContainer.appendChild(paymentRow);
-                    }
-                });
-                // Mostrar el paso 4 y ocultar el paso 3
-                step4.classList.remove('d-none');
-                step3.classList.add('d-none');
-            });
-
-            backToStep3.addEventListener('click', function () {
-                step3.classList.remove('d-none');
-                step4.classList.add('d-none');
-            })
-
-            // Similares transiciones para Step 2 -> Step 3 y Step 3 -> Step 4
-
-            // Finalizar compra
-            const purchaseForm = document.getElementById('purchaseForm');
-            purchaseForm.addEventListener('submit', function (event) {
-                event.preventDefault();
-                alert('Compra confirmada');
-                // Realiza la solicitud al servidor aquí
-            });
-            const createOrderButton = document.getElementById('createOrder');
-            createOrderButton.addEventListener('click', function () {
-                const orderData = {
-                    itemsSelected: itemsSelected,
-                    paymentDetails: paymentDetails,
-                    totalAmount: totalAmount,
-                    customer_id: authenticatedUserId
-                };
-                console.log("orderData", orderData)
-                fetch('api/create-sale', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({ orderData }),
-                })
-                .then((response) => {
-                    if (response.status === 200) { // Valida el código de estado HTTP
-                        alert('Compra creada correctamente');
-                        window.location.href = '/products';
-                    }
-                    // Verificar si la respuesta tiene un código de estado exitoso
-                    if (!response.ok) {
-                        throw new Error(`Error en la respuesta: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .catch((error) => {
-                    console.log("err", error)
-                })
-            })
-        });
-        function filterProducts() {
-            const searchInput = document.getElementById('searchInput');
-            const filter = searchInput.value.toLowerCase();
-            const productItems = document.querySelectorAll('.product-item');
-
-            productItems.forEach(item => {
-                const name = item.getAttribute('data-name');
-                if (name.includes(filter)) {
-                    item.style.display = 'block'; // Mostrar si coincide
+        // Función para mostrar el paso actual
+        function showStep(step) {
+            steps.forEach((stepElement, index) => {
+                if (index + 1 === step) {
+                    stepElement.classList.remove('d-none');
                 } else {
-                    item.style.display = 'none'; // Ocultar si no coincide
+                    stepElement.classList.add('d-none');
                 }
             });
         }
 
+        // Avanzar al paso 2
+        toStep2Button.addEventListener('click', function () {
+            if (currentStep === 1) {
+                currentStep = 2;
+                showStep(currentStep);
+
+                // Calcular el total de los productos seleccionados
+                const totalAmount = selectedItems.reduce((total, item) => {
+                    return total + item.price * item.quantity;
+                }, 0);
+
+                document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
+
+                // Obtener los métodos de pago
+                fetch('/api/payment-methods', {
+                    method: 'GET',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const paymentMethodsContainer = document.getElementById('paymentMethods');
+                        paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                        if (Array.isArray(data)) {
+                            data.forEach(paymentMethod => {
+                                const methodDiv = document.createElement('div');
+                                methodDiv.className = 'form-check';
+
+                                const input = document.createElement('input');
+                                input.type = 'radio';
+                                input.name = 'paymentMethod';
+                                input.value = paymentMethod.id;
+                                input.className = 'form-check-input';
+                                input.id = `paymentMethod_${paymentMethod.id}`;
+
+                                const label = document.createElement('label');
+                                label.className = 'form-check-label';
+                                label.htmlFor = `paymentMethod_${paymentMethod.id}`;
+                                label.textContent = `${paymentMethod.name} (${paymentMethod.currency.code})`;
+
+                                methodDiv.appendChild(input);
+                                methodDiv.appendChild(label);
+                                paymentMethodsContainer.appendChild(methodDiv);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error al obtener los métodos de pago:', error));
+            }
+        });
+
+        // Avanzar al paso 3
+        toStep3Button.addEventListener('click', function () {
+            if (currentStep === 2) {
+                currentStep = 3;
+                showStep(currentStep);
+            }
+        });
+
+        // Regresar al paso 1
+        backToStep1Button.addEventListener('click', function () {
+            if (currentStep === 2) {
+                currentStep = 1;
+                showStep(currentStep);
+            }
+        });
+
+        // Regresar al paso 2
+        backToStep2Button.addEventListener('click', function () {
+            if (currentStep === 3) {
+                currentStep = 2;
+                showStep(currentStep);
+            }
+        });
+
+        // Mostrar el paso inicial
+        showStep(currentStep);
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+    const toStep2Button = document.getElementById('toStep2');
+    const toStep3Button = document.getElementById('toStep3');
+    const backToStep1Button = document.getElementById('backToStep1');
+    const paymentMethodsContainer = document.getElementById('paymentMethods');
+    let totalAmount = 0;
+    let paymentDetails = [];
+
+    // Función para mostrar los métodos de pago separados por monedas
+    function loadPaymentMethods() {
+        fetch('/api/payment-methods', {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                if (Array.isArray(data)) {
+                    const groupedMethods = data.reduce((acc, method) => {
+                        const currency = method.currency.code;
+                        if (!acc[currency]) acc[currency] = [];
+                        acc[currency].push(method);
+                        return acc;
+                    }, {});
+
+                    for (const currency in groupedMethods) {
+                        const currencyGroup = groupedMethods[currency];
+
+                        // Título de la moneda
+                        const currencyTitle = document.createElement('h5');
+                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
+                        paymentMethodsContainer.appendChild(currencyTitle);
+
+                        // Contenedor de los métodos de pago
+                        const methodGroupDiv = document.createElement('div');
+                        methodGroupDiv.className = 'mb-3';
+
+                        currencyGroup.forEach(method => {
+                            const methodDiv = document.createElement('div');
+                            methodDiv.className = 'form-check mb-2';
+
+                            const input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.className = 'form-check-input payment-method-checkbox';
+                            input.id = `paymentMethod_${method.id}`;
+                            input.dataset.methodId = method.id;
+                            input.dataset.currency = currency;
+
+                            const label = document.createElement('label');
+                            label.className = 'form-check-label';
+                            label.htmlFor = `paymentMethod_${method.id}`;
+                            label.textContent = method.name;
+
+                            // Input para el monto (oculto inicialmente)
+                            const amountInput = document.createElement('input');
+                            amountInput.type = 'number';
+                            amountInput.className = 'form-control mt-2 d-none payment-amount-input';
+                            amountInput.placeholder = `Monto en ${currency}`;
+                            amountInput.dataset.methodId = method.id;
+
+                            // Mostrar el input al seleccionar el método
+                            input.addEventListener('change', function () {
+                                if (this.checked) {
+                                    amountInput.classList.remove('d-none');
+                                    paymentDetails.push({
+                                        id: method.id,
+                                        name: method.name,
+                                        currency: currency,
+                                        amount: 0,
+                                    });
+                                } else {
+                                    amountInput.classList.add('d-none');
+                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
+                                }
+                                validatePaymentDetails();
+                            });
+
+                            // Actualizar el monto ingresado
+                            amountInput.addEventListener('input', function () {
+                                const methodId = parseInt(this.dataset.methodId);
+                                const detail = paymentDetails.find(detail => detail.id === methodId);
+                                if (detail) {
+                                    detail.amount = parseFloat(this.value) || 0;
+                                }
+                                validatePaymentDetails();
+                            });
+
+                            methodDiv.appendChild(input);
+                            methodDiv.appendChild(label);
+                            methodDiv.appendChild(amountInput);
+                            methodGroupDiv.appendChild(methodDiv);
+                        });
+
+                        paymentMethodsContainer.appendChild(methodGroupDiv);
+                    }
+                }
+            })
+            .catch(error => console.error('Error al cargar los métodos de pago:', error));
+    }
+
+    // Validar los detalles de pago
+    function validatePaymentDetails() {
+        const totalInput = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
+        toStep3Button.disabled = totalInput !== totalAmount;
+    }
+
+    // Avanzar al paso 2
+    toStep2Button.addEventListener('click', function () {
+        totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
+        loadPaymentMethods();
+    });
+
+    // Avanzar al paso 3
+    toStep3Button.addEventListener('click', function () {
+        console.log('Detalles de pago:', paymentDetails);
+        // Aquí puedes enviar los detalles de pago al servidor o continuar con el flujo
+    });
+
+    // Regresar al paso 1
+    backToStep1Button.addEventListener('click', function () {
+        paymentDetails = []; // Reiniciar los detalles de pago
+    });
+});
+    document.addEventListener('DOMContentLoaded', function () {
+    const toStep2Button = document.getElementById('toStep2');
+    const toStep3Button = document.getElementById('toStep3');
+    const backToStep1Button = document.getElementById('backToStep1');
+    const paymentMethodsContainer = document.getElementById('paymentMethods');
+    const totalPaidElement = document.getElementById('totalPaid');
+    const paymentMessageElement = document.getElementById('paymentMessage');
+    let totalAmount = 0;
+    let paymentDetails = [];
+
+    // Función para mostrar los métodos de pago separados por monedas
+    function loadPaymentMethods() {
+        fetch('/api/payment-methods', {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                if (Array.isArray(data)) {
+                    const groupedMethods = data.reduce((acc, method) => {
+                        const currency = method.currency.code;
+                        if (!acc[currency]) acc[currency] = [];
+                        acc[currency].push(method);
+                        return acc;
+                    }, {});
+
+                    for (const currency in groupedMethods) {
+                        const currencyGroup = groupedMethods[currency];
+
+                        // Título de la moneda
+                        const currencyTitle = document.createElement('h5');
+                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
+                        paymentMethodsContainer.appendChild(currencyTitle);
+
+                        // Contenedor de los métodos de pago
+                        const methodGroupDiv = document.createElement('div');
+                        methodGroupDiv.className = 'mb-3';
+
+                        currencyGroup.forEach(method => {
+                            const methodDiv = document.createElement('div');
+                            methodDiv.className = 'form-check mb-2';
+
+                            const input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.className = 'form-check-input payment-method-checkbox';
+                            input.id = `paymentMethod_${method.id}`;
+                            input.dataset.methodId = method.id;
+                            input.dataset.currency = currency;
+
+                            const label = document.createElement('label');
+                            label.className = 'form-check-label';
+                            label.htmlFor = `paymentMethod_${method.id}`;
+                            label.textContent = method.name;
+
+                            // Input para el monto (oculto inicialmente)
+                            const amountInput = document.createElement('input');
+                            amountInput.type = 'number';
+                            amountInput.className = 'form-control mt-2 d-none payment-amount-input';
+                            amountInput.placeholder = `Monto en ${currency}`;
+                            amountInput.dataset.methodId = method.id;
+
+                            // Mostrar el input al seleccionar el método
+                            input.addEventListener('change', function () {
+                                if (this.checked) {
+                                    amountInput.classList.remove('d-none');
+                                    paymentDetails.push({
+                                        id: method.id,
+                                        name: method.name,
+                                        currency: currency,
+                                        amount: 0,
+                                    });
+                                } else {
+                                    amountInput.classList.add('d-none');
+                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
+                                }
+                                validatePaymentDetails();
+                            });
+
+                            // Actualizar el monto ingresado
+                            amountInput.addEventListener('input', function () {
+                                const methodId = parseInt(this.dataset.methodId);
+                                const detail = paymentDetails.find(detail => detail.id === methodId);
+                                if (detail) {
+                                    detail.amount = parseFloat(this.value) || 0;
+                                }
+                                validatePaymentDetails();
+                            });
+
+                            methodDiv.appendChild(input);
+                            methodDiv.appendChild(label);
+                            methodDiv.appendChild(amountInput);
+                            methodGroupDiv.appendChild(methodDiv);
+                        });
+
+                        paymentMethodsContainer.appendChild(methodGroupDiv);
+                    }
+                }
+            })
+            .catch(error => console.error('Error al cargar los métodos de pago:', error));
+    }
+
+    // Validar los detalles de pago
+    function validatePaymentDetails() {
+        const totalInput = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
+        totalPaidElement.textContent = totalInput.toFixed(2);
+
+        if (totalInput > totalAmount) {
+            const change = totalInput - totalAmount;
+            paymentMessageElement.textContent = `Vuelto: $${change.toFixed(2)}`;
+            paymentMessageElement.classList.remove('text-danger');
+            paymentMessageElement.classList.add('text-success');
+            toStep3Button.disabled = false;
+        } else if (totalInput < totalAmount) {
+            const remaining = totalAmount - totalInput;
+            paymentMessageElement.textContent = `Falta: $${remaining.toFixed(2)}`;
+            paymentMessageElement.classList.remove('text-success');
+            paymentMessageElement.classList.add('text-danger');
+            toStep3Button.disabled = true;
+        } else {
+            paymentMessageElement.textContent = '';
+            toStep3Button.disabled = false;
+        }
+    }
+
+    // Avanzar al paso 2
+    toStep2Button.addEventListener('click', function () {
+        totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
+        loadPaymentMethods();
+    });
+
+    // Avanzar al paso 3
+    toStep3Button.addEventListener('click', function () {
+        console.log('Detalles de pago:', paymentDetails);
+        // Aquí puedes enviar los detalles de pago al servidor o continuar con el flujo
+    });
+
+    // Regresar al paso 1
+    backToStep1Button.addEventListener('click', function () {
+        paymentDetails = []; // Reiniciar los detalles de pago
+    });
+});
     </script>
 </body>
 </html>

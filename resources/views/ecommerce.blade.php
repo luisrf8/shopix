@@ -19,7 +19,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Hombre Casual
+  Infinity Center
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
@@ -42,10 +42,10 @@
         <nav class="navbar navbar-expand-lg blur border-radius-xl top-0 z-index-fixed shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
           <div class="container-fluid px-0">
             <a class="navbar-brand font-weight-bolder ms-sm-3 d-none d-md-block" href="https://www.creative-tim.com/material-dashboard" rel="tooltip" title="Designed and Coded by Creative Tim" data-placement="bottom" target="_blank">
-              El Hombre Casual
+              Infinity Center
             </a>
             <a class="navbar-brand font-weight-bolder ms-sm-3 d-block d-md-none" href="https://www.creative-tim.com/material-dashboard" rel="tooltip" title="Designed and Coded by Creative Tim" data-placement="bottom" target="_blank">
-              El Hombre Casual
+              Infinity Center
             </a>
             <a href="https://www.creative-tim.com/product/material-dashboard#pricingCard" class="btn btn-sm  bg-gradient-dark  mb-0 ms-auto d-lg-none d-block">Buy Now</a>
             <button class="navbar-toggler shadow-none ms-2 ms-md-0" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,7 +122,7 @@
                 10,000+ Github Stars
               </p> -->
             </div>
-            <h1>El Hombre Casual
+            <h1>Infinity Center
             </h1>
             <p class="text-lg mt-3">
               <!-- Creative Tim's Most Popular Product. Download it now for free to create professional-looking and functional admin dashboards for your web projects. -->
@@ -1895,7 +1895,7 @@
         <div class="col-md-3 mb-4 ms-auto">
           <div>
             <a href="https://www.creative-tim.com/product/material-dashboard">
-              <img src="../assets/img/hc.png" class="mb-3 footer-logo" alt="main_logo">
+              <img src="../assets/img/inf.png" class="mb-3 footer-logo" alt="main_logo">
             </a>
             <!-- <h6 class="font-weight-bolder mb-4">Material Dashboard 3</h6> -->
           </div>

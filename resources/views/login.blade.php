@@ -21,7 +21,7 @@
 </style>
 <body>
     <div class="container d-flex justify-content-center flex-column align-items-center vh-100">
-        <img src="../../assets/img/hc.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+        <img src="../../assets/img/inf.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
         <!-- <img src="../../assets/img/fondo.jpg" class="navbar-brand-img" width="150" height="150" alt="main_logo"> -->
 
         <div class="col-md-4 d-flex justify-content-center flex-column login-container">

@@ -23,12 +23,12 @@
 </head>
 
 <body class="bg-gray-100">
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    <div class="sidenav-header">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2   my-2" id="sidenav-main">
+    <div class="sidenav-header bg-gray-900 m-0 p-0 h-15">
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand px-4 py-3 m-0" href="/dashboard" target="_blank">
-        <img src="../../assets/img/hc.png" class="navbar-brand-img" width="35" height="100" alt="main_logo">
-        <span class="ms-1 text-sm text-dark">El Hombre Casual</span>
+      <a class="navbar-brand d-flex justify-content-center align-items-center" href="/dashboard" target="_blank">
+        <img src="../../assets/img/inf.png" class="navbar-brand-img" width="100" height="100" alt="main_logo">
+        <!-- <span class="ms-1 text-sm text-dark">Infinity Center</span> -->
       </a>
     </div>
     <hr class="horizontal dark mt-0 mb-2">
@@ -136,9 +136,9 @@ document.addEventListener("DOMContentLoaded", function () {
     navLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
         if (currentUrl === linkHref) { // Compara la ruta actual con el href
-            link.classList.add("bg-gradient-info", "text-white");
+            link.classList.add("bg-gray-900", "text-white");
         } else {
-            link.classList.remove("bg-gradient-info", "text-white");
+            link.classList.remove("bg-gray-900", "text-white");
         }
     });
 });

@@ -11,6 +11,7 @@
         "endroid/qr-code": "^4.6",
         "google/apiclient": "^2.16",
         "guzzlehttp/guzzle": "^7.0.1",
+        "laravel/breeze": "^2.3",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.5",

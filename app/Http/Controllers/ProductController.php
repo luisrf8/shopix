@@ -36,8 +36,24 @@ class ProductController extends Controller
     }
     public function categoriesIndex()
     {
-        $categories = Category::all();
-        return view('categories', compact('categories')); // Asegúrate de tener una vista para mostrar las categorías.
+        $categories = Category::with(['products' => function ($query) {
+            $query->where('is_active', true)->with(['variants']);
+        }])->get();
+    
+        // Calcular total de stock por categoría
+        foreach ($categories as $category) {
+            $totalStock = 0;
+    
+            foreach ($category->products as $product) {
+                foreach ($product->variants as $variant) {
+                    $totalStock += $variant->stock;
+                }
+            }
+    
+            // Agregamos el total como propiedad adicional para usarlo en la vista
+            $category->total_available_items = $totalStock;
+        }
+        return view('categories', compact('categories'));
     }
     public function showByCategory($categoryId)
     {

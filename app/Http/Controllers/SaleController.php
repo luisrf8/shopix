@@ -32,7 +32,7 @@ class SaleController extends Controller
     public function index()
     {
         // Traer todos los productos con sus variantes
-        $productItems = Product::with('variants')->get();
+        $productItems = Product::with(['category', 'images', 'variants'])->get();
     
         // Traer métodos de pago con sus monedas
         $paymentMethods = PaymentMethod::with('currency')->get();
@@ -377,9 +377,9 @@ class SaleController extends Controller
         // Si el nuevo estado es 1, generar el PDF y enviar el correo
         if ($order->status == 1) {
             $serverIp = request()->getHost(); // Obtiene la IP o dominio del servidor
-            
+
             // Cargar la imagen y convertirla a base64
-            $imagePath = storage_path('app/public/products/hc.png');
+            $imagePath = storage_path('app/public/products/inf.png');
             $imageData = base64_encode(file_get_contents($imagePath));
             $imageBase64 = 'data:image/png;base64,' . $imageData;
     

@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    El Hombre Casual
+    Infinity Center
   </title>
   <!--     Fonts and icons     -->
   <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
@@ -47,7 +47,7 @@
     <div class="container-fluid py-2">
       <div class="row">
         <div class="ms-3">
-          <h3 class="mb-0 h4 font-weight-bolder">El Hombre Casual</h3>
+          <h3 class="mb-0 h4 font-weight-bolder">Infinity Center</h3>
           <p class="mb-4">
             Datos y Análisis.
           </p>
@@ -61,7 +61,7 @@
                     <p class="text-sm mb-0 text-capitalize">{{$stat['name']}}</p>
                     <h4 class="mb-0">{{$stat['count']}}</h4>
                   </div>
-                  <div class="icon icon-md icon-shape bg-gradient-info shadow-dark shadow text-center border-radius-lg">
+                  <div class="icon icon-md icon-shape bg-gray-900 shadow-dark shadow text-center border-radius-lg">
                     <i class="material-symbols-rounded opacity-10">leaderboard</i>
                   </div>
                 </div>
@@ -78,9 +78,9 @@
         <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center">
             <h6 class="mb-0">Ventas Realizadas</h6>
-            <a href="/sales-orders" class="mx-4 text-info">Ver Más ></a>
+            <a href="/sales-orders" class="mx-4 text-black">Ver Más ></a>
           </div>
-          <a class="btn bg-gradient-info mb-0 mx-3" href="/sales">
+          <a class="btn bg-gray-900 mb-0 mx-3 text-white" href="/sales">
             <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Venta
           </a>
         </div>
@@ -132,7 +132,7 @@
                       </div>
                       <!-- Acciones -->
                       <div class="mt-3 d-flex justify-content-center mx-4 ">
-                          <a class="btn btn-sm btn-outline-info btn-edit-provider" href="/sales/{{ $order->id }}">Ver Detalles</a>
+                          <a class="btn btn-sm btn-outline-black btn-edit-provider" href="/sales/{{ $order->id }}">Ver Detalles</a>
                       </div>
                     </div>
                   </a>
@@ -149,9 +149,9 @@
         <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center">
             <h6 class="mb-0">Compras Realizadas</h6>
-            <a href="/purchase-orders" class="mx-4 text-info">Ver Más ></a>
+            <a href="/purchase-orders" class="mx-4 btn-outline-black">Ver Más ></a>
           </div>
-          <a class="btn bg-gradient-info mb-0 mx-3" href="/purchase">
+          <a class="btn bg-gray-900 mb-0 mx-3 text-white" href="/purchase">
             <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Compra
           </a>
         </div>
@@ -184,7 +184,7 @@
                     <!-- Acciones -->
                     <div class="mt-3 d-flex justify-content-center mx-4 ">
                         <!-- <button class="btn btn-sm btn-outline-info">Editar</button> -->
-                        <a class="btn btn-sm btn-outline-info btn-edit-provider" href="/order/{{ $order->id }}">Ver Detalles</a>
+                        <a class="btn btn-sm btn-outline-black btn-edit-provider" href="/order/{{ $order->id }}">Ver Detalles</a>
                     </div>
                   </div>
                 </a>

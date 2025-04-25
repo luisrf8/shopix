@@ -38,8 +38,7 @@ class AuthenticatedSessionController extends Controller
         // Intentar la autenticación tradicional
         $request->authenticate();
     
-        // Regenerar la sesión después de la autenticación para evitar el secuestro de sesión
-        $request->session()->regenerate();
+        // Ya no usamos sesiones, así que no regeneramos
     
         // Obtener el usuario autenticado
         $user = Auth::user();
