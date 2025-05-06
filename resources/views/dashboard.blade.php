@@ -23,17 +23,10 @@
   <title>
     Infinity Center
   </title>
-  <!--     Fonts and icons     -->
-  <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
-  <!-- Nucleo Icons -->
   <link href="assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="assets/css/nucleo-svg.css" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
-  <!-- <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script> -->
-  <!-- Material Icons -->
-  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" /> -->
-  <!-- CSS Files -->
   <link id="pagestyle" href="assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100" id="d-body">
@@ -73,137 +66,171 @@
         </a>
         @endforeach
       </div>
-
-      <div class="pt-4">
-        <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <h6 class="mb-0">Ventas Realizadas</h6>
-            <a href="/sales-orders" class="mx-4 text-black">Ver Más ></a>
-          </div>
-          <a class="btn bg-gray-900 mb-0 mx-3 text-white" href="/sales">
-            <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Venta
-          </a>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="row">
-              <div class="container-fluid py-4 row">
-                @foreach($salesOrders as $order)
-                <div class="col-md-4 col-4">
-                  <a href="" class="text-decoration-none">
-                    <div class="card">
-                      <div class="card-header mx-4 p-3 text-center">
-                        <h6 class="text-center mb-0 opacity-9">Orden de Compra Nro {{ $order->id }}</h6>
-                      </div>
-                      <div class="card-body pt-0 p-3 text-center">
-                        <div class="mt-2">
-                          <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
-                          <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
-                              <div class="text-start column">
-                                <div class="text-xs text-bold mb-2">Usuario:</div>
-                                <div class="text-xs text-bold mb-2">Fecha:</div>
-                                  <div class="text-xs text-bold mb-2">Total de Productos:</div>
-                                  <div class="text-xs text-bold mb-2">Entrega:</div>
-                                  <div class="text-xs text-bold ">Estatus:</div>
-                              </div>
-                              <div class="text-end column">
-                                <div class="text-xs mb-2">
-                                    @if ($order->user)
-                                        {{ $order->user->name }}
-                                    @else
-                                        Usuario no asignado
-                                    @endif
+      <div class="row mt-4">
+                <div class="col-lg-4 col-md-6 mt-4 mb-4">
+                    <div class="card z-index-2 ">
+                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                            <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
+                                <div class="chart">
+                                    <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
                                 </div>
-                                <div class="text-xs mb-2">{{ $order->date }}</div>
-                                <div class="text-xs mb-2">{{ $order->details->sum('quantity') }}</div>
-                                <div class="text-xs mb-2">{{ $order->preference }}</div>
-                                <div class="text-xs">
-                                    @if ($order->status == 0)
-                                        En Proceso
-                                    @elseif ($order->status == 1)
-                                        Aprobado
-                                    @elseif ($order->status == 2)
-                                        Negado
-                                    @endif
-                                </div>
-                              </div>
-                          </div>
-                      </div>
-                      </div>
-                      <!-- Acciones -->
-                      <div class="mt-3 d-flex justify-content-center mx-4 ">
-                          <a class="btn btn-sm btn-outline-black btn-edit-provider" href="/sales/{{ $order->id }}">Ver Detalles</a>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-                @endforeach
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="">
-        <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <h6 class="mb-0">Compras Realizadas</h6>
-            <a href="/purchase-orders" class="mx-4 btn-outline-black">Ver Más ></a>
-          </div>
-          <a class="btn bg-gray-900 mb-0 mx-3 text-white" href="/purchase">
-            <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Compra
-          </a>
-        </div>
-        <div class="row">
-            <div class="container-fluid py-4 row">
-              @foreach($purchaseOrders as $order)
-              <div class="col-md-4 col-4">
-                <a href="" class="text-decoration-none">
-                  <div class="card">
-                    <div class="card-header mx-4 p-3 text-center">
-                      <h6 class="text-center mb-0 opacity-9">Orden de Compra Nro {{ $order->id }}</h6>
-                    </div>
-                    <div class="card-body pt-0 p-3 text-center">
-                      <div class="mt-2">
-                        <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
-                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
-                            <div class="text-start column">
-                                <div class="text-xs text-bold mb-2">Proveedor:</div>
-                                <!-- <div class="text-xs text-bold mb-2">Cantidad de productos:</div> -->
-                                <div class="text-xs text-bold">Fecha de Creación:</div>
                             </div>
-                            <div class="text-end column">
-                                <div class="text-xs mb-2">{{ $order->provider_id }}</div>
-                                <div class="text-xs mb-2">{{ $order->total_items }}</div>
-                                <div class="text-xs">{{ $order->date }}</div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-0 ">Ventas Diarias</h6>
+                            <p class="text-sm ">Ventas de la ultima semana.</p>
+                            <hr class="dark horizontal">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mt-4 mb-4">
+                    <div class="card z-index-2  ">
+                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                            <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
+                                <div class="chart">
+                                    <canvas id="chart-line" class="chart-canvas" height="170"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-0 ">Ventas Mensuales</h6>
+                            <p class="text-sm ">Ventas de los ultimos meses.</p>
+                            <hr class="dark horizontal">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-4 mb-3">
+                    <div class="card z-index-2">
+                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
+                            <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
+                                <div class="chart">
+                                    <canvas id="chart-line-tasks" class="chart-canvas" height="170"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-0">Productos mas vendidos</h6>
+                            <p class="text-sm">Análisis general.</p>
+                            <hr class="horizontal">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+                    <div class="card">
+                        <div class="card-header pb-0">
+                          <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                              <h6 class="mb-0">Ventas Realizadas</h6>
+                              <a href="/sales-orders" class="mx-4 text-black">Ver Más ></a>
+                            </div>
+                            <a class="" href="/sales">
+                              <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Venta
+                            </a>
+                          </div>
+                        </div>
+                        <div class="card-body px-0 pb-2">
+                            <div class="table-responsive">
+                            <table class="table align-items-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Orden</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($salesOrders as $order)
+                            <tr>
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                        <div class="avatar avatar-sm me-3">
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">Orden #{{ $order->id }}</h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-xs font-weight-bold">
+                                        @if ($order->user)
+                                            {{ $order->user->name }}
+                                        @else
+                                            Usuario no asignado
+                                        @endif
+                                    </span>
+                                </td>
+                                <td class="align-middle text-center text-sm">
+                                    <span class="text-xs font-weight-bold">{{ $order->date }}</span>
+                                </td>
+                                <td class="align-middle text-center text-sm">
+                                    <span class="text-xs font-weight-bold">${{ number_format($order->details->sum('price'), 2) }}</span>
+                                </td>
+                                <td class="align-middle text-center text-sm">
+                                    <span class="text-xs font-weight-bold">
+                                        @if ($order->status == 0)
+                                            <span class="badge bg-warning">En Proceso</span>
+                                        @elseif ($order->status == 1)
+                                            <span class="badge bg-success">Aprobado</span>
+                                        @elseif ($order->status == 2)
+                                            <span class="badge bg-danger">Negado</span>
+                                        @endif
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header pb-0">
+                          <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                              <h6 class="mb-0">Compras Realizadas</h6>
+                              <a href="/purchase-orders" class="mx-4 btn-outline-black">Ver Más ></a>
+                            </div>
+                            <a class="" href="/purchase">
+                              <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Compra
+                            </a>
+                          </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="timeline timeline-one-side" id="timeline">
+                                @foreach($purchaseOrders as $order)
+                                <div class="timeline-block mb-1">
+                                    <span class="timeline-step">
+                                      <i class="material-symbols-rounded text-success opacity-10" style="font-size: 30px">add_shopping_cart</i>
+                                    </span>
+                                    <div class="timeline-content">
+                                        <h6 class="text-dark text-sm font-weight-bold mb-0">
+                                            Orden de Compra #{{ $order->id }}
+                                        </h6>
+                                        <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">
+                                            Proveedor: {{ $order->provider_id ?? 'No asignado' }} 
+                                        </p>
+                                        <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">
+                                            Fecha: {{ $order->date }}
+                                        </p>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
-                    <!-- Acciones -->
-                    <div class="mt-3 d-flex justify-content-center mx-4 ">
-                        <!-- <button class="btn btn-sm btn-outline-info">Editar</button> -->
-                        <a class="btn btn-sm btn-outline-black btn-edit-provider" href="/order/{{ $order->id }}">Ver Detalles</a>
-                    </div>
-                  </div>
-                </a>
-              </div>
-              @endforeach
+                </div>
             </div>
-
-          </div>
-      </div>
-
     </div>
-      
-      </div>
-      <div class="row mb-4">
-        <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
-        </div>
-        <div class="col-lg-4 col-md-6">
-        </div>
-      </div>
+    
+</div>
+
     </div>
   </main>
   <!--   Core JS Files   -->
@@ -213,8 +240,281 @@
   <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/chartjs.min.js"></script>
   <script>
+        // Asegúrate de que las variables estén bien formateadas para JS
+        const weeklySalesCount = @json($weeklySalesCount); // Por ejemplo: [50, 20, 10, 22, 50, 10, 40]
+        const monthlySalesFormatted = @json($monthlySalesFormatted); // Podría ser un número o string
+        const months = @json($months); // Por ejemplo: [50, 20, 10, 22, 50, 10, 40]
+        const topProductNames = @json($topProductNames); // ["Producto A", "Producto B", ...]
+        const topProductSales = @json($topProductSales); // [120, 90, 70, 50, 30]
+        var ctx = document.getElementById("chart-bars").getContext("2d");
 
-  </script>
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["L", "M", "M", "J", "V", "S", "D"],
+                datasets: [{
+                    label: "Ventas semanales",
+                    tension: 0.4,
+                    borderWidth: 0,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    backgroundColor: "rgba(255, 255, 255, .8)",
+                    data: weeklySalesCount,
+                    maxBarThickness: 6
+                }, ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 500,
+                            beginAtZero: true,
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                            color: "#fff"
+                        },
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                },
+            },
+        });
+
+
+        var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+        new Chart(ctx2, {
+            type: "line",
+            data: {
+                labels: months,
+                datasets: [{
+                    label: "Ventas mensuales",
+                    tension: 0,
+                    borderWidth: 0,
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                    pointBorderColor: "transparent",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderColor: "rgba(255, 255, 255, .8)",
+                    borderWidth: 4,
+                    backgroundColor: "transparent",
+                    fill: true,
+                    data: monthlySalesFormatted,
+                    maxBarThickness: 6
+
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: false,
+                            drawOnChartArea: false,
+                            drawTicks: false,
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            },
+                        }
+                    },
+                },
+            },
+        });
+
+        var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
+
+        var maxLabelLength = 10;
+
+        // Guardamos etiquetas truncadas para mostrar en el eje X
+        var truncatedLabels = topProductNames.map(name => 
+            name.length > maxLabelLength ? name.substring(0, maxLabelLength) + "…" : name
+        );
+
+        // Usamos el original para el tooltip
+        var originalLabels = topProductNames;
+        var productSales = topProductSales;
+
+        new Chart(ctx3, {
+            type: "bar",
+            data: {
+                labels: truncatedLabels,
+                datasets: [{
+                    label: "Ventas",
+                    data: productSales,
+                    backgroundColor: [
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)"
+                    ],
+                    borderColor: [
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)",
+                        "rgba(255, 255, 255, .8)"
+                    ],
+                    borderWidth: 1,
+                    maxBarThickness: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function (context) {
+                                const index = context.dataIndex;
+                                return `${originalLabels[index]}: ${context.raw} ventas`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [5, 5],
+                            color: 'rgba(255, 255, 255, .2)'
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            drawBorder: false,
+                            display: false,
+                            drawOnChartArea: false,
+                            drawTicks: false,
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            display: true,
+                            color: '#f8f9fa',
+                            padding: 10,
+                            font: {
+                                size: 14,
+                                weight: 300,
+                                family: "Roboto",
+                                style: 'normal',
+                                lineHeight: 2
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
   <!-- Github buttons -->
   <!-- <script async defer src="https://buttons.github.io/buttons.js"></script> -->
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->

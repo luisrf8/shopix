@@ -11,50 +11,81 @@ use App\Models\User;
 use App\Models\PurchaseOrder;
 use App\Models\DollarRate;
 use Carbon\Carbon;
+use App\Models\SalesOrderDetail;
+use Illuminate\Support\Facades\DB;
+
 class IndexController extends Controller
 {
     public function index()
     {
         $currentDate = Carbon::now();
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $startOfNineMonthsAgo = Carbon::now()->subMonths(8)->startOfMonth(); // Incluye el mes actual
+    
         $users = User::with('role')->get();
         $productItems = Product::with(['category', 'images', 'variants'])->get();
-        // Últimas 3 SalesOrders
+    
         $salesOrders = SalesOrder::with(['user', 'details', 'details.variant'])
-            ->latest('date') // Ordena por la columna 'date' de forma descendente
-            ->take(3) // Obtiene solo los 3 más recientes
-            ->get();
-
-        // Últimas 3 PurchaseOrders
+            ->latest('date')->take(3)->get();
+    
         $purchaseOrders = PurchaseOrder::with(['detalles'])
-            ->latest('date') // Ordena por la columna 'date' de forma descendente
-            ->take(3) // Obtiene solo los 3 más recientes
-            ->get();
-        // Crear un arreglo con las estadísticas
+            ->latest('date')->take(3)->get();
+    
+        // Cantidad de ventas en la última semana
+        $weeklySalesCount = SalesOrder::where('date', '>=', $startOfWeek)->count();
+
+        $months = collect(range(0, 8))->map(function ($i) {
+            return Carbon::now()->subMonths($i)->format('M');
+        })->reverse()->values();
+
+        // Ventas por mes (últimos 9 meses incluyendo el actual)
+        $monthlySales = SalesOrder::selectRaw('DATE_FORMAT(date, "%b") as month, COUNT(*) as total')
+        ->where('date', '>=', $startOfNineMonthsAgo)
+        ->groupBy(DB::raw('YEAR(date), MONTH(date), DATE_FORMAT(date, "%b")'))
+        ->orderByRaw('YEAR(date), MONTH(date)')
+        ->get()
+        ->pluck('total', 'month')
+        ->toArray();
+    
+    
+        // Asegurar que cada mes esté presente (aunque sea 0)
+        $months = collect(range(0, 8))->map(function ($i) {
+            return Carbon::now()->subMonths($i)->format('M');
+        })->reverse()->values();
+    
+        $monthlySalesFormatted = $months->map(function ($month) use ($monthlySales) {
+            return $monthlySales[$month] ?? 0;
+        });
+    
+        $topProducts = SalesOrderDetail::with('variant.product')
+        ->select('products.id', 'products.name', DB::raw('SUM(quantity) as total_sales'))
+        ->join('product_variants', 'sales_order_details.product_variant_id', '=', 'product_variants.id')
+        ->join('products', 'product_variants.product_id', '=', 'products.id')
+        ->groupBy('products.id', 'products.name')
+        ->orderByDesc('total_sales')
+        ->limit(5)
+        ->get();
+    
+        $topProductNames = $topProducts->pluck('name');
+        $topProductSales = $topProducts->pluck('total_sales');
+    
         $stats = [
-            [
-                'name' => 'Usuarios',
-                'count' => User::count(),
-                'link' => '/users' // Enlace a las órdenes de compra
-            ],
-            [
-                'name' => 'Productos',
-                'count' => Product::count(),
-                'link' => '/products' // Enlace al inventario de productos
-            ],
-            [
-                'name' => 'Órdenes de Venta',
-                'count' => SalesOrder::count(),
-                'link' => '/sales-orders' // Enlace a las órdenes de compra
-            ],
-            [
-                'name' => 'Órdenes de Compra',
-                'count' => PurchaseOrder::count(),
-                'link' => '/purchase-orders' // Enlace a las órdenes de compra
-            ],
+            ['name' => 'Usuarios', 'count' => User::count(), 'link' => '/users'],
+            ['name' => 'Productos', 'count' => Product::count(), 'link' => '/products'],
+            ['name' => 'Órdenes de Venta', 'count' => SalesOrder::count(), 'link' => '/sales-orders'],
+            ['name' => 'Órdenes de Compra', 'count' => PurchaseOrder::count(), 'link' => '/purchase-orders'],
         ];
     
-        // Retornar la vista con los datos
-        return view('dashboard', compact('stats', 'purchaseOrders', 'salesOrders'));
+        return view('dashboard', compact(
+            'stats',
+            'purchaseOrders',
+            'salesOrders',
+            'weeklySalesCount',
+            'monthlySalesFormatted',
+            'topProductNames',
+            'topProductSales',
+            'months'
+        ));
     }
     
     public function head()

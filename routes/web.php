@@ -25,6 +25,9 @@ Route::middleware('guest')->group(function () {
 Route::get('/', function () {
     return view('ecommerce');
 });
+Route::get('/index', function () {
+    return view('index');
+});
 Route::get('/publicOrder/{id}', [SaleController::class, 'showPublicOrder']);
 
 // Route::post('/publicOrder/{id}', [AuthenticatedSessionController::class, 'store']);
