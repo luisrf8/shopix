@@ -166,47 +166,28 @@
       <div class="row">
         <!-- Buscador -->
       @foreach($productItems as $product)
-      <div class="product-item col-md-4 mb-4" data-name="{{ strtolower($product->name) }}">
-      <div class="card p-4 d-flex flex-row">
-          <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-black text-info border-radius-lg" style="width: 100px; height: 100px;">
-              @if(isset($product->images) && count($product->images) > 0)
-                  <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
-              @else
-                  <i class="material-symbols-rounded text-dark">photo_camera</i>
-              @endif
-          </a>
-            <div class="d-flex flex-column mx-3">
+        <div class="product-item col-md-4 mb-4" data-name="{{ strtolower($product->name) }}">
+          <div class="card p-4 d-flex flex-row" style="height: 10rem;">
+              <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-black text-info border-radius-lg" style="width: 100px; height: 100px;">
+                  @if(isset($product->images) && count($product->images) > 0)
+                      <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                  @else
+                      <i class="material-symbols-rounded text-dark">photo_camera</i>
+                  @endif
+              </a>
+              <div class="d-flex flex-column mx-3">
                 <h6 class="mb-2 text-sm">{{ $product->name }}</h6>
-                <!-- Mostrar las tallas -->
-                <span class="mb-2 text-xs">
-                    Tallas: 
-                    @php
-                        $sizes = $product->variants->pluck('size')->join(' / ');
-                    @endphp
-                    <span class="text-dark font-weight-bold ms-sm-2">{{ $sizes }}</span>
-                </span>
-                <!-- Mostrar el estado de stock -->
-                <span class="text-xs">
-                    Stock: 
-                    @php
-                        $allInStock = $product->variants->every(function ($variant) {
-                            return $variant->stock > 0;
-                        });
-                    @endphp
-                    @if($allInStock)
-                        <span class="text-success font-weight-bold ms-sm-2">Disponible</span>
-                    @else
-                        @foreach($product->variants as $variant)
-                            <div class="text-dark font-weight-bold ms-sm-2">
-                                Talla {{ $variant->size }}: {{ $variant->stock }} en stock
-                            </div>
-                        @endforeach
-                    @endif
-                </span>
-            </div>
-            <div class="ms-auto text-end">
-              <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Editar</a>
-            </div>
+                @foreach ($product->variants as $variant)
+                  <span class="mb-2 text-sm">
+                    Talla: {{ $variant->size }} - {{ $variant->price }} $ - 
+                  <span class="{{ $variant->stock < 1 ? 'text-danger' : ($variant->stock < 5 ? 'text-warning' : 'text-success') }}">{{ $variant->stock }} unidades</span>
+                  </span>
+                @endforeach
+                    <!-- Mostrar las tallas -->
+              </div>
+              <div class="ms-auto text-end">
+                <a href="{{ route('productItem', $product->id) }}" class="btn btn-link text-dark" ><i class="material-symbols-rounded text-sm">edit</i>Editar</a>
+              </div>
           </div>
         </div>
       @endforeach

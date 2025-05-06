@@ -21,11 +21,12 @@
 </style>
 <body>
     <div class="container d-flex justify-content-center flex-column align-items-center vh-100">
-        <img src="../../assets/img/inf.png" class="navbar-brand-img" width="150" height="150" alt="main_logo">
+        <img src="../../assets/img/inf.png" class="navbar-brand-img" alt="main_logo">
         <!-- <img src="../../assets/img/fondo.jpg" class="navbar-brand-img" width="150" height="150" alt="main_logo"> -->
 
-        <div class="col-md-4 d-flex justify-content-center flex-column login-container">
-            <form class="d-flex flex-column">
+        <div class="col-md-5 d-flex justify-content-center flex-column login-container py-0 my-0">
+            <h3 class="text-center">Iniciar sesion</h3>
+            <form class="d-flex flex-column py-0 my-0">
                 @csrf
                 <div class="form-group">
                     <label for="email">Correo Electrónico</label>
@@ -35,7 +36,7 @@
                     <label for="password">Contraseña</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Ingresa tu contraseña" required>
                 </div>
-                <button type="submit" class="btn btn-info btn-block" style="background-color: #124783; border-color: #124783">Ingresar</button>
+                <button type="submit" class="btn btn-dark">Ingresar</button>
             </form>
             <div class="text-center mt-3">
                 <a>¿Olvidaste tu contraseña?</a>
@@ -56,11 +57,10 @@
 <script>
     document.querySelector("form").addEventListener("submit", function(event) {
         event.preventDefault();
-        
+
         let formData = new FormData(this);
         let submitButton = this.querySelector("button[type='submit']");
-        
-        // Cambiar texto a "Cargando..." y deshabilitar el botón
+
         submitButton.textContent = "Cargando...";
         submitButton.disabled = true;
 
@@ -70,18 +70,19 @@
         })
         .then(response => {
             return response.json().then(data => {
-                console.log("response", data)
-                    // Almacena el token y redirige al dashboard
+                if (response.ok) {
                     localStorage.setItem('authToken', data.access_token);
-                    window.location.href = '/dashboard'; // Redirección al dashboard
+                    window.location.href = '/dashboard'; // Descomenta si deseas redirigir
+                } else {
+                    alert(data.message || "Credenciales incorrectas");
+                }
             });
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("Ocurrió un error");
+            alert("Ocurrió un error al intentar iniciar sesión");
         })
         .finally(() => {
-            // Restaurar el texto original y habilitar el botón
             submitButton.textContent = "Ingresar";
             submitButton.disabled = false;
         });

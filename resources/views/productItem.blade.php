@@ -35,8 +35,9 @@
       <div class="col-md-12 mt-4">
   <div class="">
     <div class="pb-0 px-3">
-      <a href="{{ route('products.index') }}">
-        <h6 class="mb-0"> <i class="material-symbols-rounded opacity-10">arrow_back_ios_new</i> Volver</h6>
+      <a href="{{ route('products.index') }}" class="d-flex align-items-center">
+        <i class="material-symbols-rounded opacity-10">arrow_back_ios_new</i>
+        <h6 class="mb-0 mx-1">Volver</h6>
       </a>
     </div>
     <div class="pt-4">
@@ -47,20 +48,38 @@
               <!-- <div class="card"> -->
               <div class="card" data-product-id="{{ $product->id }}">
                   <div class="card-body d-flex flex-row">
-                    <div class="position-relative" style="width: 25rem; height: 25rem;">
-                      <p class="text-info position-absolute top-0 end-0 m-2">
-                        @if(isset($product->images) && count($product->images) > 0)
-                          <button class="btn btn-danger btn-sm" onclick="confirmRemoveImage({{ $product->images[0]->id }})">Eliminar imagen</button>
-                        @else
-                          <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addImageModal">Agregar imagen +</button>
-                        @endif
-                      </p>
-                      <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-info text-info border-radius-lg w-100 h-100">
-                        @if(isset($product->images) && count($product->images) > 0)
-                          <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
-                        @else
-                          <i class="material-symbols-rounded text-dark" style="font-size: 5rem;">photo_camera</i>
-                        @endif
+                    <div class="d-flex">
+                      {{-- Miniaturas a la izquierda --}}
+                      <div class="d-flex flex-column me-3" style="gap: 0.5rem;">
+                        @foreach($product->images as $index => $image)
+                          <img 
+                            src="{{ asset('storage/' . $image->path) }}" 
+                            alt="Miniatura"
+                            class="img-thumbnail cursor-pointer m-0 p-0 border border-1 border-dark text-dark border-radius-lg "
+                            style="width: 4rem; height: 4rem; object-fit: cover;"
+                            onclick="changeMainImage('{{ asset('storage/' . $image->path) }}', {{ $image->id }})"
+                          >
+                        @endforeach
+                      </div>
+
+                      {{-- Imagen principal y botones --}}
+                      <div class="position-relative" style="width: 25rem; height: 25rem;">
+                        <p class="text-info position-absolute top-0 end-0 m-2 d-flex flex-column align-items-end" style="gap: 0.5rem;">
+                          <button class="btn btn-danger btn-sm" onclick="confirmRemoveImage(currentImageId)">Eliminar imagen</button>
+                        </p>
+                        <div class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-dark text-dark border-radius-lg w-100 h-100">
+                          @if(isset($product->images) && count($product->images) > 0)
+                            <img 
+                              id="mainImage" 
+                              src="{{ asset('storage/' . $product->images[0]->path) }}" 
+                              alt="Imagen del producto" 
+                              style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;"
+                            >
+                            <input type="hidden" id="mainImageId" value="{{ $product->images[0]->id }}">
+                          @else
+                            <i class="material-symbols-rounded text-dark" style="font-size: 5rem;">photo_camera</i>
+                          @endif
+                        </div>
                       </div>
                     </div>
                     <!-- Modal para agregar imagen -->
@@ -81,7 +100,7 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                              <button type="submit" class="btn btn-primary">Guardar</button>
+                              <button type="submit" class="btn btn-dark">Guardar</button>
                             </div>
                           </div>
                         </form>
@@ -103,8 +122,9 @@
                       <!-- <p><strong>Categoría:</strong> {{ $product->category->name }}</p> -->
                          <!-- Action Buttons -->
                       <div class="mt-4">
-                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#editProductModal" onclick="editProduct()">Editar</button>
-                        <button class="btn btn-primary" onclick="deleteProduct({{ $product->id }})">Eliminar</button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editProductModal" onclick="editProduct()">Editar</button>
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addImageModal">Agregar imagen +</button>
+                        <button class="btn btn-dark" onclick="deleteProduct({{ $product->id }})">Eliminar</button>
                       </div>
                     </div>
                   </div>
@@ -141,13 +161,13 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="saveChangesBtn">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-dark" id="saveChangesBtn">Guardar Cambios</button>
                     </form>
                     <div class="form-group">
                       <label for="productVariants">Variedades</label>
                       <div id="variantContainer"></div>
                       <button type="button" class="btn btn-secondary mt-3" id="addVariantBtn">Agregar Variante</button>
-                      <button type="button" class="btn btn-primary mt-3" id="saveVariantsBtn">Guardar Variantes Creadas</button>
+                      <button type="button" class="btn btn-dark mt-3" id="saveVariantsBtn">Guardar Variantes Creadas</button>
                     </div>
                   </div>
                 </div>
@@ -169,6 +189,24 @@
 
 
 <script>
+    let currentImageId = {{ $product->images[0]->id ?? 'null' }};
+
+    function changeMainImage(imagePath, imageId) {
+      const mainImage = document.getElementById('mainImage');
+      const mainImageId = document.getElementById('mainImageId');
+
+      mainImage.src = imagePath;
+      currentImageId = imageId;
+      mainImageId.value = imageId;
+    }
+
+    function confirmRemoveImage(imageId) {
+      if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
+        // Aquí iría tu lógica para eliminar la imagen
+        // Por ejemplo, una redirección o una llamada AJAX
+        window.location.href = `/productos/eliminar-imagen/${imageId}`;
+      }
+    }
   document.querySelectorAll('.thumbnail img').forEach(img => {
     img.addEventListener('click', function() {
       document.getElementById('mainImage').src = this.src;
@@ -299,7 +337,7 @@ function editProduct() {
         <input type="number" class="form-control border border-1 p-2" value="${variant.stock}" placeholder="Stock" name="variantStock[]">
       </div>
       <div class="col pt-2">
-        <button type="button" class="btn btn-primary mt-4 editVariantBtn" data-id="${variant.id}">Editar</button>
+        <button type="button" class="btn btn-dark mt-4 editVariantBtn" data-id="${variant.id}">Editar</button>
       </div>
     `;
     variantContainer.appendChild(variantDiv);

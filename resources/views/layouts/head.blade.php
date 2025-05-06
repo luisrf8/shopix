@@ -36,11 +36,16 @@
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
-<nav class="navbar navbar-main navbar-expand-lg px-0 mx-3 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
-      <div class="container-fluid py-1 px-3">
+<nav class="navbar navbar-main navbar-expand-lg px-0  shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
+      <div class="container-fluid py-1">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD</a></li>
+            <li>
+              <button id="toggleNavbar" class="btn btn-black top-0 start-0 m-2 z-index-3">
+                <i class="material-symbols-rounded">menu</i>
+              </button>
+            </li>
+            <li class="breadcrumb-item text-sm d-flex align-items-center"><a class="opacity-5 text-dark" href="javascript:;">Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD</a></li>
             <!-- <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li> -->
             <!-- <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Billing</li> -->
           </ol>
@@ -161,6 +166,22 @@
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 
   <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const toggleNavbarButton = document.getElementById('toggleNavbar');
+        const sidenav = document.getElementById('sidenav-main');
+        const body = document.getElementById('sidenav-main');
+
+        toggleNavbarButton.addEventListener('click', function () {
+            sidenav.classList.toggle('closed');
+            body.classList.toggle('sidenav'); // Agrega o elimina la clase navbar-closed
+            const icon = toggleNavbarButton.querySelector('i');
+            if (sidenav.classList.contains('closed')) {
+                icon.textContent = 'menu_open'; // Cambia el ícono a "menu_open"
+            } else {
+                icon.textContent = 'menu'; // Cambia el ícono a "menu"
+            }
+        });
+    });
   </script>
 
   <!-- Github buttons -->

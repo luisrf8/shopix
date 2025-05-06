@@ -21,9 +21,37 @@
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+<style>
+  #sidenav-main {
+  transition: transform 0.3s ease-in-out;
+}
 
+#sidenav-main.closed {
+  transform: translateX(-100%);
+}
+
+#g-sidenav-show {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidenav.fixed-start + .main-content {
+    margin-left: 15rem;
+    transition: margin 0.3s ease-in-out;
+}
+
+.sidenav.fixed-end + .main-content {
+    margin-right: 15rem;
+    transition: margin 0.3s ease-in-out;
+}
+
+/* Cuando la navbar está oculta */
+.navbar-closed .main-content {
+    margin-left: 0;
+    margin-right: 0;
+}
+</style>
 <body class="bg-gray-100">
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2   my-2" id="sidenav-main">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 my-2" id="sidenav-main">
     <div class="sidenav-header bg-gray-900 m-0 p-0 h-15">
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand d-flex justify-content-center align-items-center" href="/dashboard" target="_blank">
@@ -141,6 +169,25 @@ document.addEventListener("DOMContentLoaded", function () {
             link.classList.remove("bg-gray-900", "text-white");
         }
     });
+    const toggleNavbarButton = document.getElementById('toggleNavbar');
+    const sidenav = document.getElementById('sidenav-main');
+    const body = document.getElementById('d-body');
+
+    toggleNavbarButton.addEventListener('click', function () {
+        sidenav.classList.toggle('closed');
+        body.classList.toggle('navbar-closed');
+    });
+    toggleNavbarButton.addEventListener('click', function () {
+    sidenav.classList.toggle('closed');
+    body.classList.toggle('navbar-closed');
+
+    const icon = toggleNavbarButton.querySelector('i');
+    if (sidenav.classList.contains('closed')) {
+        icon.textContent = 'menu_open'; // Cambia el ícono a "menu_open"
+    } else {
+        icon.textContent = 'menu'; // Cambia el ícono a "menu"
+    }
+});
 });
 
   function logOut() {

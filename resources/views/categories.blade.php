@@ -7,14 +7,13 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Productos
   </title>
   <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
 </head>
 
-<body class="g-sidenav-show  bg-gray-100" id="d-body">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 d-none d-lg-block bg-white my-2" id="sidenav-main">
+<body class="g-sidenav-show bg-gray-100" id="d-body">
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 bg-white my-2" id="sidenav-main">
     @include('layouts.navbar')
   </aside>
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
@@ -48,7 +47,7 @@
                   <textarea class="form-control border border-1 p-2" id="categoryDescription" name="description" rows="3" required></textarea>
                 </div>
                 <div class="d-flex flex-row-reverse">
-                  <button type="submit" class="btn btn-info">Guardar</button>
+                  <button type="submit" class="btn btn-dark">Guardar</button>
                 </div>
               </form>
             </div>

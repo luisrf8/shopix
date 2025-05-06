@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'http://192.168.1.102:8000',
-        'http://192.168.1.102:8000/api/*',
+        'http://192.168.1.113:8000',
+        'http://192.168.1.113:8000/api/*',
         'api/*', // Excluir todas las rutas dentro del grupo 'api' de la verificación CSRF
         'login', // Excluir la ruta 'login' de la verificación CSRF
         'logout', // Excluir la ruta 'logout' de la verificación CSRF
