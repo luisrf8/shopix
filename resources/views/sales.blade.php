@@ -29,12 +29,21 @@
     <div class="mx-5 d-flex justify-content-between gap-4">
         <div class="w-75">
             <h1>Flujo de Venta</h1>
+            <span id="customerId" data-rate="{{ $customerId}}"></span>
             <form id="purchaseForm">
                 @csrf
                 <!-- Paso 1: Selección del Ítem -->
                 <div id="step1" class="step">
                     <!-- Input de Búsqueda -->
-                    <div id="categoriesContainer" class="d-flex overflow-auto gap-3  py-3" style="scroll-snap-type: x mandatory;">
+                    <div class="">
+                        <input 
+                            type="text" 
+                            id="searchCategory" 
+                            class="form-control border border-1 p-2 bg-white" 
+                            placeholder="Buscar categoría..." 
+                            onkeyup="filterCategories()">
+                    </div>
+                    <div id="categoriesContainer" class="d-flex overflow-auto gap-3 py-3 mb-2" style="scroll-snap-type: x mandatory;">
                         <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="all">
                             <a href="javascript:void(0)" class="text-decoration-none category-filter">
                                 <div class="card h-100">
@@ -50,7 +59,7 @@
                             </a>
                         </div>
                         @foreach($categories as $category)
-                            <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="{{ $category->id }}">
+                            <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category-name="{{ $category->name }}" data-category="{{ $category->id }}">
                                 <a href="javascript:void(0)" class="text-decoration-none category-filter">
                                 <div class="card h-100">
                                     <div class="card-header mx-3 p-3 text-center">
@@ -59,7 +68,7 @@
                                     </div>
                                     </div>
                                     <div class="card-body pt-0 p-3 text-center">
-                                    <h6 class="text-center mb-0 opacity-9">{{ $category['name'] }}</h6>
+                                    <h6 class="text-center mb-0 opacity-9">{{ $category->name }}</h6>
                                     </div>
                                 </div>
                                 </a>
@@ -120,8 +129,11 @@
                 </div>
                 <div id="step2" class="step d-none">
                     <h4>Paso 2: Selecciona Métodos de Pago</h4>
-                    <div id="totalAmountDisplay" class="mt-3 mb-3">
+                    <div id="totalAmountDisplay" class="mt-3">
                         <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Tasa BCV: </strong><span id="dollarRate" data-rate="{{ number_format($dollarRate->rate, 2, '.', '') }}">{{ number_format($dollarRate->rate, 2) }} Bs.</span>
                     </div>
                     <div id="paymentMethods" class="mb-3">
                         <!-- Los métodos de pago se agregarán aquí dinámicamente -->
@@ -188,12 +200,11 @@
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
-
-<!-- Github buttons -->
-<!-- <script async defer src="https://buttons.github.io/buttons.js"></script> -->
     <script>
         var selectedItems = [];
         var totalAmount = 0;
+        const dollarRate = parseFloat(document.getElementById('dollarRate').dataset.rate);
+        const customerId = document.getElementById('customerId').dataset.rate; // Asegúrate de que esta variable esté definida correctamente
         document.addEventListener('DOMContentLoaded', function () {
             // Escuchar todos los checkboxes
             const checkboxes = document.querySelectorAll('input[name="selectedVariants[]"]');
@@ -352,545 +363,278 @@
             modal.show();
         }
 
+        function filterCategories() {
+            const searchValue = document.getElementById('searchCategory').value.toLowerCase();
+            const categories = document.querySelectorAll('.category-item');
+
+            categories.forEach(category => {
+                const name = category.getAttribute('data-category-name')?.toLowerCase() || '';
+                if (name.includes(searchValue) || category.getAttribute('data-category') === 'all') {
+                    category.style.display = 'block';
+                } else {
+                    category.style.display = 'none';
+                }
+            });
+        }
         document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('searchInput');
-            const categoryFilters = document.querySelectorAll('.category-filter');
-            const productItems = document.querySelectorAll('.product-item');
-
-            // Filtrar productos por categoría
-            categoryFilters.forEach(filter => {
-                filter.addEventListener('click', function () {
-                    const selectedCategory = this.closest('.category-item').getAttribute('data-category');
-
-                    productItems.forEach(item => {
-                        const itemCategory = item.getAttribute('data-category');
-                        if (selectedCategory === itemCategory || selectedCategory === 'all') {
-                            item.style.display = 'block'; // Mostrar si coincide
-                        } else {
-                            item.style.display = 'none'; // Ocultar si no coincide
-                        }
-                    });
-
-                    // Limpiar el input de búsqueda al cambiar de categoría
-                    searchInput.value = '';
-                });
-            });
-
-            // Filtrar productos por búsqueda
-            searchInput.addEventListener('keyup', function () {
-                const filter = searchInput.value.toLowerCase();
-
-                productItems.forEach(item => {
-                    const name = item.getAttribute('data-name');
-                    if (name.includes(filter)) {
-                        item.style.display = 'block'; // Mostrar si coincide
-                    } else {
-                        item.style.display = 'none'; // Ocultar si no coincide
-                    }
-                });
-            });
-        });
-        toStep3.addEventListener('click', function () {
-                step3.classList.remove('d-none');
-                step2.classList.add('d-none');
-                
-                // Calcular el total de todos los productos seleccionados
-                totalAmount = itemsSelected.reduce((total, item) => {
-                    // Convertir el precio de la variante a número y multiplicarlo por la cantidad
-                    return total + (parseFloat(item.variant.price) * item.quantity);
-                }, 0);
-
-                // Mostrar el total calculado en consola
-                console.log("Total calculado:", totalAmount);
-                document.getElementById('totalAmountValue').innerText = totalAmount.toFixed(2); // Formatear a dos decimales
-                document.getElementById('totalAmountValueToConfirm').innerText = totalAmount.toFixed(2); // Formatear a dos decimales
-
-                // Realizar la petición para obtener los métodos de pago con sus monedas
-                fetch('/api/payment-methods', {
-                    method: 'GET',
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Datos recibidos:", data);
-
-                    const paymentMethodsContainer = document.getElementById('paymentMethods');
-                    paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar los nuevos métodos
-
-                    if (Array.isArray(data)) {
-                        const groupedMethods = data.reduce((acc, paymentMethod) => {
-                            const currencyCode = paymentMethod.currency.code;
-                            if (!acc[currencyCode]) {
-                                acc[currencyCode] = [];
-                            }
-                            acc[currencyCode].push(paymentMethod);
-                            return acc;
-                        }, {});
-
-                        for (const currencyCode in groupedMethods) {
-                            const currencyMethods = groupedMethods[currencyCode];
-
-                            const currencyTitle = document.createElement('h5');
-                            currencyTitle.innerText = currencyCode;
-                            paymentMethodsContainer.appendChild(currencyTitle);
-
-                            const rowDiv = document.createElement('div');
-                            rowDiv.classList.add('row', 'g-3'); 
-
-                            currencyMethods.forEach(paymentMethod => {
-                                const colDiv = document.createElement('div');
-                                colDiv.classList.add('col-4');
-
-                                const cardDiv = document.createElement('div');
-                                cardDiv.classList.add('card', 'shadow-sm', 'p-3'); 
-
-                                const cardBodyDiv = document.createElement('div');
-                                cardBodyDiv.classList.add('card-body');
-
-                                const label = document.createElement('label');
-                                label.classList.add('form-check-label');
-                                label.innerText = `${paymentMethod.name}`;
-
-                                const amountInput = document.createElement('input');
-                                amountInput.type = 'number';
-                                amountInput.classList.add('form-control', 'mt-2', 'border', 'border-1', 'p-2');
-                                amountInput.placeholder = `Monto en ${paymentMethod.currency.code}`;
-                                amountInput.id = `amount${paymentMethod.id}`;
-
-                                cardBodyDiv.appendChild(label);
-                                cardBodyDiv.appendChild(amountInput);
-
-                                cardDiv.appendChild(cardBodyDiv);
-                                colDiv.appendChild(cardDiv);
-                                rowDiv.appendChild(colDiv);
-                            });
-
-                            paymentMethodsContainer.appendChild(rowDiv);
-                        }
-                    } else {
-                        console.error('La respuesta no es un arreglo válido:', data);
-                    }
-
-                    // Escuchar el cambio en los inputs de monto después de haber agregado los inputs
-                    document.querySelectorAll('input[id^="amount"]').forEach(input => {
-                        input.addEventListener('input', function () {
-                            // Obtener el total ingresado en todos los inputs
-                            let totalInput = 0;
-                            
-                            // Limpiar el arreglo de paymentDetails antes de agregar los nuevos detalles
-                            paymentDetails = [];
-
-                            document.querySelectorAll('input[id^="amount"]').forEach(amountInput => {
-                                const paymentMethodId = amountInput.id.replace('amount', ''); // Obtener el ID del método de pago
-                                const paymentAmount = parseFloat(amountInput.value) || 0; // Obtener el monto ingresado
-
-                                // Encontrar el método de pago completo a partir del ID
-                                const paymentMethod = data.find(method => method.id == paymentMethodId);
-
-                                console.log("paymentMethodId", paymentMethodId, "paymentAmount", paymentAmount);
-
-                                totalInput += paymentAmount;
-
-                                // Almacenar los detalles completos del método de pago en paymentDetails
-                                paymentDetails.push({
-                                    id: paymentMethodId,
-                                    name: paymentMethod.name,
-                                    currency: paymentMethod.currency.code,
-                                    amount: paymentAmount,
-                                });
-                            });
-
-                            // Comparar el total ingresado con el total calculado
-                            const toStep4Button = document.getElementById('toStep4');
-                            if (totalInput === totalAmount) {
-                                toStep4Button.disabled = false; // Habilitar el botón si el total es correcto
-
-                                // Aquí, ahora asociamos el arreglo paymentDetails con itemsSelected
-                                const updatedItemsSelected = itemsSelected.map(item => {
-                                    // Para cada item, añadir la referencia al paymentDetails con el id del producto
-                                    item.paymentDetails = paymentDetails.filter(payment => payment.id === item.product_id);
-                                    return item;
-                                });
-
-                                // Mostrar el estado actualizado de itemsSelected y paymentDetails en la consola
-                                console.log("Items seleccionados actualizados:", updatedItemsSelected);
-                                console.log("Detalles de pagos:", paymentDetails);
-                            } else {
-                                toStep4Button.disabled = true; // Deshabilitar el botón si el total es incorrecto
-                            }
-                        });
-                    });
-
-
-                })
-                .catch(error => {
-                    console.error('Error al obtener los métodos de pago:', error);
-                });
-            });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        let currentStep = 1; // Contador para rastrear el paso actual
-        const totalSteps = 3; // Número total de pasos
-
-        const steps = document.querySelectorAll('.step');
         const toStep2Button = document.getElementById('toStep2');
         const toStep3Button = document.getElementById('toStep3');
         const backToStep1Button = document.getElementById('backToStep1');
-        const backToStep2Button = document.getElementById('backToStep2');
+        const paymentMethodsContainer = document.getElementById('paymentMethods');
+        let totalAmount = 0;
+        let paymentDetails = [];
 
-        // Función para mostrar el paso actual
-        function showStep(step) {
-            steps.forEach((stepElement, index) => {
-                if (index + 1 === step) {
-                    stepElement.classList.remove('d-none');
-                } else {
-                    stepElement.classList.add('d-none');
+        // Función para mostrar los métodos de pago separados por monedas
+        function loadPaymentMethods() {
+            toStep2Button.classList.remove('d-block'); // Ocultar el botón de siguiente
+            toStep2Button.classList.add('d-none'); // Ocultar el botón de siguiente
+            fetch('/api/payment-methods', {
+                method: 'GET',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Métodos de pago:", data);
+                    paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                    if (Array.isArray(data)) {
+                        const groupedMethods = data.reduce((acc, method) => {
+                            const currency = method.currency.code;
+                            if (!acc[currency]) acc[currency] = [];
+                            acc[currency].push(method);
+                            return acc;
+                        }, {});
+
+                    for (const currency in groupedMethods) {
+                        const currencyGroup = groupedMethods[currency];
+
+                        // Título de la moneda
+                        const currencyTitle = document.createElement('h5');
+                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
+                        paymentMethodsContainer.appendChild(currencyTitle);
+
+                        // Contenedor de los métodos de pago
+                        const methodGroupDiv = document.createElement('div');
+                        methodGroupDiv.className = 'mb-3 card d-flex flex-row align-items-center gap-2 p-4 border border-radius-lg';
+                        methodGroupDiv.style.width = 'fit-content';
+                        methodGroupDiv.style.height = 'fit-content';
+
+                        currencyGroup.forEach(method => {
+                            const methodDiv = document.createElement('div');
+                            methodDiv.className = 'card p-3 mb-3 border border-radius-lg col-12 col-md-4 d-flex flex-column align-items-center gap-3';
+                            methodDiv.style.width = '21rem';
+                            methodDiv.style.height = '16rem';
+
+                            // Contenedor para el QR y los datos
+                            const qrAndInfoDiv = document.createElement('div');
+                            qrAndInfoDiv.className = 'd-flex align-items-center gap-3';
+
+                            // QR Code
+                            if (method.qr_image) {
+                                const qrImage = document.createElement('img');
+                                qrImage.src = `/storage/${JSON.parse(method.qr_image)[0]}`;
+                                qrImage.alt = 'QR Code';
+                                qrImage.style.width = '100px';
+                                qrImage.style.height = '100px';
+                                qrImage.style.objectFit = 'cover';
+                                qrImage.style.borderRadius = '8px';
+                                qrAndInfoDiv.appendChild(qrImage);
+                            }
+
+                            // Información adicional del método de pago
+                            const additionalInfo = document.createElement('div');
+                            additionalInfo.className = 'text-sm';
+
+                            if (method.dni) {
+                                const dniInfo = document.createElement('label');
+                                dniInfo.textContent = `ID: ${method.dni}`;
+                                additionalInfo.appendChild(dniInfo);
+                            }
+
+                            if (method.bank) {
+                                const bankInfo = document.createElement('label');
+                                bankInfo.textContent = `Banco: ${method.bank}`;
+                                additionalInfo.appendChild(bankInfo);
+                            }
+
+                            if (method.admin_name) {
+                                const adminName = document.createElement('label');
+                                adminName.textContent = `Nombre del Beneficiario: ${method.admin_name}`;
+                                additionalInfo.appendChild(adminName);
+                            }
+
+
+                            // Checkbox para seleccionar el método de pago
+                            const input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.className = 'form-check-input';
+                            input.id = `paymentMethod_${method.id}`;
+                            input.dataset.methodId = method.id;
+                            input.dataset.currency = currency;
+
+                            const label = document.createElement('label');
+                            label.className = 'form-check-label';
+                            label.htmlFor = `paymentMethod_${method.id}`;
+                            label.textContent = method.name;
+
+                            const checkboxContainer = document.createElement('div');
+                            checkboxContainer.className = 'd-flex w-100 align-items-center';
+                            checkboxContainer.appendChild(input);
+                            checkboxContainer.appendChild(label);
+
+                            additionalInfo.appendChild(checkboxContainer);
+                            qrAndInfoDiv.appendChild(additionalInfo);
+                            methodDiv.appendChild(qrAndInfoDiv);
+
+                            // Input para el monto (oculto inicialmente)
+                            const amountInput = document.createElement('input');
+                            amountInput.type = 'number';
+                            amountInput.className = 'form-control d-none border border-radius-lg mx-4 p-2';
+                            amountInput.placeholder = `Monto en ${currency}`;
+                            amountInput.dataset.methodId = method.id;
+
+                            // Mostrar el input al seleccionar el método
+                            input.addEventListener('change', function () {
+                                if (this.checked) {
+                                    amountInput.classList.remove('d-none');
+                                    paymentDetails.push({
+                                        id: method.id,
+                                        name: method.name,
+                                        currency: currency,
+                                        amount: 0,
+                                    });
+                                    console.log("Detalles de pago:", paymentDetails);
+                                } else {
+                                    amountInput.classList.add('d-none');
+                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
+                                }
+                                validatePaymentDetails();
+                            });
+
+                            // Actualizar el monto ingresado
+                            amountInput.addEventListener('input', function () {
+                                const rawAmount = parseFloat(this.value) || 0;
+                                let convertedAmount = rawAmount;
+
+                                if (currency === 'BS') {
+                                    convertedAmount = rawAmount / dollarRate;
+                                }
+
+                                // Encuentra y actualiza el paymentDetail correspondiente
+                                const detail = paymentDetails.find(p => p.id === method.id);
+                                if (detail) {
+                                    detail.amount = convertedAmount;
+                                }
+
+                                validatePaymentDetails(); // Para actualizar resumen y validaciones
+                            });
+
+                            methodDiv.appendChild(amountInput);
+                            methodGroupDiv.appendChild(methodDiv);
+                        });
+
+                        paymentMethodsContainer.appendChild(methodGroupDiv);
+                    }
                 }
-            });
-        }
-
-        // Avanzar al paso 2
-        toStep2Button.addEventListener('click', function () {
-            if (currentStep === 1) {
-                currentStep = 2;
-                showStep(currentStep);
-
-                // Calcular el total de los productos seleccionados
-                const totalAmount = selectedItems.reduce((total, item) => {
-                    return total + item.price * item.quantity;
-                }, 0);
-
-                document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
-
-                // Obtener los métodos de pago
-                fetch('/api/payment-methods', {
-                    method: 'GET',
+                    document.getElementById('step2').classList.remove('d-none');
+                    document.getElementById('step1').classList.add('d-none');
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        const paymentMethodsContainer = document.getElementById('paymentMethods');
-                        paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
-
-                        if (Array.isArray(data)) {
-                            data.forEach(paymentMethod => {
-                                const methodDiv = document.createElement('div');
-                                methodDiv.className = 'form-check';
-
-                                const input = document.createElement('input');
-                                input.type = 'radio';
-                                input.name = 'paymentMethod';
-                                input.value = paymentMethod.id;
-                                input.className = 'form-check-input';
-                                input.id = `paymentMethod_${paymentMethod.id}`;
-
-                                const label = document.createElement('label');
-                                label.className = 'form-check-label';
-                                label.htmlFor = `paymentMethod_${paymentMethod.id}`;
-                                label.textContent = `${paymentMethod.name} (${paymentMethod.currency.code})`;
-
-                                methodDiv.appendChild(input);
-                                methodDiv.appendChild(label);
-                                paymentMethodsContainer.appendChild(methodDiv);
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error al obtener los métodos de pago:', error));
+                .catch(error => console.error('Error al cargar los métodos de pago:', error));
             }
-        });
 
-        // Avanzar al paso 3
-        toStep3Button.addEventListener('click', function () {
-            if (currentStep === 2) {
-                currentStep = 3;
-                showStep(currentStep);
-            }
-        });
+            // Validar los detalles de pago
+            function validatePaymentDetails() {
+                const totalPaid = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
+                const totalPaidSpan = document.getElementById('totalPaid');
+                const paymentMessage = document.getElementById('paymentMessage');
 
-        // Regresar al paso 1
-        backToStep1Button.addEventListener('click', function () {
-            if (currentStep === 2) {
-                currentStep = 1;
-                showStep(currentStep);
-            }
-        });
+                // Mostrar el total ingresado
+                totalPaidSpan.textContent = totalPaid.toFixed(2);
 
-        // Regresar al paso 2
-        backToStep2Button.addEventListener('click', function () {
-            if (currentStep === 3) {
-                currentStep = 2;
-                showStep(currentStep);
-            }
-        });
-
-        // Mostrar el paso inicial
-        showStep(currentStep);
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-    const toStep2Button = document.getElementById('toStep2');
-    const toStep3Button = document.getElementById('toStep3');
-    const backToStep1Button = document.getElementById('backToStep1');
-    const paymentMethodsContainer = document.getElementById('paymentMethods');
-    let totalAmount = 0;
-    let paymentDetails = [];
-
-    // Función para mostrar los métodos de pago separados por monedas
-    function loadPaymentMethods() {
-        fetch('/api/payment-methods', {
-            method: 'GET',
-        })
-            .then(response => response.json())
-            .then(data => {
-                paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
-
-                if (Array.isArray(data)) {
-                    const groupedMethods = data.reduce((acc, method) => {
-                        const currency = method.currency.code;
-                        if (!acc[currency]) acc[currency] = [];
-                        acc[currency].push(method);
-                        return acc;
-                    }, {});
-
-                    for (const currency in groupedMethods) {
-                        const currencyGroup = groupedMethods[currency];
-
-                        // Título de la moneda
-                        const currencyTitle = document.createElement('h5');
-                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
-                        paymentMethodsContainer.appendChild(currencyTitle);
-
-                        // Contenedor de los métodos de pago
-                        const methodGroupDiv = document.createElement('div');
-                        methodGroupDiv.className = 'mb-3';
-
-                        currencyGroup.forEach(method => {
-                            const methodDiv = document.createElement('div');
-                            methodDiv.className = 'form-check mb-2';
-
-                            const input = document.createElement('input');
-                            input.type = 'checkbox';
-                            input.className = 'form-check-input payment-method-checkbox';
-                            input.id = `paymentMethod_${method.id}`;
-                            input.dataset.methodId = method.id;
-                            input.dataset.currency = currency;
-
-                            const label = document.createElement('label');
-                            label.className = 'form-check-label';
-                            label.htmlFor = `paymentMethod_${method.id}`;
-                            label.textContent = method.name;
-
-                            // Input para el monto (oculto inicialmente)
-                            const amountInput = document.createElement('input');
-                            amountInput.type = 'number';
-                            amountInput.className = 'form-control mt-2 d-none payment-amount-input';
-                            amountInput.placeholder = `Monto en ${currency}`;
-                            amountInput.dataset.methodId = method.id;
-
-                            // Mostrar el input al seleccionar el método
-                            input.addEventListener('change', function () {
-                                if (this.checked) {
-                                    amountInput.classList.remove('d-none');
-                                    paymentDetails.push({
-                                        id: method.id,
-                                        name: method.name,
-                                        currency: currency,
-                                        amount: 0,
-                                    });
-                                } else {
-                                    amountInput.classList.add('d-none');
-                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
-                                }
-                                validatePaymentDetails();
-                            });
-
-                            // Actualizar el monto ingresado
-                            amountInput.addEventListener('input', function () {
-                                const methodId = parseInt(this.dataset.methodId);
-                                const detail = paymentDetails.find(detail => detail.id === methodId);
-                                if (detail) {
-                                    detail.amount = parseFloat(this.value) || 0;
-                                }
-                                validatePaymentDetails();
-                            });
-
-                            methodDiv.appendChild(input);
-                            methodDiv.appendChild(label);
-                            methodDiv.appendChild(amountInput);
-                            methodGroupDiv.appendChild(methodDiv);
-                        });
-
-                        paymentMethodsContainer.appendChild(methodGroupDiv);
-                    }
+                // Mostrar mensaje correspondiente
+                if (totalPaid < totalAmount) {
+                    const remaining = (totalAmount - totalPaid).toFixed(2);
+                    paymentMessage.textContent = `Falta por pagar: $${remaining}`;
+                    paymentMessage.className = 'text-danger';
+                } else if (totalPaid > totalAmount) {
+                    const change = (totalPaid - totalAmount).toFixed(2);
+                    paymentMessage.textContent = `Debe entregar vuelto: $${change}`;
+                    paymentMessage.className = 'text-warning';
+                } else {
+                    paymentMessage.textContent = `Pago exacto.`;
+                    paymentMessage.className = 'text-success';
                 }
-            })
-            .catch(error => console.error('Error al cargar los métodos de pago:', error));
-    }
 
-    // Validar los detalles de pago
-    function validatePaymentDetails() {
-        const totalInput = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
-        toStep3Button.disabled = totalInput !== totalAmount;
-    }
+                // Habilitar o deshabilitar el botón
+                toStep3Button.disabled = totalPaid < totalAmount;
+            }
 
-    // Avanzar al paso 2
-    toStep2Button.addEventListener('click', function () {
-        totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
-        loadPaymentMethods();
-    });
 
-    // Avanzar al paso 3
-    toStep3Button.addEventListener('click', function () {
-        console.log('Detalles de pago:', paymentDetails);
-        // Aquí puedes enviar los detalles de pago al servidor o continuar con el flujo
-    });
+            // Avanzar al paso 2
+            toStep2Button.addEventListener('click', function () {
+                totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
+                loadPaymentMethods();
+            });
 
-    // Regresar al paso 1
-    backToStep1Button.addEventListener('click', function () {
-        paymentDetails = []; // Reiniciar los detalles de pago
-    });
-});
-    document.addEventListener('DOMContentLoaded', function () {
-    const toStep2Button = document.getElementById('toStep2');
-    const toStep3Button = document.getElementById('toStep3');
-    const backToStep1Button = document.getElementById('backToStep1');
-    const paymentMethodsContainer = document.getElementById('paymentMethods');
-    const totalPaidElement = document.getElementById('totalPaid');
-    const paymentMessageElement = document.getElementById('paymentMessage');
-    let totalAmount = 0;
-    let paymentDetails = [];
+            toStep3Button.addEventListener('click', function () {
+                console.log('Detalles de pago:', paymentDetails);
+                console.log('Detalles de selectedItems:', selectedItems);
+                console.log('Detalles de customerId:', customerId);
 
-    // Función para mostrar los métodos de pago separados por monedas
-    function loadPaymentMethods() {
-        fetch('/api/payment-methods', {
-            method: 'GET',
-        })
-            .then(response => response.json())
-            .then(data => {
-                paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
+                const formData = new FormData();
 
-                if (Array.isArray(data)) {
-                    const groupedMethods = data.reduce((acc, method) => {
-                        const currency = method.currency.code;
-                        if (!acc[currency]) acc[currency] = [];
-                        acc[currency].push(method);
-                        return acc;
-                    }, {});
+                // Enviar customerId y totalAmount
+                formData.append('customer_id', customerId); // Define esta variable antes
+                formData.append('totalAmount', totalAmount);
 
-                    for (const currency in groupedMethods) {
-                        const currencyGroup = groupedMethods[currency];
+                // Agregar itemsSelected como JSON string
+                formData.append('itemsSelected', JSON.stringify(selectedItems));
 
-                        // Título de la moneda
-                        const currencyTitle = document.createElement('h5');
-                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
-                        paymentMethodsContainer.appendChild(currencyTitle);
+                // Agregar paymentDetails como objetos separados
+                paymentDetails.forEach((payment, index) => {
+                    formData.append(`paymentDetails[${index}][id]`, payment.id);
+                    formData.append(`paymentDetails[${index}][name]`, payment.name);
+                    formData.append(`paymentDetails[${index}][currency]`, payment.currency);
+                    formData.append(`paymentDetails[${index}][amount]`, payment.amount);
 
-                        // Contenedor de los métodos de pago
-                        const methodGroupDiv = document.createElement('div');
-                        methodGroupDiv.className = 'mb-3';
-
-                        currencyGroup.forEach(method => {
-                            const methodDiv = document.createElement('div');
-                            methodDiv.className = 'form-check mb-2';
-
-                            const input = document.createElement('input');
-                            input.type = 'checkbox';
-                            input.className = 'form-check-input payment-method-checkbox';
-                            input.id = `paymentMethod_${method.id}`;
-                            input.dataset.methodId = method.id;
-                            input.dataset.currency = currency;
-
-                            const label = document.createElement('label');
-                            label.className = 'form-check-label';
-                            label.htmlFor = `paymentMethod_${method.id}`;
-                            label.textContent = method.name;
-
-                            // Input para el monto (oculto inicialmente)
-                            const amountInput = document.createElement('input');
-                            amountInput.type = 'number';
-                            amountInput.className = 'form-control mt-2 d-none payment-amount-input';
-                            amountInput.placeholder = `Monto en ${currency}`;
-                            amountInput.dataset.methodId = method.id;
-
-                            // Mostrar el input al seleccionar el método
-                            input.addEventListener('change', function () {
-                                if (this.checked) {
-                                    amountInput.classList.remove('d-none');
-                                    paymentDetails.push({
-                                        id: method.id,
-                                        name: method.name,
-                                        currency: currency,
-                                        amount: 0,
-                                    });
-                                } else {
-                                    amountInput.classList.add('d-none');
-                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
-                                }
-                                validatePaymentDetails();
-                            });
-
-                            // Actualizar el monto ingresado
-                            amountInput.addEventListener('input', function () {
-                                const methodId = parseInt(this.dataset.methodId);
-                                const detail = paymentDetails.find(detail => detail.id === methodId);
-                                if (detail) {
-                                    detail.amount = parseFloat(this.value) || 0;
-                                }
-                                validatePaymentDetails();
-                            });
-
-                            methodDiv.appendChild(input);
-                            methodDiv.appendChild(label);
-                            methodDiv.appendChild(amountInput);
-                            methodGroupDiv.appendChild(methodDiv);
-                        });
-
-                        paymentMethodsContainer.appendChild(methodGroupDiv);
+                    // Si tiene imagen (opcional)
+                    if (payment.image) {
+                        formData.append(`paymentDetails[${index}][image]`, payment.image);
                     }
-                }
-            })
-            .catch(error => console.error('Error al cargar los métodos de pago:', error));
-    }
+                });
 
-    // Validar los detalles de pago
-    function validatePaymentDetails() {
-        const totalInput = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
-        totalPaidElement.textContent = totalInput.toFixed(2);
+                fetch('/api/create-sale', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        alert('Venta registrada exitosamente.');
+                        // Redirigir o limpiar formularios si es necesario
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al enviar datos:', error);
+                    alert('Ocurrió un error en la solicitud.');
+                });
+            });
 
-        if (totalInput > totalAmount) {
-            const change = totalInput - totalAmount;
-            paymentMessageElement.textContent = `Vuelto: $${change.toFixed(2)}`;
-            paymentMessageElement.classList.remove('text-danger');
-            paymentMessageElement.classList.add('text-success');
-            toStep3Button.disabled = false;
-        } else if (totalInput < totalAmount) {
-            const remaining = totalAmount - totalInput;
-            paymentMessageElement.textContent = `Falta: $${remaining.toFixed(2)}`;
-            paymentMessageElement.classList.remove('text-success');
-            paymentMessageElement.classList.add('text-danger');
-            toStep3Button.disabled = true;
-        } else {
-            paymentMessageElement.textContent = '';
-            toStep3Button.disabled = false;
-        }
-    }
 
-    // Avanzar al paso 2
-    toStep2Button.addEventListener('click', function () {
-        totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
-        loadPaymentMethods();
-    });
-
-    // Avanzar al paso 3
-    toStep3Button.addEventListener('click', function () {
-        console.log('Detalles de pago:', paymentDetails);
-        // Aquí puedes enviar los detalles de pago al servidor o continuar con el flujo
-    });
-
-    // Regresar al paso 1
-    backToStep1Button.addEventListener('click', function () {
-        paymentDetails = []; // Reiniciar los detalles de pago
-    });
-});
+            // Regresar al paso 1
+            backToStep1Button.addEventListener('click', function () {
+            toStep2Button.classList.remove('d-none'); // Ocultar el botón de siguiente
+            toStep2Button.classList.add('d-block'); // Ocultar el botón de siguiente
+            document.getElementById('step2').classList.remove('d-none');
+            document.getElementById('step1').classList.add('d-none');
+                paymentDetails = []; // Reiniciar los detalles de pago
+            });
+        });
     </script>
 </body>
 </html>

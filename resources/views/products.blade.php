@@ -160,14 +160,19 @@
     </div>
     <!-- Fin Modal para crear producto -->
     <div class="px-3">
-      <div class="mb-3">
+      <div class="mb-3 d-flex justify-content-between align-items-center">
         <input type="text" id="searchProduct" class="w-25 form-control border border-1 p-2 bg-white" placeholder="Buscar producto...">
+        <div class="text-end">
+          <button id="generateReport" class="btn btn-dark" onclick="getReport()">
+            Generar Reporte
+          </button>
+        </div>
       </div>
       <div class="row">
         <!-- Buscador -->
       @foreach($productItems as $product)
         <div class="product-item col-md-4 mb-4" data-name="{{ strtolower($product->name) }}">
-          <div class="card p-4 d-flex flex-row" style="height: 10rem;">
+          <div class="card p-4 d-flex flex-row" style="min-height: 10rem;">
               <a href="{{ route('productItem', $product->id) }}" class="icon icon-shape icon-xl shadow bg-transparent text-center border border-1 border-black text-info border-radius-lg" style="width: 100px; height: 100px;">
                   @if(isset($product->images) && count($product->images) > 0)
                       <img src="{{ asset('storage/' . $product->images[0]->path) }}" alt="Imagen del producto" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
@@ -176,13 +181,15 @@
                   @endif
               </a>
               <div class="d-flex flex-column mx-3">
-                <h6 class="mb-2 text-sm">{{ $product->name }}</h6>
-                @foreach ($product->variants as $variant)
-                  <span class="mb-2 text-sm">
-                    Talla: {{ $variant->size }} - {{ $variant->price }} $ - 
-                  <span class="{{ $variant->stock < 1 ? 'text-danger' : ($variant->stock < 5 ? 'text-warning' : 'text-success') }}">{{ $variant->stock }} unidades</span>
-                  </span>
-                @endforeach
+                <h6 class="text-sm">{{ $product->name }}</h6>
+                <div class="text-sm d-flex flex-column">
+                  @foreach ($product->variants as $variant)
+                    <span class="text-sm">
+                      Talla: {{ $variant->size }} - {{ $variant->price }} $ - 
+                    <span class="{{ $variant->stock < 1 ? 'text-danger' : ($variant->stock < 5 ? 'text-warning' : 'text-success') }}">{{ $variant->stock }} unidades</span>
+                    </span>
+                  @endforeach
+                </div>
                     <!-- Mostrar las tallas -->
               </div>
               <div class="ms-auto text-end">
@@ -304,6 +311,24 @@
       }
     });
   });
+  function getReport() {
+    fetch('api/products/report', {
+      method: 'GET',
+          headers: {
+              'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+          }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message === 'Report generated successfully') {
+        alert('Reporte generado correctamente');
+        // Aquí puedes añadir lógica para manejar el reporte, como descargarlo o mostrarlo
+      } else {
+        alert('Ocurrió un error al generar el reporte');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
   </script>
 
 </body>

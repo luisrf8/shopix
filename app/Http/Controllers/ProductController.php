@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 class ProductController extends Controller
 {
@@ -111,7 +112,6 @@ class ProductController extends Controller
     }
     public function create(Request $request)
     {
-        // dd($request);
         // Validar los datos del producto y las variantes
         $request->validate([
             // 'category_id' => 'required|numeric',
@@ -242,7 +242,6 @@ class ProductController extends Controller
 
     public function show($id) {
         $product = Product::with(['images', 'variants', 'category'])->findOrFail($id);
-        // dd($product); // Esto te mostrará los datos completos del producto
         return response()->json($product);
     }
     
@@ -256,6 +255,25 @@ class ProductController extends Controller
         return response()->json(['message' => 'Producto actualizado con éxito.', 'Producto' => $product], 201);
 
 
+    }
+
+    public function generateReport()
+    {
+        $products = Product::with('variants')->get();
+
+        $csvData = "Nombre,Descripción,Precio,Stock Total\n";
+
+        foreach ($products as $product) {
+            $totalStock = $product->variants->sum('stock');
+            $csvData .= "{$product->name},{$product->description},{$product->price},{$totalStock}\n";
+        }
+
+        $fileName = "reporte_productos_" . now()->format('Y-m-d') . ".csv";
+
+        return Response::make($csvData, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+        ]);
     }
     
 }

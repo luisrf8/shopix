@@ -26,21 +26,25 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Label\Label;
 use Endroid\QrCode\Logo\Logo;
 use Endroid\QrCode\RoundBlockSizeMode;
+use App\Models\DollarRate;
+use Illuminate\Support\Facades\Auth;
 
 class SaleController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        $customerId = $user;
+        // dd($customerId, $user);
         // Traer todos los productos con sus variantes
         $productItems = Product::with(['category', 'images', 'variants'])->get();
-    
-        // Traer métodos de pago con sus monedas
-        $paymentMethods = PaymentMethod::with('currency')->get();
-    
+
+        $dollarRate = DollarRate::latest('created_at')->first();
+
         // Traer todas las categorías
         $categories = Category::all();
     
-        return view('sales', compact('categories', 'productItems', 'paymentMethods'));
+        return view('sales', compact('categories', 'productItems', 'dollarRate', 'customerId'));
     }
     
     public function store(Request $request)
@@ -468,11 +472,9 @@ class SaleController extends Controller
     {
         // Buscar el pago
         $payment = Payment::findOrFail($id);
-        // dd($payment);
         // Cambiar el estado del pago
         $payment->status = $request->status;
         $payment->save();
-        // dd($request->email);
         // Enviar correo de confirmación si el pago es aprobado
         if ($payment->status == 1) {
             // Mail::to($request->email)->send(new PaymentConfirmationMail($payment));

@@ -21,11 +21,6 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-      <div class="py-1 px-3 text-end" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-        <label>
-          + Agregar Categoría
-        </label>
-      </div>
       <!-- Modal para crear categoría -->
       <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -56,49 +51,77 @@
       </div>
       <!-- Modal para crear categoría -->
       <!-- Tabla para mostrar categorías -->
-      <div class="row card m-3">
-        <div class="col-lg-12">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Productos Disponibles</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($categories as $category)
-                <tr>
-                  <td>{{ $category['name'] }}</td>
-                  <td>{{ $category['description'] }}</td>
-                  <td>
-                    <span class="badge {{ $category->is_active ? 'bg-success' : 'bg-danger' }}">
-                      {{ $category->is_active ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
-                  <td>{{ $category->total_available_items ?? 0 }}</td>
-                  <td>
-                    <button class="btn btn-sm toggle-status-btn {{ $category->is_active ? 'btn-outline-danger' : 'btn-outline-success'}}" 
-                            data-id="{{ $category->id }}" 
-                            data-status="{{ $category->is_active ? 'active' : 'inactive' }}">
-                        {{ $category->is_active ? 'Inactivar' : 'Activar' }}
-                    </button>
-                    <button 
-                      class="btn btn-sm btn-outline-info btn-edit-user" 
-                      data-bs-toggle="modal" 
-                      data-bs-target="#editCategoryModal" 
-                      data-category-id="{{ $category->id }}"
-                      data-name="{{ $category->name }}"
-                      data-description="{{ $category->description }}">
-                      Editar
-                    </button>
-                  </td>
-                </tr>
-              @endforeach
-            </tbody>
-          </table>
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                <h6 class="text-white text-capitalize ps-3">CATEGORÍAS</h6>
+                <div class="py-1 px-3 text-end " data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                  <label class="text-white">
+                    + Agregar Categoría
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead class="text-center">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Descripción</th>
+                      <th>Estado</th>
+                      <th>Productos Disponibles</th>
+                      <th>Editar</th>
+                      <th>Activar / Inactivar</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-center">
+                    @foreach($categories as $category)
+                      <tr>
+                        <td>
+                          <div class="d-flex px-2 py-1">
+                            <div class="d-flex flex-column justify-content-center">
+                              <h6 class="mb-0 text-sm">{{ $category['name'] }}</h6>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <p class="text-xs text-secondary mb-0">{{ $category['description'] }}</p>
+                        </td>
+                        <td class="align-middle text-center text-sm">
+                          <span class="badge badge-sm  {{ $category->is_active ? 'bg-gradient-success' : 'bg-gradient-secondary' }}">{{ $category->is_active ? 'Activo' : 'Inactivo' }}
+                          </span>
+                        </td>
+                        <td>{{ $category->total_available_items ?? 0 }}</td>
+                        <td class="align-middle">
+                          <a href="javascript:;"
+                          class="text-secondary font-weight-bold text-xs btn-edit-user d-flex align-items-center justify-content-center"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#editCategoryModal" 
+                          data-category-id="{{ $category->id }}"
+                          data-name="{{ $category->name }}"
+                          data-description="{{ $category->description }}">
+                            <!-- <i class="material-symbols-rounded opacity-10">edit</i> -->
+                            Editar
+                          </a>
+                        </td>
+                        <td class="align-middle">
+                          <a href="javascript:;"
+                          class="text-secondary font-weight-bold text-xs toggle-status-btn" 
+                          data-id="{{ $category->id }}" 
+                          data-status="{{ $category->is_active ? 'active' : 'inactive' }}">
+                            {{ $category->is_active ? 'Inactivar' : 'Activar' }}
+                          </a>
+                        </td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Modal para editar categoría -->

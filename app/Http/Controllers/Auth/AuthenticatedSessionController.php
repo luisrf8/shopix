@@ -11,7 +11,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Http\RedirectResponse;
+ 
 class AuthenticatedSessionController extends Controller
 {
     /**
@@ -42,7 +43,6 @@ class AuthenticatedSessionController extends Controller
     
         // Obtener el usuario autenticado
         $user = Auth::user();
-    
         // Generar el token usando el usuario autenticado
         $token = JWTAuth::fromUser($user, ['custom_claim' => 'value']);
     
@@ -53,6 +53,26 @@ class AuthenticatedSessionController extends Controller
         ], 200);
     }
 
+    public function authenticate(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+ 
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $user = Auth::user();
+ 
+            return response()->json([
+                'user'  => $user,
+            ], 200);
+        }
+ 
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
     /**
      * Destroy an authenticated session.
      *

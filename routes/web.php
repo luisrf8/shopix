@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
          ->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'authenticate']);
     
     Route::get('register', [RegisteredUserController::class, 'create'])
     ->name('register');
@@ -35,9 +35,9 @@ Route::get('/publicOrder/{id}', [SaleController::class, 'showPublicOrder']);
 // Route::middleware('auth')->get('/dashboard', function () {
     //     return view('dashboard');
     // });
-// Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [IndexController::class, 'index'])->name('dashboard');
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'logout'])->name('logout');
     Route::get('/categories', [ProductController::class, 'categoriesIndex'])->name('categories.index');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -63,7 +63,7 @@ Route::get('/publicOrder/{id}', [SaleController::class, 'showPublicOrder']);
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'viewOrders'])->name('purchase.orders');
     Route::get('/order/{id}', [PurchaseOrderController::class, 'showByOrder'])->name('showByOrder');
 
-// });
+});
 
 
 require __DIR__.'/auth.php';

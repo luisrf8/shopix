@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
   function logOut() {
-    fetch("/api/logout", { // Ajusta a `/api/logout` si es una ruta API.
+    fetch("/logout", { // Ajusta a `/api/logout` si es una ruta API.
         method: 'POST',
         // headers: {
         //     'Content-Type': 'application/json',

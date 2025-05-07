@@ -101,8 +101,6 @@ class PurchaseOrderController extends Controller
                 ];
             }
         }
-        // dd($groupedData);
-    
         // Paso 3: Crear las órdenes de compra y sus detalles
         foreach ($groupedData as $providerId => $orderData) {
             // Crear la orden principal

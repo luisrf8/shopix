@@ -15,12 +15,6 @@ use App\Http\Controllers\GoogleDriveController;
 
 // ------------------------ RUTAS PÚBLICAS ------------------------
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
-// Route::post('login', [AuthenticatedSessionController::class, 'store']);
-Route::middleware('auth:sanctum')->post('/adminUser', function (Request $request) {
-    return response()->json($request->user());
-});
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy']);
 Route::post('loginEcomm', [AuthenticatedSessionController::class, 'store']);
 Route::post('/registerEcomm', [AuthenticatedSessionController::class, 'registerEcomm']);
@@ -63,6 +57,7 @@ Route::post('/create-product', [ProductController::class, 'create']);
 // Route::post('/create-product', [ProductController::class, 'store'])->name('products.store');
 Route::post('/addImage/{productId}', [ProductController::class, 'addImage'])->name('products.addImage');
 Route::delete('/product/remove-image/{imageId}', [ProductController::class, 'removeImage'])->name('products.removeImage');
+Route::get('/products/report', [ProductController::class, 'generateReport']);
 
 // ------------------------ VARIANTES DE PRODUCTOS ------------------------
 
