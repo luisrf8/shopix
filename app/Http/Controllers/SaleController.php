@@ -35,25 +35,29 @@ class SaleController extends Controller
     {
         $user = Auth::user();
         $customerId = $user;
-        // dd($customerId, $user);
         // Traer todos los productos con sus variantes
         $productItems = Product::with(['category', 'images', 'variants'])->get();
-
+        $paymentMethods = PaymentMethod::with('currency')->get();
         $dollarRate = DollarRate::latest('created_at')->first();
 
         // Traer todas las categorías
         $categories = Category::all();
     
-        return view('sales', compact('categories', 'productItems', 'dollarRate', 'customerId'));
+        return view('sales', compact('categories', 'paymentMethods', 'productItems', 'dollarRate', 'customerId'));
     }
     
     public function store(Request $request)
     {
-        // Validar los datos
-        $itemsSelected = $request->itemsSelected;
-        $paymentDetails = $request->paymentDetails;
-        $totalAmount = $request->totalAmount;
-        $customerId = $request->customer_id;
+        // Decodificar customerId si viene como JSON string
+        $customer = is_string($request->customerId) ? json_decode($request->customerId, true) : $request->customerId;
+        $customerId = is_array($customer) ? $customer['id'] : null;
+    
+        $itemsSelected = $request->items;
+        $paymentDetails = $request->payments;
+    
+        if (!$customerId) {
+            return response()->json(['error' => 'ID de cliente no válido.'], 400);
+        }
     
         // Validación de productos
         if (empty($itemsSelected) || !is_array($itemsSelected)) {
@@ -68,23 +72,22 @@ class SaleController extends Controller
         // Agrupar y procesar datos de productos
         $groupedData = [];
         foreach ($itemsSelected as $item) {
-            // Comprobar que 'variant' sea un objeto o un array de objetos
-                // Si 'variant' no es un array, es un objeto, lo tratamos de otra manera
-                $variant = $item['variant'];
-                $groupedData[] = [
-                    'product_variant_id' => $variant['id'],  // Usamos '->' para acceder a las propiedades del objeto
-                    'quantity' => $item['quantity'],
-                    'price' => $variant['price'],
-                    'amount' => $variant['price'] * $item['quantity'],
-                ];
+            $groupedData[] = [
+                'product_variant_id' => $item['id'],  // Enviado directamente como id del variant
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+                'amount' => $item['price'] * $item['quantity'],
+            ];
         }
+    
         // Crear orden de venta
         $salesOrder = SalesOrder::create([
             'user_id' => $customerId,
             'date' => now()->toDateString(),
-            'status' => 1, // Aprobado
+            'status' => 1,
             'address' => 'Tienda',
             'preference' => 'Tienda',
+            'deliver_status' => 1, // Asignar estado de entrega
         ]);
     
         // Crear detalles de la venta y actualizar stock
@@ -97,7 +100,6 @@ class SaleController extends Controller
                 'amount' => $detail['amount'],
             ]);
     
-            // Actualizar el stock
             $productVariant = ProductVariant::find($detail['product_variant_id']);
             if ($productVariant && $productVariant->stock >= $detail['quantity']) {
                 $productVariant->stock -= $detail['quantity'];
@@ -111,25 +113,20 @@ class SaleController extends Controller
         foreach ($paymentDetails as $paymentDetail) {
             $payment = Payment::create([
                 'sales_order_id' => $salesOrder->id,
-                'payment_method' => $paymentDetail['id'],
+                'payment_method' => $paymentDetail['methodId'],  // Se llama methodId en tu objeto
                 'amount' => $paymentDetail['amount'],
                 'currency' => $paymentDetail['currency'],
+                'reference' => $paymentDetail['reference'] ?? null,
+                'status' => 1, // Aprobado por defecto
             ]);
     
-            // Subir imagen (comprobante de pago)
-            if (isset($paymentDetail['image']) && $paymentDetail['image']) {
-                $imagePath = $paymentDetail['image']->store('payment_images', 'public'); // Suponiendo que la imagen es enviada en la solicitud
-    
-                // Crear registro de imagen del pago
-                PaymentImage::create([
-                    'payment_id' => $payment->id,
-                    'image_path' => $imagePath,
-                ]);
-            }
+            // Si planeas subir imágenes más adelante, aquí va el código
+            // Actualmente el objeto JS no está enviando imágenes
         }
     
         return response()->json(['message' => 'Venta registrada exitosamente.'], 200);
     }
+    
     public function storeEcommerceSale(Request $request)
     {
         // Validar los datos recibidos

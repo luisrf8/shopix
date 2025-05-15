@@ -44,7 +44,7 @@
                             onkeyup="filterCategories()">
                     </div>
                     <div id="categoriesContainer" class="d-flex overflow-auto gap-3 py-3 mb-2" style="scroll-snap-type: x mandatory;">
-                        <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="all">
+                        <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category="all" onclick="filterProductsByCategory('all')">
                             <a href="javascript:void(0)" class="text-decoration-none category-filter">
                                 <div class="card h-100">
                                     <div class="card-header mx-3 p-3 text-center">
@@ -59,7 +59,7 @@
                             </a>
                         </div>
                         @foreach($categories as $category)
-                            <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category-name="{{ $category->name }}" data-category="{{ $category->id }}">
+                            <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category-name="{{ $category->name }}" data-category="{{ $category->id }}" onclick="filterProductsByCategory('{{ $category->id }}')">
                                 <a href="javascript:void(0)" class="text-decoration-none category-filter">
                                 <div class="card h-100">
                                     <div class="card-header mx-3 p-3 text-center">
@@ -130,32 +130,110 @@
                 <div id="step2" class="step d-none">
                     <h4>Paso 2: Selecciona Métodos de Pago</h4>
                     <div id="totalAmountDisplay" class="mt-3">
-                        <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>
+                        <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>$
                     </div>
                     <div class="mb-3">
                         <strong>Tasa BCV: </strong><span id="dollarRate" data-rate="{{ number_format($dollarRate->rate, 2, '.', '') }}">{{ number_format($dollarRate->rate, 2) }} Bs.</span>
                     </div>
                     <div id="paymentMethods" class="mb-3">
-                        <!-- Los métodos de pago se agregarán aquí dinámicamente -->
+                        @php
+                            $groupedMethods = $paymentMethods->groupBy(fn($m) => $m->currency->code);
+                        @endphp
+
+                        <!-- Botones de monedas -->
+                        <div class="btn-group mb-1" role="group">
+                            @foreach ($groupedMethods as $currencyCode => $methods)
+                                <button type="button" class="btn btn-outline-dark currency-tab" data-currency="{{ $currencyCode }}">
+                                    {{ $currencyCode }}
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <!-- Contenedor de métodos de pago por moneda -->
+                        @foreach ($groupedMethods as $currencyCode => $methods)
+                            <div class="currency-section d-none" data-currency="{{ $currencyCode }}">
+
+                            @foreach ($methods as $method)
+                                <div class="card mb-2 p-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            @if ($method->qr_image)
+                                                @php $qr = json_decode($method->qr_image)[0] ?? null; @endphp
+                                                @if ($qr)
+                                                    <img src="{{ asset('storage/' . $qr) }}" alt="QR" style="max-width: 70px; max-height: 70px; cursor: pointer;"
+                                                        onclick="showQrModal('{{ asset('storage/' . $qr) }}')">
+                                                @endif
+                                            @endif
+                                            <div>
+                                                <strong>{{ $method->name }}</strong>
+                                                @if ($method->admin_name) - {{ $method->admin_name }} @endif
+                                                @if ($method->bank) ({{ $method->bank }}) @endif
+                                                @if ($method->dni)
+                                                    <div><small>DNI/Correo: {{ $method->dni }}</small></div>
+                                                @endif
+                                                <div id="paymentFields_{{ $method->id }}" class="d-none d-flex flex-row gap-2 align-items-center">
+                                                    <label for="amount_{{ $method->id }}">Monto:</label>
+                                                    <input type="number" step="0.01" min="0" class="form-control payment-input border border-1 p-2" 
+                                                        id="amount_{{ $method->id }}" 
+                                                        data-method-id="{{ $method->id }}" 
+                                                        data-currency="{{ $currencyCode }}" 
+                                                        oninput="updatePayment(this)">
+
+                                                    @php
+                                                        $noReference = in_array(strtolower($method->name), ['efectivo', 'punto de venta', 'pago movil']);
+                                                    @endphp
+
+                                                    @if (!$noReference)
+                                                        <label for="reference_{{ $method->id }}">Referencia:</label>
+                                                        <input type="text" class="form-control payment-reference-input border border-1 p-2" 
+                                                            id="reference_{{ $method->id }}" 
+                                                            data-method-id="{{ $method->id }}" 
+                                                            oninput="updatePayment(this)">
+                                                    @else
+                                                        <input type="hidden" id="reference_{{ $method->id }}" value="00">
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <input type="checkbox" class="form-check-input payment-method-checkbox" id="method_{{ $method->id }}" 
+                                                data-method-id="{{ $method->id }}" data-currency="{{ $currencyCode }}" 
+                                                onchange="togglePaymentFields(this)">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            @endforeach
+                            </div>
+                        @endforeach
                     </div>
+
                     <div id="paymentSummary" class="mt-3">
                         <strong>Total ingresado: </strong><span id="totalPaid">0.00</span><br>
-                        <span id="paymentMessage" class="text-danger"></span>
+                        <span class="text-danger paymentMessage"></span>
                     </div>
-                    <button type="button" class="btn btn-secondary mt-3" id="backToStep1">Atrás</button>
-                    <button type="button" class="btn btn-info mt-3" id="toStep3" disabled>Siguiente</button>
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <button type="button" class="btn btn-secondary mt-3" id="backToStep1">Atrás</button>
+                        <button type="button" class="btn btn-info mt-3" id="toStep3" disabled>Siguiente</button>
+                    </div>
                 </div>
 
                 <div id="step3" class="step d-none">
-                    <!-- Contenido del paso 3 -->
                     <h4>Paso 3: Confirmación</h4>
                     <p>Resumen de la compra y confirmación.</p>
-                    <button type="button" class="btn btn-secondary mt-3" id="backToStep2">Atrás</button>
-                    <button type="button" class="btn btn-success mt-3" id="confirmPurchase">Confirmar</button>
+
+                    <div id="summaryContainer" class="mt-3 card p-4"></div> <!-- Aquí se insertará el resumen -->
+                    <span class="text-danger paymentMessage"></span>
+
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <button type="button" class="btn btn-secondary mt-3" id="backToStep2">Atrás</button>
+                        <button type="button" class="btn btn-success mt-3" id="confirmPurchase">Confirmar</button>
+                    </div>
                 </div>
+
             </form>
         </div>
-        <div class="w-25 card p-4 h-100">
+        <div class="w-25 card p-4 h-100" id="cart">
             <h1>Carrito</h1>
             <ul id="cartList" class="list-group"></ul>
             <div class="mt-3">
@@ -197,12 +275,26 @@
         </div>
     </div>
 </div>
+<!-- Modal para mostrar el QR -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img id="qrModalImage" src="" alt="QR Code" style="max-width: 100%; height: auto; border-radius: 8px;">
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
     <script>
         var selectedItems = [];
         var totalAmount = 0;
+        let payments = []; 
+        let totalPaid = 0; 
+
+
         const dollarRate = parseFloat(document.getElementById('dollarRate').dataset.rate);
         const customerId = document.getElementById('customerId').dataset.rate; // Asegúrate de que esta variable esté definida correctamente
         document.addEventListener('DOMContentLoaded', function () {
@@ -257,8 +349,8 @@
         function renderCart() {
             const cartList = document.getElementById('cartList');
             const cartTotal = document.getElementById('cartTotal');
+            const totalAmountValue = document.getElementById('totalAmountValue');
             const toStep2Btn = document.getElementById('toStep2');
-
             cartList.innerHTML = '';
 
             selectedItems.forEach(item => {
@@ -287,7 +379,7 @@
                 quantityInput.min = '1';
                 quantityInput.max = item.stock;
                 quantityInput.value = item.quantity;
-                quantityInput.className = 'form-control';
+                quantityInput.className = 'form-control qty-edit';
                 quantityInput.style.width = '80px';
                 quantityInput.style.height = 'fit-content';
                 quantityInput.style.padding = '0.25rem 0.5rem';
@@ -298,7 +390,7 @@
                 quantityDiv.appendChild(quantityInput);
 
                 const removeBtn = document.createElement('button');
-                removeBtn.className = 'btn btn-sm btn-danger mt-3';
+                removeBtn.className = 'btn btn-sm btn-danger mt-3 delete-button';
                 removeBtn.innerText = 'X';
                 removeBtn.onclick = () => removeFromCart(item.id);
 
@@ -310,7 +402,8 @@
                 cartList.appendChild(li);
             });
 
-            cartTotal.textContent = totalAmount.toFixed(2); // Asegúrate de mostrar un número válido
+            cartTotal.textContent = totalAmount.toFixed(2); 
+            totalAmountValue.textContent = totalAmount.toFixed(2); // Asegúrate de mostrar un número válido
             toStep2Btn.disabled = selectedItems.length === 0;
         }
 
@@ -326,7 +419,22 @@
 
             renderCart();
         }
+        function filterProductsByCategory(categoryId) {
+            const productItems = document.querySelectorAll('.product-item');
 
+            productItems.forEach(item => {
+                const itemCategory = item.getAttribute('data-category');
+                if (categoryId === 'all' || itemCategory === categoryId) {
+                    item.style.display = 'block'; // Mostrar si coincide con la categoría seleccionada
+                } else {
+                    item.style.display = 'none'; // Ocultar si no coincide
+                }
+            });
+
+            // Limpiar el campo de búsqueda de productos al cambiar de categoría
+            document.getElementById('searchInput').value = '';
+        }
+        
         function filterProducts() {
             const searchInput = document.getElementById('searchInput');
             const filter = searchInput.value.toLowerCase();
@@ -362,7 +470,12 @@
             const modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
             modal.show();
         }
-
+        function showQrModal(imageUrl) {
+            const qrModalImage = document.getElementById('qrModalImage');
+            qrModalImage.src = imageUrl; // Establecer la imagen en el modal
+            const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+            qrModal.show(); // Mostrar el modal
+        }
         function filterCategories() {
             const searchValue = document.getElementById('searchCategory').value.toLowerCase();
             const categories = document.querySelectorAll('.category-item');
@@ -376,263 +489,272 @@
                 }
             });
         }
-        document.addEventListener('DOMContentLoaded', function () {
-        const toStep2Button = document.getElementById('toStep2');
-        const toStep3Button = document.getElementById('toStep3');
-        const backToStep1Button = document.getElementById('backToStep1');
-        const paymentMethodsContainer = document.getElementById('paymentMethods');
-        let totalAmount = 0;
-        let paymentDetails = [];
-
-        // Función para mostrar los métodos de pago separados por monedas
-        function loadPaymentMethods() {
-            toStep2Button.classList.remove('d-block'); // Ocultar el botón de siguiente
-            toStep2Button.classList.add('d-none'); // Ocultar el botón de siguiente
-            fetch('/api/payment-methods', {
-                method: 'GET',
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Métodos de pago:", data);
-                    paymentMethodsContainer.innerHTML = ''; // Limpiar el contenedor
-
-                    if (Array.isArray(data)) {
-                        const groupedMethods = data.reduce((acc, method) => {
-                            const currency = method.currency.code;
-                            if (!acc[currency]) acc[currency] = [];
-                            acc[currency].push(method);
-                            return acc;
-                        }, {});
-
-                    for (const currency in groupedMethods) {
-                        const currencyGroup = groupedMethods[currency];
-
-                        // Título de la moneda
-                        const currencyTitle = document.createElement('h5');
-                        currencyTitle.textContent = `Métodos de Pago en ${currency}`;
-                        paymentMethodsContainer.appendChild(currencyTitle);
-
-                        // Contenedor de los métodos de pago
-                        const methodGroupDiv = document.createElement('div');
-                        methodGroupDiv.className = 'mb-3 card d-flex flex-row align-items-center gap-2 p-4 border border-radius-lg';
-                        methodGroupDiv.style.width = 'fit-content';
-                        methodGroupDiv.style.height = 'fit-content';
-
-                        currencyGroup.forEach(method => {
-                            const methodDiv = document.createElement('div');
-                            methodDiv.className = 'card p-3 mb-3 border border-radius-lg col-12 col-md-4 d-flex flex-column align-items-center gap-3';
-                            methodDiv.style.width = '21rem';
-                            methodDiv.style.height = '16rem';
-
-                            // Contenedor para el QR y los datos
-                            const qrAndInfoDiv = document.createElement('div');
-                            qrAndInfoDiv.className = 'd-flex align-items-center gap-3';
-
-                            // QR Code
-                            if (method.qr_image) {
-                                const qrImage = document.createElement('img');
-                                qrImage.src = `/storage/${JSON.parse(method.qr_image)[0]}`;
-                                qrImage.alt = 'QR Code';
-                                qrImage.style.width = '100px';
-                                qrImage.style.height = '100px';
-                                qrImage.style.objectFit = 'cover';
-                                qrImage.style.borderRadius = '8px';
-                                qrAndInfoDiv.appendChild(qrImage);
-                            }
-
-                            // Información adicional del método de pago
-                            const additionalInfo = document.createElement('div');
-                            additionalInfo.className = 'text-sm';
-
-                            if (method.dni) {
-                                const dniInfo = document.createElement('label');
-                                dniInfo.textContent = `ID: ${method.dni}`;
-                                additionalInfo.appendChild(dniInfo);
-                            }
-
-                            if (method.bank) {
-                                const bankInfo = document.createElement('label');
-                                bankInfo.textContent = `Banco: ${method.bank}`;
-                                additionalInfo.appendChild(bankInfo);
-                            }
-
-                            if (method.admin_name) {
-                                const adminName = document.createElement('label');
-                                adminName.textContent = `Nombre del Beneficiario: ${method.admin_name}`;
-                                additionalInfo.appendChild(adminName);
-                            }
-
-
-                            // Checkbox para seleccionar el método de pago
-                            const input = document.createElement('input');
-                            input.type = 'checkbox';
-                            input.className = 'form-check-input';
-                            input.id = `paymentMethod_${method.id}`;
-                            input.dataset.methodId = method.id;
-                            input.dataset.currency = currency;
-
-                            const label = document.createElement('label');
-                            label.className = 'form-check-label';
-                            label.htmlFor = `paymentMethod_${method.id}`;
-                            label.textContent = method.name;
-
-                            const checkboxContainer = document.createElement('div');
-                            checkboxContainer.className = 'd-flex w-100 align-items-center';
-                            checkboxContainer.appendChild(input);
-                            checkboxContainer.appendChild(label);
-
-                            additionalInfo.appendChild(checkboxContainer);
-                            qrAndInfoDiv.appendChild(additionalInfo);
-                            methodDiv.appendChild(qrAndInfoDiv);
-
-                            // Input para el monto (oculto inicialmente)
-                            const amountInput = document.createElement('input');
-                            amountInput.type = 'number';
-                            amountInput.className = 'form-control d-none border border-radius-lg mx-4 p-2';
-                            amountInput.placeholder = `Monto en ${currency}`;
-                            amountInput.dataset.methodId = method.id;
-
-                            // Mostrar el input al seleccionar el método
-                            input.addEventListener('change', function () {
-                                if (this.checked) {
-                                    amountInput.classList.remove('d-none');
-                                    paymentDetails.push({
-                                        id: method.id,
-                                        name: method.name,
-                                        currency: currency,
-                                        amount: 0,
-                                    });
-                                    console.log("Detalles de pago:", paymentDetails);
-                                } else {
-                                    amountInput.classList.add('d-none');
-                                    paymentDetails = paymentDetails.filter(detail => detail.id !== method.id);
-                                }
-                                validatePaymentDetails();
-                            });
-
-                            // Actualizar el monto ingresado
-                            amountInput.addEventListener('input', function () {
-                                const rawAmount = parseFloat(this.value) || 0;
-                                let convertedAmount = rawAmount;
-
-                                if (currency === 'BS') {
-                                    convertedAmount = rawAmount / dollarRate;
-                                }
-
-                                // Encuentra y actualiza el paymentDetail correspondiente
-                                const detail = paymentDetails.find(p => p.id === method.id);
-                                if (detail) {
-                                    detail.amount = convertedAmount;
-                                }
-
-                                validatePaymentDetails(); // Para actualizar resumen y validaciones
-                            });
-
-                            methodDiv.appendChild(amountInput);
-                            methodGroupDiv.appendChild(methodDiv);
-                        });
-
-                        paymentMethodsContainer.appendChild(methodGroupDiv);
-                    }
-                }
-                    document.getElementById('step2').classList.remove('d-none');
-                    document.getElementById('step1').classList.add('d-none');
-                })
-                .catch(error => console.error('Error al cargar los métodos de pago:', error));
-            }
-
-            // Validar los detalles de pago
-            function validatePaymentDetails() {
-                const totalPaid = paymentDetails.reduce((sum, detail) => sum + detail.amount, 0);
-                const totalPaidSpan = document.getElementById('totalPaid');
-                const paymentMessage = document.getElementById('paymentMessage');
-
-                // Mostrar el total ingresado
-                totalPaidSpan.textContent = totalPaid.toFixed(2);
-
-                // Mostrar mensaje correspondiente
-                if (totalPaid < totalAmount) {
-                    const remaining = (totalAmount - totalPaid).toFixed(2);
-                    paymentMessage.textContent = `Falta por pagar: $${remaining}`;
-                    paymentMessage.className = 'text-danger';
-                } else if (totalPaid > totalAmount) {
-                    const change = (totalPaid - totalAmount).toFixed(2);
-                    paymentMessage.textContent = `Debe entregar vuelto: $${change}`;
-                    paymentMessage.className = 'text-warning';
-                } else {
-                    paymentMessage.textContent = `Pago exacto.`;
-                    paymentMessage.className = 'text-success';
-                }
-
-                // Habilitar o deshabilitar el botón
-                toStep3Button.disabled = totalPaid < totalAmount;
-            }
-
-
-            // Avanzar al paso 2
-            toStep2Button.addEventListener('click', function () {
-                totalAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                document.getElementById('totalAmountValue').textContent = totalAmount.toFixed(2);
-                loadPaymentMethods();
-            });
-
-            toStep3Button.addEventListener('click', function () {
-                console.log('Detalles de pago:', paymentDetails);
-                console.log('Detalles de selectedItems:', selectedItems);
-                console.log('Detalles de customerId:', customerId);
-
-                const formData = new FormData();
-
-                // Enviar customerId y totalAmount
-                formData.append('customer_id', customerId); // Define esta variable antes
-                formData.append('totalAmount', totalAmount);
-
-                // Agregar itemsSelected como JSON string
-                formData.append('itemsSelected', JSON.stringify(selectedItems));
-
-                // Agregar paymentDetails como objetos separados
-                paymentDetails.forEach((payment, index) => {
-                    formData.append(`paymentDetails[${index}][id]`, payment.id);
-                    formData.append(`paymentDetails[${index}][name]`, payment.name);
-                    formData.append(`paymentDetails[${index}][currency]`, payment.currency);
-                    formData.append(`paymentDetails[${index}][amount]`, payment.amount);
-
-                    // Si tiene imagen (opcional)
-                    if (payment.image) {
-                        formData.append(`paymentDetails[${index}][image]`, payment.image);
-                    }
-                });
-
-                fetch('/api/create-sale', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                    body: formData,
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert('Error: ' + data.error);
-                    } else {
-                        alert('Venta registrada exitosamente.');
-                        // Redirigir o limpiar formularios si es necesario
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al enviar datos:', error);
-                    alert('Ocurrió un error en la solicitud.');
-                });
-            });
-
-
-            // Regresar al paso 1
-            backToStep1Button.addEventListener('click', function () {
-            toStep2Button.classList.remove('d-none'); // Ocultar el botón de siguiente
-            toStep2Button.classList.add('d-block'); // Ocultar el botón de siguiente
-            document.getElementById('step2').classList.remove('d-none');
+        document.getElementById('toStep2').addEventListener('click', function() {
             document.getElementById('step1').classList.add('d-none');
-                paymentDetails = []; // Reiniciar los detalles de pago
+            document.getElementById('step2').classList.remove('d-none');
+
+            // Deshabilitar inputs y ocultar botones de eliminar
+            document.querySelectorAll('.qty-edit').forEach(input => {
+                input.disabled = true;
+            });
+
+            document.getElementById('toStep2').classList.add('d-none');
+
+            document.querySelectorAll('.delete-button').forEach(btn => {
+                btn.classList.add('d-none');
+            });
+        });
+
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            document.getElementById('step2').classList.add('d-none');
+            document.getElementById('step1').classList.remove('d-none');
+            document.getElementById('toStep2').classList.remove('d-none');
+
+            // Habilitar inputs y mostrar botones de eliminar
+            document.querySelectorAll('.qty-edit').forEach(input => {
+                input.disabled = false;
+            });
+
+            document.querySelectorAll('.delete-button').forEach(btn => {
+                btn.classList.remove('d-none');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const currencyButtons = document.querySelectorAll('.currency-tab');
+            const sections = document.querySelectorAll('.currency-section');
+
+            currencyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const selectedCurrency = btn.dataset.currency;
+
+                    // Ocultar todas las secciones
+                    sections.forEach(section => {
+                        section.classList.add('d-none');
+                    });
+
+                    // Mostrar solo la sección de la moneda seleccionada
+                    document.querySelector(`.currency-section[data-currency="${selectedCurrency}"]`)?.classList.remove('d-none');
+
+                    // Resaltar botón activo
+                    currencyButtons.forEach(b => b.classList.remove('btn-dark'));
+                    currencyButtons.forEach(b => b.classList.add('btn-outline-dark'));
+                    btn.classList.remove('btn-outline-dark');
+                    btn.classList.add('btn-dark');
+                });
+            });
+            
+        });
+        function togglePaymentFields(checkbox) {
+            const methodId = checkbox.dataset.methodId;
+            const paymentFields = document.getElementById(`paymentFields_${methodId}`);
+
+            if (checkbox.checked) {
+                paymentFields.classList.remove('d-none'); // Mostrar los campos de monto y referencia
+                payments.push({
+                    methodId: methodId,
+                    currency: checkbox.dataset.currency,
+                    amount: 0,
+                    reference: ''
+                });
+            } else {
+                // Limpiar los valores de los inputs
+                const amountInput = document.getElementById(`amount_${methodId}`);
+                const referenceInput = document.getElementById(`reference_${methodId}`);
+
+                if (amountInput) amountInput.value = ''; // Limpiar el campo de monto
+                if (referenceInput) referenceInput.value = ''; // Limpiar el campo de referencia
+
+                paymentFields.classList.add('d-none'); // Ocultar los campos
+                payments = payments.filter(payment => payment.methodId !== methodId); // Eliminar el pago del arreglo
+            }
+
+            console.log(payments); // Verificar el arreglo de pagos en la consola
+            validatePaymentDetails(); // Validar los detalles de pago
+        }
+
+        function updatePayment(input) {
+            const methodId = input.dataset.methodId;
+            const currency = input.dataset.currency;
+            const payment = payments.find(payment => payment.methodId === methodId);
+
+            // Obtener la tasa del dólar desde el DOM
+            const dollarRateElement = document.getElementById('dollarRate');
+            const dollarRate = parseFloat(dollarRateElement.dataset.rate) || 1;
+
+            if (payment) {
+                if (input.classList.contains('payment-input')) {
+                    let amount = parseFloat(input.value) || 0;
+
+                    // Si la moneda es bolívares, convertir a dólares
+                    if (currency === 'BS') {
+                        amount = amount / dollarRate;
+                    }
+
+                    payment.amount = amount;
+                } else if (input.classList.contains('payment-reference-input')) {
+                    payment.reference = input.value;
+                }
+            }
+
+            console.log(payments);
+            validatePaymentDetails();
+        }
+        function validatePaymentDetails() {
+            totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
+            const totalPaidSpan = document.getElementById('totalPaid');
+            const paymentMessages = document.querySelectorAll('.paymentMessage');
+            const toStep3Button = document.getElementById('toStep3');
+
+            // Mostrar el total ingresado
+            totalPaidSpan.textContent = totalPaid.toFixed(2);
+
+            let messageText = '';
+            let messageClass = '';
+            let disableStep3 = false;
+
+            // Verificar si hay referencias vacías (solo si el método requiere referencia)
+            const hasEmptyReference = payments.some(payment => {
+                const methodElement = document.querySelector(`[data-method-id="${payment.methodId}"]`);
+                if (methodElement && methodElement.dataset.currency !== undefined) {
+                    const inputReference = document.getElementById(`reference_${payment.methodId}`);
+                    return inputReference && inputReference.type !== 'hidden' && (!payment.reference || payment.reference.trim() === '');
+                }
+                return false;
+            });
+
+            if (hasEmptyReference) {
+                messageText = `Todos los métodos de pago deben tener una referencia válida.`;
+                messageClass = 'text-danger';
+                disableStep3 = true;
+            } else if (totalPaid < totalAmount) {
+                const remaining = (totalAmount - totalPaid).toFixed(2);
+                messageText = `Falta por pagar: $${remaining}`;
+                messageClass = 'text-danger';
+                disableStep3 = true;
+            } else if (totalPaid > totalAmount) {
+                const change = (totalPaid - totalAmount).toFixed(2);
+                messageText = `Debe entregar vuelto: $${change}`;
+                messageClass = 'text-warning';
+                disableStep3 = false;
+            } else {
+                messageText = `Pago exacto.`;
+                messageClass = 'text-success';
+                disableStep3 = false;
+            }
+
+            // Actualizar todos los mensajes en pantalla
+            paymentMessages.forEach(el => {
+                el.textContent = messageText;
+                el.className = `paymentMessage ${messageClass}`; // Mantener la clase base más el color
+            });
+
+            toStep3Button.disabled = disableStep3;
+        }
+
+
+        //Funciones para paso 3
+        document.getElementById('toStep3').addEventListener('click', function() {
+            document.getElementById('step2').classList.add('d-none');
+            renderSummary(); // Mostrar el resumen
+            document.getElementById('cart').classList.add('d-none');
+            document.getElementById('step3').classList.remove('d-none');
+            console.log('Resumen:', selectedItems);
+            console.log('Pagos:', payments);
+        });
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            document.getElementById('step3').classList.add('d-none');
+            document.getElementById('step2').classList.remove('d-none');
+            document.getElementById('cart').classList.remove('d-none');
+
+        });
+        function renderSummary() {
+            const container = document.getElementById('summaryContainer');
+            container.innerHTML = ''; // Limpiar resumen anterior
+
+            // Resumen de items
+            const itemsTitle = document.createElement('h5');
+            itemsTitle.innerText = 'Productos seleccionados';
+            container.appendChild(itemsTitle);
+
+            const itemList = document.createElement('ul');
+            selectedItems.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = `${item.productName} - Talla: ${item.productSize} - Cantidad: ${item.quantity} - Subtotal: $${(item.price * item.quantity).toFixed(2)}`;
+                itemList.appendChild(li);
+            });
+            container.appendChild(itemList);
+            itemList.className = 'card p-4 gap-2';
+
+            // Total
+            const totalDiv = document.createElement('p');
+            totalDiv.innerHTML = `<strong>Total a pagar:</strong> $${totalAmount.toFixed(2)}`;
+            container.appendChild(totalDiv);
+
+            // Resumen de métodos de pago
+            const paymentsTitle = document.createElement('h5');
+            paymentsTitle.innerText = 'Métodos de pago';
+            container.appendChild(paymentsTitle);
+
+            if (payments.length === 0) {
+                const noPayment = document.createElement('p');
+                noPayment.innerText = 'No se ha seleccionado ningún método de pago.';
+                container.appendChild(noPayment);
+            } else {
+                const paymentList = document.createElement('ul');
+                payments.forEach(payment => {
+                    const amountInput = document.getElementById(`amount_${payment.methodId}`);
+                    const referenceInput = document.getElementById(`reference_${payment.methodId}`);
+                    const amount = amountInput?.value || 0;
+                    const reference = referenceInput?.value || '';
+
+                    const li = document.createElement('li');
+                    li.innerText = `Método: ${payment.currency} - Monto: $${parseFloat(amount).toFixed(2)} - Referencia: ${reference}`;
+                    paymentList.appendChild(li);
+                });
+                container.appendChild(paymentList);
+                paymentList.className = 'card p-4 gap-2';
+            }
+        }
+        
+        document.getElementById('confirmPurchase').addEventListener('click', function() {
+
+            const summary = {
+                customerId: customerId,
+                items: selectedItems,
+                payments: payments
+            };
+
+            // Obtener el token CSRF desde el meta tag o un input hidden
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            console.log('Resumen a enviar:', summary);
+            // Enviar la solicitud al servidor
+            fetch('/create-sale', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken // Incluir el token CSRF
+                },
+                body: JSON.stringify(summary) // Convertir el resumen a JSON
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Parsear la respuesta como JSON
+                } else {
+                    throw new Error('Error al confirmar la compra.');
+                }
+            })
+            .then(data => {
+                // Manejar la respuesta exitosa
+                alert('Compra confirmada con éxito.');
+                console.log('Respuesta del servidor:', data);
+                // Redirigir o limpiar el formulario
+                window.location.href = '/sales-orders'; // Cambia la ruta según sea necesario
+            })
+            .catch(error => {
+                // Manejar errores
+                console.error('Error:', error);
+                alert('Error al confirmar la compra.');
             });
         });
     </script>
