@@ -37,11 +37,118 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-      <div class="py-1 px-3 text-end" data-bs-toggle="modal" data-bs-target="#createCategoryModal"  onclick="getSucursales()">
-        <label>
-          + Crear Usuario
-        </label>
+      <!-- Buscador -->
+
+
+      <!-- Tabla de usuarios -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                <h6 class="text-white text-capitalize ps-3">USUARIOS</h6>
+                <div class="py-1 px-3 text-end " data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                  <label class="text-white">
+                    + Crear Usuario
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+              <div class="mx-3">
+                <input type="text" id="searchUser" class="form-control border border-1 p-2" placeholder="Buscar usuario...">
+              </div>
+              <div class="table-responsive m-3">
+                <table class="table table-striped text-center">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Correo Electrónico</th>
+                      <th>Rol</th>
+                      <th>Estado</th>
+                      <th>Editar</th>
+                      <th>Activar / Inactivar</th>
+                    </tr>
+                  </thead>
+                  <tbody id="userTableBody">
+                    @foreach($users as $user)
+                      <tr>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->role->name }}</td>
+                        <td class="text-center">
+                          <span class="badge badge-sm  {{ $user->is_active ? 'bg-gradient-success' : 'bg-gradient-secondary' }}">{{ $user->is_active ? 'Activo' : 'Inactivo' }}
+                          </span>
+                        </td>
+                        <td>
+                          <a class="text-secondary font-weight-bold text-xs btn-edit-user d-flex align-items-center justify-content-center" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#editUserModal" 
+                            data-user-id="{{ $user->id }}"
+                            data-name="{{ $user->name }}"
+                            data-email="{{ $user->email }}"
+                            data-role="{{ $user->role->id }}">
+                            Editar
+</a>
+                        </td>
+                        <td>
+                          <a class="text-secondary font-weight-bold text-xs toggle-status-btn" 
+                            data-id="{{ $user->id }}" 
+                            data-status="{{ $user->is_active ? 'active' : 'inactive' }}">
+                            {{ $user->is_active ? 'Inactivar' : 'Activar' }}
+</a>
+                        </td>
+                      </tr>
+                      <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <form id="editUserForm" class="text-start" enctype="multipart/form-data">
+                                          @csrf
+                                          <input type="hidden" id="editUserId" name="id">
+                                          <div class="mb-3">
+                                            <label for="editUserName" class="form-label">Nombre</label>
+                                            <input type="text" class="form-control border border-1 p-2" id="editUserName" name="name" required>
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editUserEmail" class="form-label">Correo Electrónico</label>
+                                            <input type="email" class="form-control border border-1 p-2" id="editUserEmail" name="email" placeholder="Ingrese el correo electrónico" required>
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editUserRoleSelector" class="form-label">Rol</label>
+                                            <select id="editUserRoleSelector" name="role_id" class="form-control border border-1 p-2" required>
+                                              <option value="">Seleccione un rol</option>
+                                              <!-- Aquí se cargarán los roles dinámicamente -->
+                                              @foreach($roles as $role)
+                                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                              @endforeach
+                                            </select>
+                                          </div>
+                                          <div class="d-flex flex-row-reverse">
+                                            <button type="submit" class="btn btn-info">Guardar</button>
+                                          </div>
+                                        </form>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+      <!-- Paginador -->
+      <div class="d-flex justify-content-center">
+        {{ $users->links() }}
+      </div>
+
       <!-- Modal para crear usuario -->
       <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -81,99 +188,6 @@
           </div>
         </form>
             </div>
-          </div>
-        </div>
-      </div>
-      <!-- Modal para crear usuario -->
-      <div class="row">
-        <div class="col-12">
-          <div class="row">
-          @foreach($users as $user)
-            <div class="col-md-3 col-3">
-                <div class="card mb-4">
-                    <!-- Ícono -->
-                    <div class="card-header mx-4 p-3 text-center">
-                        <div class="icon icon-shape icon-lg bg-gradient-info shadow text-center border-radius-lg">
-                            <i class="material-symbols-rounded opacity-10">category</i>
-                        </div>
-                    </div>
-                    <!-- Información del usuario -->
-                    <div class="card-body pt-0 p-3 text-center">
-                        <!-- Nombre del usuario -->
-                        <h6 class="text-center mb-0 opacity-9">{{ $user['name'] }}</h6>
-                        
-                        <div class="mt-4">
-                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
-                                <div class="text-start column">
-                                    <div class="text-xs text-bold">Rol:</div>
-                                </div>
-                                <div class="text-end column">
-                                    <div class="text-xs ">{{ $user['role']['name'] }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Acciones -->
-                        <div class="mt-3">
-                            <button 
-                              class="btn btn-sm btn-outline-info btn-edit-user" 
-                              data-bs-toggle="modal" 
-                              data-bs-target="#editUserModal" 
-                              data-user-id="{{ $user['id'] }}"
-                              data-name="{{ $user['name'] }}"
-                              data-email="{{ $user['email'] }}"
-                              data-role="{{ $user['role']['id'] }}">
-                              Editar
-                            </button>
-                            <button class="btn btn-sm toggle-status-btn {{ $user->is_active ? 'btn-outline-danger' : 'btn-outline-success'}}" 
-                              data-id="{{ $user->id }}" 
-                              data-status="{{ $user->is_active ? 'active' : 'inactive' }}">
-                              {{ $user->is_active ? 'Inactivar' : 'Activar' }}
-                            </button>
-                        </div>
-                        <!-- Modal para editar usuario -->
-                        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-                          <div class="modal-dialog">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body">
-                                <form id="editUserForm" class="text-start" enctype="multipart/form-data">
-                                  @csrf
-                                  <input type="hidden" id="editUserId" name="id">
-                                  <div class="mb-3">
-                                    <label for="editUserName" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control border border-1 p-2" id="editUserName" name="name" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="editUserEmail" class="form-label">Correo Electrónico</label>
-                                    <input type="email" class="form-control border border-1 p-2" id="editUserEmail" name="email" placeholder="Ingrese el correo electrónico" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="editUserRoleSelector" class="form-label">Rol</label>
-                                    <select id="editUserRoleSelector" name="role_id" class="form-control border border-1 p-2" required>
-                                      <option value="">Seleccione un rol</option>
-                                      <!-- Aquí se cargarán los roles dinámicamente -->
-                                      @foreach($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                      @endforeach
-                                    </select>
-                                  </div>
-                                  <div class="d-flex flex-row-reverse">
-                                    <button type="submit" class="btn btn-info">Guardar</button>
-                                  </div>
-                                </form>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        
-                    </div>
-                </div>
-            </div>
-            @endforeach
           </div>
         </div>
       </div>
@@ -281,6 +295,20 @@
         });
         })
       });
+    document.getElementById('searchUser').addEventListener('input', function () {
+      const searchValue = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#userTableBody tr');
+
+      rows.forEach(row => {
+          const name = row.cells[0].textContent.toLowerCase();
+          const email = row.cells[1].textContent.toLowerCase();
+          if (name.includes(searchValue) || email.includes(searchValue)) {
+              row.style.display = ''; // Mostrar fila
+          } else {
+              row.style.display = 'none'; // Ocultar fila
+          }
+      });
+    });
   </script>
 
 </body>
