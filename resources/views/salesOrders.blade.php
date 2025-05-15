@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Productos
+    Ventas Realizadas
   </title>
   <!--     Fonts and icons     -->
   <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" /> -->
@@ -31,16 +31,18 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-    <div class="pb-0 px-3">
-        <h6 class="mb-0">Ventas Realizadas</h6>
-    </div>
-    <div class="row">
+    <div class="row mt-4">
         <div class="col-12">
             <div class="card">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                  <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h6 class="text-white text-capitalize ps-3">VENTAS REALIZADAS</h6>
+                  </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="thead-dark">
+                        <table class="table align-items-center mb-0">
+                            <thead class="text-center">
                                 <tr>
                                     <th># Orden</th>
                                     <th>Fecha</th>
@@ -51,7 +53,7 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="text-center">
                                 @foreach($salesOrders as $order)
                                 <!-- {{$order}} -->
                                     <tr>
@@ -64,7 +66,7 @@
                                           {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : ($order->status == 2 ? 'Negado' : '')) }}
                                         </td>
                                         <td>
-                                            <a href="/sales/{{ $order->id }}" class="btn btn-sm btn-outline-info">Ver Detalles</a>
+                                            <a href="/sales/{{ $order->id }}" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>
                                         </td>
                                     </tr>
                                 @endforeach

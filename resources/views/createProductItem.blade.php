@@ -14,49 +14,57 @@
   @include('layouts.head')
 
     <div class="container">
-        <h1 class="text-center">Crear Producto</h1>
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark text-white shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-center align-items-center">
+                    <h1 class="text-white">Crear Producto</h1>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form id="createProductForm" enctype="multipart/form-data">
+                    @csrf
+                    <!-- Product Name -->
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Nombre del Producto</label>
+                        <input type="text" id="productName" name="productName" class="form-control border border-radius-lg p-2" placeholder="Ingrese el nombre del producto" required>
+                    </div>
 
-        <form id="createProductForm" enctype="multipart/form-data">
-            @csrf
-            <!-- Product Name -->
-            <div class="mb-3">
-                <label for="productName" class="form-label">Nombre del Producto</label>
-                <input type="text" id="productName" name="productName" class="form-control border border-radius-lg p-2" placeholder="Ingrese el nombre del producto" required>
-            </div>
+                    <!-- Product Category -->
+                    <div class="mb-3">
+                        <label for="categorySelector" class="form-label">Categoría</label>
+                        <select id="categorySelector" name="category_id" class="form-select border border-radius-lg p-2" required>
+                            <option value="">Seleccione una categoría</option>
+                        </select>
+                    </div>
 
-            <!-- Product Category -->
-            <div class="mb-3">
-                <label for="categorySelector" class="form-label">Categoría</label>
-                <select id="categorySelector" name="category_id" class="form-select border border-radius-lg p-2" required>
-                    <option value="">Seleccione una categoría</option>
-                </select>
-            </div>
+                    <!-- Product Description -->
+                    <div class="mb-3">
+                        <label for="productDescription" class="form-label">Descripcion</label>
+                        <textarea id="productDescription" name="productDescription" class="form-control border border-radius-lg p-2" rows="3" placeholder="Ingrese la descripcion del producto"></textarea>
+                    </div>
 
-            <!-- Product Description -->
-            <div class="mb-3">
-                <label for="productDescription" class="form-label">Descripcion</label>
-                <textarea id="productDescription" name="productDescription" class="form-control border border-radius-lg p-2" rows="3" placeholder="Ingrese la descripcion del producto"></textarea>
-            </div>
+                    <!-- Product Images -->
+                    <div class="mb-3">
+                        <label for="productImages" class="form-label">Imagenes</label>
+                        <input type="file" id="productImages" name="images[]" class="form-control border border-radius-lg p-2" multiple accept="image/*">
+                        <div id="imagePreview" class="mt-3 d-flex flex-wrap"></div>
+                    </div>
 
-            <!-- Product Images -->
-            <div class="mb-3">
-                <label for="productImages" class="form-label">Imagenes</label>
-                <input type="file" id="productImages" name="images[]" class="form-control border border-radius-lg p-2" multiple accept="image/*">
-                <div id="imagePreview" class="mt-3 d-flex flex-wrap"></div>
+                    <!-- Product Variants -->
+                    <div class="mb-3">
+                        <label class="form-label">Variantes</label>
+                        <div id="variantContainer"></div>
+                        <button type="button" id="addVariantBtn" class="btn btn-secondary mt-2">Agregar Variante +</button>
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-dark">Crear Producto</button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Product Variants -->
-            <div class="mb-3">
-                <label class="form-label">Variantes</label>
-                <div id="variantContainer"></div>
-                <button type="button" id="addVariantBtn" class="btn btn-secondary mt-2">Agregar Variante +</button>
-            </div>
-            <!-- Submit Button -->
-            <div class="text-end">
-                <button type="submit" class="btn btn-info">Crear Producto</button>
-            </div>
-        </form>
+        </div>
     </div>
+
     </main>
 
     <script>
@@ -148,6 +156,7 @@
             })
                 .then((response) => {
                     console.log("response", response)
+                    window.location.href = '/products';
                 })
                 // .then((data) => {
                 //     if (data.success) {
