@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/sales', [SaleController::class, 'index'])->name('sales');
     Route::get('/sales-orders', [SaleController::class, 'viewOrders'])->name('sales.orders');
     Route::get('/sales/{id}', [SaleController::class, 'showByOrder'])->name('sales.showByOrder');
+    Route::post('/sales/{id}/return', [SaleController::class, 'processReturn'])->name('sales.return');
     Route::post('/create-sale', [SaleController::class, 'store']);
 
     Route::get('/purchase', [PurchaseOrderController::class, 'index'])->name('purchase');

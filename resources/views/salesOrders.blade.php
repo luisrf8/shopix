@@ -50,12 +50,12 @@
                                     <th>Entrega</th>
                                     <th># Productos</th>
                                     <th>Estado</th>
+                                    <th>Devolución</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center">
                                 @foreach($salesOrders as $order)
-                                <!-- {{$order}} -->
                                     <tr>
                                         <td>{{ $order->id }}</td>
                                         <td>{{ $order->date }}</td>
@@ -64,6 +64,13 @@
                                         <td>{{ $order->total_items }}</td>
                                         <td>
                                           {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : ($order->status == 2 ? 'Negado' : '')) }}
+                                        </td>
+                                        <td>
+                                          @if($order->has_returns)
+                                            <span class="text-danger">Con Devolución</span>
+                                          @else
+                                            <span class="">Sin Devolución</span>
+                                          @endif
                                         </td>
                                         <td>
                                             <a href="/sales/{{ $order->id }}" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>

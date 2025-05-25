@@ -23,4 +23,8 @@ class SalesOrder extends Model
     {
         return $this->hasMany(Payment::class, 'sales_order_id'); // Asegúrate de que la clave foránea sea la correcta
     }
+    public function returns()
+    {
+        return $this->hasMany(SalesReturn::class);
+    }
 }

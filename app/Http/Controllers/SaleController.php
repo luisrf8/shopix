@@ -11,6 +11,8 @@ use App\Models\Payment;
 use App\Models\Currency;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SalesReturn;
+use App\Models\SalesReturnItem;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Storage;
@@ -269,7 +271,18 @@ class SaleController extends Controller
         $totalPagado = $order->payments->sum(function ($payment) {
             return $payment->amount;
         });
-
+        $totalDevuelto = $order->returns->flatMap->items->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
+        
+        $totalOrden = $order->details->sum('amount') - $totalDevuelto;
+        $totalPagado = $order->payments->sum('amount');
+        $saldo = $totalOrden - $totalPagado; // si es negativo, se debe dar vuelto
+        $order->saldo = $saldo; // Agregar saldo al objeto de la orden
+        $order->total_devuelto = $totalDevuelto; // Agregar total devuelto al objeto de la orden
+        $order->total_pagado = $totalPagado; // Agregar total pagado al objeto de la orden
+        $order->total_orden = $totalOrden; // Agregar total de la orden al objeto de la orden
+        $order->has_returns = $order->returns->isNotEmpty(); // Verificar si tiene devoluciones
         return view('salesOrderDetail', compact('order', 'totalOrden', 'totalPagado'));
     }
     public function showPublicOrder($id)
@@ -488,4 +501,47 @@ class SaleController extends Controller
             ]);
         }
     }
+    public function processReturn(Request $request, $orderId)
+    {
+        $order = SalesOrder::with('details')->findOrFail($orderId);
+        $itemsToReturn = $request->input('items'); // array de items con id y cantidad
+        $reason = $request->input('reason');
+
+        if (empty($itemsToReturn)) {
+            return response()->json(['error' => 'No se especificaron productos a devolver.'], 400);
+        }
+
+        $return = SalesReturn::create([
+            'sales_order_id' => $order->id,
+            'reason' => $reason,
+        ]);
+
+        foreach ($itemsToReturn as $item) {
+            $detail = $order->details->where('product_variant_id', $item['id'])->first();
+
+            if (!$detail || $item['quantity'] > $detail->quantity) {
+                return response()->json(['error' => 'Cantidad inválida para devolver.'], 400);
+            }
+
+            // Registrar item devuelto
+            SalesReturnItem::create([
+                'sales_return_id' => $return->id,
+                'product_variant_id' => $item['id'],
+                'quantity' => $item['quantity'],
+                'price' => $detail->price,
+            ]);
+
+            // Actualizar inventario
+            $variant = ProductVariant::find($item['id']);
+            $variant->stock += $item['quantity'];
+            $variant->save();
+        }
+
+        // Marcar la orden como que tiene devolución
+        $order->has_returns = true;
+        $order->save();
+
+        return response()->json(['message' => 'Devolución registrada exitosamente.']);
+    }
+
 }

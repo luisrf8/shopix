@@ -28,13 +28,17 @@
       <p><strong>Entrega:</strong> {{ $order->preference }} | <strong>Dirección:</strong> {{ $order->address }}</p>
       <div class="d-flex align-items-center gap-2">
         <strong>Entregado:</strong>
-        <select id="deliver-status" class="btn btn-sm toggle-status-btn 
-          {{ $order->deliver_status == 0 ? 'btn-outline-warning' : ($order->deliver_status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
-          onchange="updateDeliverStatus(this, {{ $order->id }})">
-            <option value="0" {{ $order->deliver_status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
-            <option value="1" {{ $order->deliver_status == 1 ? 'selected' : '' }}>Entregado ↓</option>
-            <option value="2" {{ $order->deliver_status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
-        </select>
+        @if($order->has_returns)
+          <span class="text-danger">Devolución Registrada</span>
+        @else
+          <select id="deliver-status" class="btn btn-sm toggle-status-btn 
+            {{ $order->deliver_status == 0 ? 'btn-outline-warning' : ($order->deliver_status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
+            onchange="updateDeliverStatus(this, {{ $order->id }})">
+              <option value="0" {{ $order->deliver_status == 0 ? 'selected' : '' }}>Pendiente ↓</option>
+              <option value="1" {{ $order->deliver_status == 1 ? 'selected' : '' }}>Entregado ↓</option>
+              <option value="2" {{ $order->deliver_status == 2 ? 'selected' : '' }}>Cancelado ↓</option>
+          </select>
+        @endif
       </div>
 
       <div class="d-flex gap-2">
@@ -43,6 +47,9 @@
         </div> 
           <div class="d-flex gap-2">
               <strong>Estado:</strong>
+              @if($order->has_returns)
+                <span class="text-danger">Devolución Registrada</span>
+              @else
               <select id="order-status" class="btn btn-sm toggle-status-btn 
                 {{ $order->status == 0 ? 'btn-outline-warning' : ($order->status == 1 ? 'btn-outline-success' : 'btn-outline-danger') }}" 
                 onchange="updateOrderStatus(this, {{ $order->id }})">
@@ -50,11 +57,17 @@
                   <option value="1" {{ $order->status == 1 ? 'selected' : '' }}>Aprobado ↓</option>
                   <option value="2" {{ $order->status == 2 ? 'selected' : '' }}>Negado ↓</option>
               </select>
+              @endif
           </div>
       </div>
-
+      <!-- Botón para registrar devolución -->
+      <div class="w-100 d-flex justify-content-end mt-3">
+        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#returnModal">
+            Registrar Devolución
+        </button>
+      </div>
       <!-- Tabla de Detalles de la Orden -->
-      <div class="card mt-4">
+      <div class="card">
         <div class="card-header">
           <h6 class="mb-0">Productos en la Orden</h6>
         </div>
@@ -82,6 +95,7 @@
             </tbody>
           </table>
           <p><strong>Total Orden:</strong> ${{ number_format($totalOrden, 2) }}</p>
+          <p><strong>{{ $order->has_returns ? 'Total Devolucion' : ''}} </strong> ${{ $order->has_returns ? number_format($order->total_devuelto, 2) : '' }}</p>
         </div>
       </div>
 
@@ -126,7 +140,65 @@
             </tbody>
           </table>
           <p><strong>Total Pagado:</strong> ${{ number_format($totalPagado, 2) }}</p>
+          <p><strong>{{ $order->has_returns ? 'Total Devolucion' : ''}} </strong> ${{ number_format($order->total_devuelto, 2) }}</p>
         </div>
+      </div>
+
+      <!-- Modal para realizar devoluciones -->
+      <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="returnModalLabel">Registrar Devolución</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                      <form id="returnForm">
+                          @csrf
+                          <input type="hidden" id="orderId" value="{{ $order->id }}">
+                          
+                          <div class="mb-3">
+                              <label for="returnReason" class="form-label">Razón de la devolución</label>
+                              <textarea id="returnReason" class="form-control border border-1 border-radius-lg p-2" rows="3" placeholder="Especifique la razón de la devolución" required></textarea>
+                          </div>
+
+                          <div class="mb-3">
+                              <h6>Productos de la Orden</h6>
+                              <table class="table">
+                                  <thead>
+                                      <tr>
+                                          <th>Producto</th>
+                                          <th>Cantidad</th>
+                                          <th>Devolver</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @foreach($order->details as $detalle)
+                                          <tr>
+                                              <td>{{ $detalle->variant->product->name ?? 'Sin nombre' }}</td>
+                                              <td>{{ $detalle->quantity }}</td>
+                                              <td>
+                                                  <input type="number" class="form-control return-quantity border border-1 border-radius-lg p-2" 
+                                                      data-id="{{ $detalle->variant->id }}" 
+                                                      data-max="{{ $detalle->quantity }}" 
+                                                      placeholder="Cantidad a devolver" 
+                                                      min="0" 
+                                                      max="{{ $detalle->quantity }}">
+                                              </td>
+                                          </tr>
+                                      @endforeach
+                                  </tbody>
+                              </table>
+                          </div>
+
+                          <div class="d-flex justify-content-end">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                              <button type="submit" class="btn btn-dark ms-2">Registrar Devolución</button>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
       </div>
     </div>
   </main>
@@ -232,6 +304,53 @@ function updatePaymentStatus(selectElement, paymentId) {
         restoreText(selectElement, originalText);
     });
 }
+
+document.getElementById('returnForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const orderId = document.getElementById('orderId').value;
+    const reason = document.getElementById('returnReason').value;
+    const items = [];
+
+    document.querySelectorAll('.return-quantity').forEach(input => {
+        const quantity = parseInt(input.value);
+        const maxQuantity = parseInt(input.getAttribute('data-max'));
+        const id = input.getAttribute('data-id');
+
+        if (quantity > 0 && quantity <= maxQuantity) {
+            items.push({ id, quantity });
+        }
+    });
+
+    if (items.length === 0) {
+        alert('Debe especificar al menos un producto para devolver.');
+        return;
+    }
+
+    fetch(`/sales/${orderId}/return`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items, reason }),
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Error al registrar la devolución.');
+        }
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload(); // Recargar la página para reflejar los cambios
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al registrar la devolución.');
+    });
+});
 </script>
 
 </body>
