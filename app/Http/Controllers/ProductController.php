@@ -27,12 +27,16 @@ class ProductController extends Controller
     public function index()
     {
         $categories = Category::all();
-        $productItems = Product::with(['category', 'images', 'variants'])->get();
-        return view('products', compact('categories', 'productItems')); // Asegúrate de tener una vista para mostrar las categorías.
+        $productItems = Product::with(['category', 'images', 'variants'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        return view('products', compact('categories', 'productItems'));
     }
     public function getProducts()
     {
-        $productItems = Product::with(['category', 'images', 'variants'])->get();
+        $productItems = Product::with(['category', 'images', 'variants'])
+        ->orderBy('created_at', 'desc')->get();
         return response()->json($productItems);
     }
     public function categoriesIndex()
@@ -60,7 +64,9 @@ class ProductController extends Controller
     {
         $category = Category::findOrFail($categoryId);
         $categories = Category::all();
-        $productItems = Product::where('category_id', $category->id)->get();
+        $productItems = Product::where('category_id', $category->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
     
         return view('products', compact('productItems', 'category', 'categories'));
     }
@@ -70,6 +76,7 @@ class ProductController extends Controller
         $categories = Category::all();
         $productItems = Product::where('category_id', $category->id)
         ->with(['images', 'variants'])
+        ->orderBy('created_at', 'desc')
         ->get();
         return response()->json($productItems);
     }

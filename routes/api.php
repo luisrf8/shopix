@@ -98,6 +98,7 @@ Route::post('/payment/{id}/status/update', [SaleController::class, 'paymentToggl
 Route::post('/deliver/{id}/status/update', [SaleController::class, 'orderDeliverToggleStatus']);
 Route::post('/order/{id}/status/update', [SaleController::class, 'orderToggleStatus']);
 Route::get('/orders/{id}', [SaleController::class, 'viewUserOrders']);
+Route::post('/sales-orders-report', [SaleController::class, 'viewOrdersReport'])->name('sales.orders.report');
 
 // ------------------------ ÓRDENES DE COMPRA ------------------------
 

@@ -31,50 +31,53 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-      <div class="pb-0 px-3">
-        <h6 class="mb-0">Ordenes Realizadas</h6>
-      </div>
-      <div class="row">
+      <div class="row mt-4">
         <div class="col-12">
-          <div class="row">
-            <div class="container-fluid py-4 row">
-              @foreach($purchaseOrders as $order)
-              <div class="col-md-4 col-4 mb-4">
-                <a href="" class="text-decoration-none">
-                  <div class="card">
-                    <div class="card-header mx-4 p-3 text-center">
-                      <h6 class="text-center mb-0 opacity-9">Orden de Compra Nro {{ $order->id }}</h6>
-                    </div>
-                    <div class="card-body pt-0 p-3 text-center">
-                      <div class="mt-2">
-                        <!-- <h6 class="text-left opacity-8">Inventario</h6> -->
-                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border rounded bg-lighter">
-                            <div class="text-start column">
-                                <div class="text-xs text-bold mb-2">Proveedor:</div>
-                                <div class="text-xs text-bold mb-2">Cantidad de productos:</div>
-                                <div class="text-xs text-bold">Fecha de Creación:</div>
-                            </div>
-                            <div class="text-end column">
-                                <div class="text-xs mb-2">{{ $order->provider_id }}</div>
-                                <div class="text-xs mb-2">{{ $order->total_items }}</div>
-                                <div class="text-xs">{{ $order->date }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Acciones -->
-                    <div class="mt-3 d-flex justify-content-center mx-4 ">
-                        <!-- <button class="btn btn-sm btn-outline-info">Editar</button> -->
-                        <a class="btn btn-sm btn-outline-info btn-edit-provider" href="/order/{{ $order->id }}">Ver Detalles</a>
-                    </div>
+            <div class="card">
+              <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                  <h6 class="text-white text-capitalize ps-3">ORDENES DE COMPRA REALIZADAS</h6>
+                  <div class="py-1 px-3 text-end" data-bs-toggle="modal" data-bs-target="#reportModal">
+                    <label class="text-white">
+                      + Generar Reporte
+                    </label>
+                    <a class="text-white ms-6" href="/purchase">
+                      + Generar Compra
+                    </a>
                   </div>
-                </a>
+                </div>
+              </div> 
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead class="text-center">
+                      <tr>
+                        <th># Orden</th>
+                        <th>Fecha</th>
+                        <th>Proveedor</th>
+                        <th># Productos</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-center">
+                      @foreach($purchaseOrders as $order)
+                        <tr>
+                          <td>{{ $order->id }}</td>
+                          <td>{{ $order->date }}</td>
+                          <td>{{ $order->provider_id }}</td>
+                          <td>{{ $order->total_items }}</td>
+                          <td>
+                            <a href="/order/{{ $order->id }}" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              @endforeach
             </div>
-
-          </div>
         </div>
+      </div>
       </div>
     </div>
   </main>

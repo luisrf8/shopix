@@ -68,20 +68,36 @@
       </div>
       <div class="row mt-4">
                 <div class="col-lg-4 col-md-6 mt-4 mb-4">
-                    <div class="card z-index-2 ">
-                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
-                            <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
-                                <div class="chart">
-                                    <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
-                                </div>
-                            </div>
+                    <div class="card z-index-2" style="min-height: 18.3rem;">
+                    <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                        <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                            <h6 class="text-white ps-3">Productos con menor stock</h6>
                         </div>
-                        <div class="card-body">
-                            <h6 class="mb-0 ">Ventas Diarias</h6>
-                            <p class="text-sm ">Ventas de la ultima semana.</p>
-                            <hr class="dark horizontal">
-
+                    </div> 
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead class="">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody class="">
+                            @foreach($lowStockProducts as $product)
+                                <tr>
+                                <td>{{ $product->name }}</td>
+                                <td class="text-center">{{ $product->total_stock }}</td>
+                                <td>
+                                    <a href="/products" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>
+                                </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 mt-4 mb-4">
@@ -120,18 +136,18 @@
             </div>
             <div class="row mb-4">
                 <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
-                    <div class="card">
-                        <div class="card-header pb-0">
-                          <div class="pb-0 px-3 d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                              <h6 class="mb-0">Ventas Realizadas</h6>
-                              <a href="/sales-orders" class="mx-4 text-black">Ver Más ></a>
+                    <div class="card mt-4">
+                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                            <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                                <h6 class="text-white text-capitalize ps-3">VENTAS REALIZADAS</h6>
+                            <div class="py-1 px-3 text-end ">
+                                <a href="/sales-orders" class="mx-4 text-white">Ver Más ></a>
+                                <a class="text-white" href="/sales">
+                                    <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Venta
+                                </a>
                             </div>
-                            <a class="" href="/sales">
-                              <i class="material-symbols-rounded text-sm">add</i>&nbsp;&nbsp;Realizar Venta
-                            </a>
-                          </div>
-                        </div>
+                            </div>
+                        </div> 
                         <div class="card-body px-0 pb-2">
                             <div class="table-responsive">
                             <table class="table align-items-center mb-0">
@@ -172,15 +188,14 @@
                                     <span class="text-xs font-weight-bold">${{ number_format($order->details->sum('price'), 2) }}</span>
                                 </td>
                                 <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">
-                                        @if ($order->status == 0)
-                                            <span class="badge bg-warning">En Proceso</span>
-                                        @elseif ($order->status == 1)
-                                            <span class="badge bg-success">Aprobado</span>
-                                        @elseif ($order->status == 2)
-                                            <span class="badge bg-danger">Negado</span>
-                                        @endif
-                                    </span>
+                                <span class="badge badge-sm
+                                    {{ $order->status == '0' ? 'bg-gradient-warning' :
+                                        ($order->status == '1' ? 'bg-gradient-success' :
+                                        ($order->status == '2' ? 'bg-gradient-danger' : '') ) }}">
+                                    {{ $order->status == 0 ? 'En Proceso' :
+                                        ($order->status == 1 ? 'Aprobado' :
+                                        ($order->status == 2 ? 'Negado' : '')) }}
+                                </span>
                                 </td>
                             </tr>
                             @endforeach
@@ -241,91 +256,10 @@
   <script src="../assets/js/plugins/chartjs.min.js"></script>
   <script>
         // Asegúrate de que las variables estén bien formateadas para JS
-        const weeklySalesCount = @json($weeklySalesCount); // Por ejemplo: [50, 20, 10, 22, 50, 10, 40]
         const monthlySalesFormatted = @json($monthlySalesFormatted); // Podría ser un número o string
         const months = @json($months); // Por ejemplo: [50, 20, 10, 22, 50, 10, 40]
         const topProductNames = @json($topProductNames); // ["Producto A", "Producto B", ...]
         const topProductSales = @json($topProductSales); // [120, 90, 70, 50, 30]
-        var ctx = document.getElementById("chart-bars").getContext("2d");
-
-        new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: ["L", "M", "M", "J", "V", "S", "D"],
-                datasets: [{
-                    label: "Ventas semanales",
-                    tension: 0.4,
-                    borderWidth: 0,
-                    borderRadius: 4,
-                    borderSkipped: false,
-                    backgroundColor: "rgba(255, 255, 255, .8)",
-                    data: weeklySalesCount,
-                    maxBarThickness: 6
-                }, ],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false,
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-                scales: {
-                    y: {
-                        grid: {
-                            drawBorder: false,
-                            display: true,
-                            drawOnChartArea: true,
-                            drawTicks: false,
-                            borderDash: [5, 5],
-                            color: 'rgba(255, 255, 255, .2)'
-                        },
-                        ticks: {
-                            suggestedMin: 0,
-                            suggestedMax: 500,
-                            beginAtZero: true,
-                            padding: 10,
-                            font: {
-                                size: 14,
-                                weight: 300,
-                                family: "Roboto",
-                                style: 'normal',
-                                lineHeight: 2
-                            },
-                            color: "#fff"
-                        },
-                    },
-                    x: {
-                        grid: {
-                            drawBorder: false,
-                            display: true,
-                            drawOnChartArea: true,
-                            drawTicks: false,
-                            borderDash: [5, 5],
-                            color: 'rgba(255, 255, 255, .2)'
-                        },
-                        ticks: {
-                            display: true,
-                            color: '#f8f9fa',
-                            padding: 10,
-                            font: {
-                                size: 14,
-                                weight: 300,
-                                family: "Roboto",
-                                style: 'normal',
-                                lineHeight: 2
-                            },
-                        }
-                    },
-                },
-            },
-        });
-
 
         var ctx2 = document.getElementById("chart-line").getContext("2d");
 

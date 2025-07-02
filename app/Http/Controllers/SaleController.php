@@ -30,6 +30,7 @@ use Endroid\QrCode\Logo\Logo;
 use Endroid\QrCode\RoundBlockSizeMode;
 use App\Models\DollarRate;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class SaleController extends Controller
 {
@@ -241,13 +242,82 @@ class SaleController extends Controller
     
         return view('salesOrders', compact('salesOrders'));
     }
+
+    public function viewOrdersReport(Request $request)
+    {
+        $range = $request->input('range', 'monthly');
+        $today = Carbon::today();
+
+        switch ($range) {
+            case 'weekly':
+                $startDate = $today->copy()->startOfWeek();
+                $rangoDescriptivo = 'la última semana';
+                break;
+            case 'monthly':
+                $startDate = $today->copy()->startOfMonth();
+                $rangoDescriptivo = 'el último mes';
+                break;
+            case 'quarterly':
+                $startDate = $today->copy()->subMonths(3)->startOfDay();
+                $rangoDescriptivo = 'los últimos 3 meses';
+                break;
+            case 'yearly':
+                $startDate = $today->copy()->startOfYear();
+                $rangoDescriptivo = 'el último año';
+                break;
+            default:
+                $startDate = $today->copy()->startOfMonth();
+                $rangoDescriptivo = 'el último mes';
+        }
+
+        $salesOrders = SalesOrder::with([
+            'user',
+            'details',
+            'details.variant',
+            'payments'
+        ])
+        ->whereDate('created_at', '>=', $startDate)
+        ->orderBy('id', 'desc')
+        ->get();
+
+        foreach ($salesOrders as $order) {
+            $order->total_items = $order->details->sum('quantity');
+        }
+
+
+        $pdfContent = view('salesOrdersReport', compact('salesOrders', 'rangoDescriptivo', 'startDate'))->render();
+        
+            // Configuración de Dompdf
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isPhpEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($pdfContent);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $fecha = now()->format('d-m-Y_His');
+            $fileName = 'reporte_ordenes_ventas_' . $fecha . '.pdf';
+            Storage::disk('public')->put('reports/' . $fileName, $dompdf->output());
+            $filePath = storage_path('app/public/reports/' . $fileName);
+
+            $pdfUrl = asset('storage/reports/' . $fileName);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reporte generado',
+            'pdf_url' => $pdfUrl,
+            'fecha' => $fecha
+        ]);
+    }
+
     public function viewUserOrders($id)
     {
         $salesOrders = SalesOrder::with([
             'user', 
             'details', 
             'details.variant', 
-            'payments'
+            'payments',
+            'payments.payment' // método de pago completo
         ])->where('user_id', $id) // Filtrar por usuario específico
         ->orderBy('date', 'desc')
         ->get();

@@ -156,7 +156,7 @@
             })
                 .then((response) => {
                     console.log("response", response)
-                    window.location.href = '/products';
+                    window.history.back();
                 })
                 // .then((data) => {
                 //     if (data.success) {

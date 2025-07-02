@@ -38,6 +38,14 @@ class IndexController extends Controller
             return Carbon::now()->subMonths($i)->format('M');
         })->reverse()->values();
 
+        // Productos con bajo stock (menos de 10 unidades)
+        $lowStockProducts = Product::select('products.id', 'products.name', DB::raw('SUM(product_variants.stock) as total_stock'))
+        ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+        ->groupBy('products.id', 'products.name')
+        ->orderBy('total_stock', 'asc')
+        ->limit(4)
+        ->get();
+
         // Ventas por mes (últimos 9 meses incluyendo el actual)
         $monthlySales = SalesOrder::selectRaw('DATE_FORMAT(date, "%b") as month, COUNT(*) as total')
         ->where('date', '>=', $startOfNineMonthsAgo)
@@ -84,7 +92,8 @@ class IndexController extends Controller
             'monthlySalesFormatted',
             'topProductNames',
             'topProductSales',
-            'months'
+            'months',
+            'lowStockProducts'
         ));
     }
     

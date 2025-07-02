@@ -37,7 +37,12 @@ input[type="checkbox"]:checked + .position-absolute {
     <!-- Navbar -->
     @include('layouts.head')
     <!-- End Navbar -->
-    <div class="m-5">
+    <div class="py-1 px-3 text-end" onclick="getSucursales()">
+      <a class="nav-link text-dark" href="/createProduct">
+        + Agregar Producto
+      </a>
+    </div>
+    <div class="mx-5">
         <h1>Flujo de Compra</h1>
         <form id="purchaseForm">
             @csrf

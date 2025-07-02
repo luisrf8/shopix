@@ -89,14 +89,14 @@
                             data-email="{{ $user->email }}"
                             data-role="{{ $user->role->id }}">
                             Editar
-</a>
+                          </a>
                         </td>
                         <td>
                           <a class="text-secondary font-weight-bold text-xs toggle-status-btn" 
                             data-id="{{ $user->id }}" 
                             data-status="{{ $user->is_active ? 'active' : 'inactive' }}">
                             {{ $user->is_active ? 'Inactivar' : 'Activar' }}
-</a>
+                          </a>
                         </td>
                       </tr>
                       <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">

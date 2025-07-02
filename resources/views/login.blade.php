@@ -9,7 +9,7 @@
 </head>
 <style>
         body {
-            background: url("../../assets/img/fondo.jpg") no-repeat center center fixed;
+            background: black;
             background-size: cover;
         }
         .login-container {

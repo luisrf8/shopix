@@ -20,6 +20,7 @@
   <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" /> -->
   <!-- CSS Files -->
   <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="g-sidenav-show  bg-gray-100" id="d-body">
@@ -31,61 +32,108 @@
     @include('layouts.head')
     <!-- End Navbar -->
     <div class="container-fluid py-2">
-    <div class="row mt-4">
+      <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                  <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
-                    <h6 class="text-white text-capitalize ps-3">VENTAS REALIZADAS</h6>
+              <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                  <h6 class="text-white text-capitalize ps-3">VENTAS REALIZADAS</h6>
+                  <div class="py-1 px-3 text-end">
+                    <label class="text-white"  data-bs-toggle="modal" data-bs-target="#reportModal">
+                      + Generar Reporte
+                    </label>
+                    <a class="text-white ms-6" href="/sales">
+                      + Generar Venta
+                    </a>
                   </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table align-items-center mb-0">
-                            <thead class="text-center">
-                                <tr>
-                                    <th># Orden</th>
-                                    <th>Fecha</th>
-                                    <th>Usuario</th>
-                                    <th>Entrega</th>
-                                    <th># Productos</th>
-                                    <th>Estado</th>
-                                    <th>Devolución</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center">
-                                @foreach($salesOrders as $order)
-                                    <tr>
-                                        <td>{{ $order->id }}</td>
-                                        <td>{{ $order->date }}</td>
-                                        <td>{{ $order->user ? $order->user->name : 'Usuario no asignado' }}</td>
-                                        <td>{{ $order->preference}}</td>
-                                        <td>{{ $order->total_items }}</td>
-                                        <td>
-                                          {{ $order->status == 0 ? 'En Proceso' : ($order->status == 1 ? 'Aprobado' : ($order->status == 2 ? 'Negado' : '')) }}
-                                        </td>
-                                        <td>
-                                          @if($order->has_returns)
-                                            <span class="text-danger">Con Devolución</span>
-                                          @else
-                                            <span class="">Sin Devolución</span>
-                                          @endif
-                                        </td>
-                                        <td>
-                                            <a href="/sales/{{ $order->id }}" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+              </div> 
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead class="text-center">
+                      <tr>
+                        <th># Orden</th>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Entrega</th>
+                        <th># Productos</th>
+                        <th>Estado</th>
+                        <th>Devolución</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-center">
+                      @foreach($salesOrders as $order)
+                        <tr>
+                          <td>{{ $order->id }}</td>
+                          <td>{{ $order->date }}</td>
+                          <td>{{ $order->user ? $order->user->name : 'Usuario no asignado' }}</td>
+                          <td class="text-center">
+                            <span class="badge badge-sm  {{ $order->preference == 'Tienda' ? 'bg-gradient-secondary' : 'bg-gradient-info' }}">{{ $order->preference }}
+                            </span>
+                          </td>
+                          <td>{{ $order->total_items }}</td>
+                          <td class="text-center">
+                            <span class="badge badge-sm
+                              {{ $order->status == '0' ? 'bg-gradient-warning' :
+                                ($order->status == '1' ? 'bg-gradient-success' :
+                                ($order->status == '2' ? 'bg-gradient-danger' : '') ) }}">
+                              {{ $order->status == 0 ? 'En Proceso' :
+                                ($order->status == 1 ? 'Aprobado' :
+                                ($order->status == 2 ? 'Negado' : '')) }}
+                            </span>
+                          </td>
+                          <td>
+                            @if($order->has_returns)
+                              <span class="text-danger">Con Devolución</span>
+                            @else
+                              <span class=""></span>
+                            @endif
+                          </td>
+                          <td>
+                            <a href="/sales/{{ $order->id }}" class="text-secondary font-weight-bold text-xs toggle-status-btn">Ver Detalles</a>
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
                 </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+<!-- Modal para generar reporte -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Generar Reporte de Ventas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="range" class="form-label">Seleccionar Rango de Fechas</label>
+                        <select id="range" name="range" class="form-control border border-radius-lg p-2">
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly" selected>Mensual</option>
+                            <option value="quarterly">Trimestral</option>
+                            <option value="yearly">Anual</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button onclick="getReport()" class="btn btn-dark ms-2">Generar Reporte</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
   </main>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
@@ -123,6 +171,39 @@
       })
       .catch(error => console.error('Error:', error));
     });
+    
+    function getReport() {
+        event.preventDefault();
+        const range = document.getElementById('range').value;
+        fetch('api/sales-orders-report', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ range: range })
+        })
+        .then(response => response.json()) // <--- AQUI conviertes la respuesta a JSON
+        .then(data => {
+            // Aquí puedes manejar la respuesta del servidor
+            console.log('Reporte generado:', data.response);
+            if(data.pdf_url) {
+              const link = document.createElement("a");
+              link.href = data.pdf_url;
+              console.log('PDF URL:', data.pdf_url);
+              link.download = `reporte_ordenes_ventas_${data.fecha}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+            console.log('PDF URL:', data.pdf_url);
+            alert('Reporte generado con éxito');
+        })
+        .catch(error => {
+            console.error('Error al generar el reporte:', error);
+            alert('Ocurrió un error al generar el reporte');
+        });
+    }
 
     document.getElementById('createCategoryForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Evita el envío normal del formulario

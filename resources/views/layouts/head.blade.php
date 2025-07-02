@@ -45,7 +45,7 @@
                 <i class="material-symbols-rounded">menu</i>
               </button>
             </li>
-            <li class="breadcrumb-item text-sm d-flex align-items-center"><a class="opacity-5 text-dark" href="javascript:;">Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD</a></li>
+            <li class="breadcrumb-item text-sm d-flex align-items-center"><a class="opacity-5 text-dark" href="/paymentMethods">Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD</a></li>
             <!-- <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li> -->
             <!-- <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Billing</li> -->
           </ol>

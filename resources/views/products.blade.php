@@ -103,17 +103,23 @@
       </div>
       <div class="row">
       <div class="col-md-12 mt-4">
-  <div class="">
-    <div class="pb-0 px-3">
-      <h6 class="mb-0">Productos</h6>
-    </div>
-    <div class="py-1 px-3 text-end" onclick="getSucursales()">
-      <a class="nav-link text-dark" href="/createProduct">
-        <label>
-          + Agregar Producto
-        </label>
-      </a>
-    </div>
+        <div class="">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="px-3 w-30">
+              <input type="text" id="searchProduct" class="w-100 form-control border border-1 p-2 bg-white" placeholder="Buscar producto...">
+            </div>
+            <div class="px-3 d-flex justify-content-end align-items-center gap-5">
+              <a class="nav-link text-black" href="/createProduct">
+                + Agregar Producto
+              </a>
+              <a class="nav-link text-black" href="/purchase">
+                + Generar Compra
+              </a>
+              <button id="generateReport" class="btn btn-dark mt-3" onclick="getReport()">
+                Generar Reporte
+              </button>
+            </div>
+          </div>
     <!-- Modal para crear producto -->
     <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -160,14 +166,6 @@
     </div>
     <!-- Fin Modal para crear producto -->
     <div class="px-3">
-      <div class="mb-3 d-flex justify-content-between align-items-center">
-        <input type="text" id="searchProduct" class="w-25 form-control border border-1 p-2 bg-white" placeholder="Buscar producto...">
-        <div class="text-end">
-          <button id="generateReport" class="btn btn-dark" onclick="getReport()">
-            Generar Reporte
-          </button>
-        </div>
-      </div>
       <div class="row">
         <!-- Buscador -->
       @foreach($productItems as $product)
