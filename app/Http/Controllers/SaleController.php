@@ -39,7 +39,8 @@ class SaleController extends Controller
         $user = Auth::user();
         $customerId = $user;
         // Traer todos los productos con sus variantes
-        $productItems = Product::with(['category', 'images', 'variants'])->get();
+        $productItems = Product::with(['category', 'images', 'variants'])
+        ->orderBy('created_at', 'desc')->get();
         $paymentMethods = PaymentMethod::with('currency')->get();
         $dollarRate = DollarRate::latest('created_at')->first();
 
@@ -126,10 +127,98 @@ class SaleController extends Controller
             // Si planeas subir imágenes más adelante, aquí va el código
             // Actualmente el objeto JS no está enviando imágenes
         }
-    
-        return response()->json(['message' => 'Venta registrada exitosamente.'], 200);
+        // RECUPERAR la orden ya con todas sus relaciones, como en orderToggleStatus
+        $order = SalesOrder::with([
+            'user',
+            'details',
+            'details.variant.product',
+            'payments.payment'
+        ])->findOrFail($salesOrder->id);
+
+        // Datos extra para el PDF
+        $serverIp = request()->getHost(); // IP o dominio
+
+        $imagePath = storage_path('app/public/products/infblack.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $imageBase64 = 'data:image/png;base64,' . $imageData;
+
+        $totalOrden = $order->details->sum('amount');
+        $totalPagado = $order->payments->sum('amount');
+
+        // Generar QR
+        $qrUrl = "http://{$serverIp}:8000/publicOrder/{$order->id}";
+        $qrCode = QrCode::create($qrUrl)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setSize(250)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $qrCodeImage = $writer->write($qrCode);
+        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeImage->getString());
+
+        // Generar HTML y PDF
+        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado', 'imageBase64', 'qrCodeBase64'))->render();
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($pdfContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Guardar PDF
+        $fileName = 'orden-' . $order->id . '.pdf';
+        Storage::disk('public')->put('orders/' . $fileName, $dompdf->output());
+        $pdfUrl = asset('storage/orders/' . $fileName);
+
+        return response()->json([
+            'message' => 'Venta registrada exitosamente.',
+            'pdf_url' => $pdfUrl
+        ], 200);
+        
     }
-    
+    public function downloadPdf($id)
+    {
+        $order = SalesOrder::with([
+            'user',
+            'details.variant.product',
+            'payments.payment'
+        ])->findOrFail($id);
+
+        $totalOrden = $order->details->sum('amount');
+        $totalPagado = $order->payments->sum('amount');
+
+        $serverIp = request()->getHost();
+        $qrUrl = "http://{$serverIp}:8000/publicOrder/{$order->id}";
+
+        $qrCode = QrCode::create($qrUrl)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setSize(250)
+            ->setMargin(10);
+        $writer = new PngWriter();
+        $qrCodeImage = $writer->write($qrCode);
+        $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrCodeImage->getString());
+
+        $imagePath = storage_path('app/public/products/infblack.png');
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $imageBase64 = 'data:image/png;base64,' . $imageData;
+
+        $pdfContent = view('orderPdf', compact('order', 'totalOrden', 'totalPagado', 'imageBase64', 'qrCodeBase64'))->render();
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($pdfContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="orden-' . $order->id . '.pdf"');
+    }
+
     public function storeEcommerceSale(Request $request)
     {
         // Validar los datos recibidos
@@ -285,7 +374,7 @@ class SaleController extends Controller
         }
 
 
-        $pdfContent = view('salesOrdersReport', compact('salesOrders', 'rangoDescriptivo', 'startDate'))->render();
+        $pdfContent = view('salesOrdersReport', compact('salesOrders', 'rangoDescriptivo', 'startDate', 'range'))->render();
         
             // Configuración de Dompdf
             $options = new Options();
@@ -463,7 +552,7 @@ class SaleController extends Controller
             $serverIp = request()->getHost(); // Obtiene la IP o dominio del servidor
 
             // Cargar la imagen y convertirla a base64
-            $imagePath = storage_path('app/public/products/inf.png');
+            $imagePath = storage_path('app/public/products/infblack.png');
             $imageData = base64_encode(file_get_contents($imagePath));
             $imageBase64 = 'data:image/png;base64,' . $imageData;
     

@@ -35,7 +35,7 @@
         <td style="text-align: left; padding: 0; border: none;">
             <h1>Infinity Center C.A.</h1>
             <p>RIF: 297236511-J</p>
-            <p>Calle Arriojas, Mini Centro Comercial Cappadoro, Local-21, Maturin edo. Monagas</p>
+            <p>Calle Sucre, Edificio Maturin, Local-01, Maturin edo. Monagas</p>
         </td>
         <td style="text-align: right; padding: 0; border: none;">
             <img src="{{ $imageBase64 }}" alt="main_logo" style="width: 150px; height: 150px">

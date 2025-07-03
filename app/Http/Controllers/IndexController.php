@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use App\Models\ProductInventory;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\SalesOrder;
 use App\Models\User;
@@ -16,6 +17,34 @@ use Illuminate\Support\Facades\DB;
 
 class IndexController extends Controller
 {
+    public function landing()
+    {
+        $categories = Category::all()
+        ->take(3)
+        ;
+    
+        // Asocia íconos por nombre o ID
+        $icons = [
+            'Ropa' => 'bi bi-shirt',
+            'Calzado' => 'bi bi-boot',
+            'Accesorios' => 'bi bi-sunglasses',
+            // Agrega más según tus categorías
+        ];
+    
+        // Añadir icono a cada categoría
+        foreach ($categories as $category) {
+            $category->icon = $icons[$category->name] ?? 'bi bi-tag'; // icono por defecto
+        }
+    
+        $productItems = Product::with(['category', 'images', 'variants'])
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+    
+        return view('ecommerce', compact('categories', 'productItems'));
+    }
+    
+
     public function index()
     {
         $currentDate = Carbon::now();

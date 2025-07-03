@@ -59,18 +59,37 @@
                             </a>
                         </div>
                         @foreach($categories as $category)
+                            @php
+                                switch ($category->name) {
+                                    case 'Chemises':
+                                        $icon = 'accessibility_new';
+                                        break;
+                                    case 'Pantalones':
+                                        $icon = 'vignette';
+                                        break;
+                                    case 'Camisas':
+                                        $icon = 'hiking';
+                                        break;
+                                    case 'Franelas':
+                                        $icon = 'view_stream';
+                                        break;
+                                    default:
+                                        $icon = 'category'; // ícono por defecto
+                                }
+                            @endphp
+
                             <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-category-name="{{ $category->name }}" data-category="{{ $category->id }}" onclick="filterProductsByCategory('{{ $category->id }}')">
                                 <a href="javascript:void(0)" class="text-decoration-none category-filter">
-                                <div class="card h-100">
-                                    <div class="card-header mx-3 p-3 text-center">
-                                    <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
-                                        <i class="material-symbols-rounded opacity-10">category</i>
+                                    <div class="card h-100">
+                                        <div class="card-header mx-3 p-3 text-center">
+                                            <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
+                                                <i class="material-symbols-rounded opacity-10">{{ $icon }}</i>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pt-0 p-3 text-center">
+                                            <h6 class="text-center mb-0 opacity-9">{{ $category->name }}</h6>
+                                        </div>
                                     </div>
-                                    </div>
-                                    <div class="card-body pt-0 p-3 text-center">
-                                    <h6 class="text-center mb-0 opacity-9">{{ $category->name }}</h6>
-                                    </div>
-                                </div>
                                 </a>
                             </div>
                         @endforeach
@@ -131,6 +150,9 @@
                     <h4>Paso 2: Selecciona Métodos de Pago</h4>
                     <div id="totalAmountDisplay" class="mt-3">
                         <strong>Total a pagar: </strong><span id="totalAmountValue">0.00</span>$
+                    </div>
+                    <div class="">
+                        <strong>Total a pagar: </strong><span id="totalAmountBsValue">0.00</span>Bs 
                     </div>
                     <div class="mb-3">
                         <strong>Tasa BCV: </strong><span id="dollarRate" data-rate="{{ number_format($dollarRate->rate, 2, '.', '') }}">{{ number_format($dollarRate->rate, 2) }} Bs.</span>
@@ -209,7 +231,7 @@
                     </div>
 
                     <div id="paymentSummary" class="mt-3">
-                        <strong>Total ingresado: </strong><span id="totalPaid">0.00</span><br>
+                        <strong>Total ingresado: </strong> $ <span id="totalPaid">0.00</span><br>
                         <span class="text-danger paymentMessage"></span>
                     </div>
                     <div class="d-flex justify-content-between w-100 align-items-center">
@@ -238,6 +260,9 @@
             <ul id="cartList" class="list-group"></ul>
             <div class="mt-3">
                 <strong>Total:</strong> $<span id="cartTotal">0.00</span>
+            </div>
+            <div class="mt-3">
+                <strong>Total Bs:</strong>Bs<span id="cartTotalBs">0.00</span>
             </div>
             <div class="d-flex justify-content-end">
                 <button type="button" class="btn btn-dark mt-3" id="toStep2" disabled>Siguiente</button>
@@ -349,7 +374,9 @@
         function renderCart() {
             const cartList = document.getElementById('cartList');
             const cartTotal = document.getElementById('cartTotal');
+            const cartTotalBs = document.getElementById('cartTotalBs');
             const totalAmountValue = document.getElementById('totalAmountValue');
+            const totalAmountBsValue = document.getElementById('totalAmountBsValue');
             const toStep2Btn = document.getElementById('toStep2');
             cartList.innerHTML = '';
 
@@ -401,9 +428,14 @@
                 li.appendChild(controlsDiv);
                 cartList.appendChild(li);
             });
+            // Obtener la tasa del dólar desde el DOM
+            const dollarRateElement = document.getElementById('dollarRate');
+            const dollarRate = parseFloat(dollarRateElement.dataset.rate) || 1;
 
             cartTotal.textContent = totalAmount.toFixed(2); 
+            cartTotalBs.textContent = (totalAmount * dollarRate ).toFixed(2); 
             totalAmountValue.textContent = totalAmount.toFixed(2); // Asegúrate de mostrar un número válido
+            totalAmountBsValue.textContent = (totalAmount * dollarRate ).toFixed(2); // Asegúrate de mostrar un número válido
             toStep2Btn.disabled = selectedItems.length === 0;
         }
 
@@ -670,6 +702,10 @@
         });
         function renderSummary() {
             const container = document.getElementById('summaryContainer');
+            
+            // Obtener la tasa del dólar desde el DOM
+            const dollarRateElement = document.getElementById('dollarRate');
+            const dollarRate = parseFloat(dollarRateElement.dataset.rate) || 1;
             container.innerHTML = ''; // Limpiar resumen anterior
 
             // Resumen de items
@@ -690,6 +726,11 @@
             const totalDiv = document.createElement('p');
             totalDiv.innerHTML = `<strong>Total a pagar:</strong> $${totalAmount.toFixed(2)}`;
             container.appendChild(totalDiv);
+
+            // Total BS
+            const totalDivBs = document.createElement('p');
+            totalDivBs.innerHTML = `<strong>Total a pagar Bs:</strong> Bs${(totalAmount * dollarRate).toFixed(2)}`;
+            container.appendChild(totalDivBs);
 
             // Resumen de métodos de pago
             const paymentsTitle = document.createElement('h5');
@@ -747,7 +788,12 @@
             .then(data => {
                 // Manejar la respuesta exitosa
                 alert('Compra confirmada con éxito.');
-                console.log('Respuesta del servidor:', data);
+                const link = document.createElement('a');
+                link.href = data.pdf_url;
+                link.download = ''; // Puedes darle un nombre: 'orden-venta.pdf'
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
                 // Redirigir o limpiar el formulario
                 window.location.href = '/sales-orders'; // Cambia la ruta según sea necesario
             })

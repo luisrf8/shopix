@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
          ->name('login');
+         
     Route::post('login', [AuthenticatedSessionController::class, 'authenticate']);
     
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -22,12 +23,15 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisteredUserController::class, 'store']);
 });
 // web.php
-Route::get('/', function () {
-    return view('ecommerce');
-});
+// Route::get('/', function () {
+//     return view('ecommerce');
+// });
 Route::get('/index', function () {
     return view('index');
 });
+
+Route::get('/', [IndexController::class, 'landing'])->name('landing');
+
 Route::get('/publicOrder/{id}', [SaleController::class, 'showPublicOrder']);
 
 // Route::post('/publicOrder/{id}', [AuthenticatedSessionController::class, 'store']);
@@ -63,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/purchase', [PurchaseOrderController::class, 'index'])->name('purchase');
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'viewOrders'])->name('purchase.orders');
     Route::get('/order/{id}', [PurchaseOrderController::class, 'showByOrder'])->name('showByOrder');
+    Route::get('/sales-orders/{id}/pdf', [SaleController::class, 'downloadPdf']);
 
 });
 

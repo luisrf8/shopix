@@ -59,9 +59,13 @@
         <!-- <span class="ms-1 text-sm text-dark">Infinity Center</span> -->
       </a>
     </div>
+    @php
+      $user = Auth::user();
+    @endphp
     <hr class="horizontal dark mt-0 mb-2">
-    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
       <ul class="navbar-nav">
+      @if($user->name !== 'Vendedor')
         <li class="nav-item">
           <a class="nav-link text-dark" href="/dashboard">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
@@ -88,6 +92,7 @@
             <span class="nav-link-text ms-1">Métodos de Pago</span>
           </a>
         </li>
+      @endif
         <li class="nav-item">
           <a class="nav-link text-dark" href="/sales">
             <i class="material-symbols-rounded opacity-5">receipt_long</i>
@@ -100,28 +105,30 @@
             <span class="nav-link-text ms-1">Ventas Realizadas</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="/purchase">
-            <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-            <!-- <i class="bi bi-bag"></i> -->
-            <span class="nav-link-text ms-1">Realizar Compra</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="/purchase-orders">
-            <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
-            <span class="nav-link-text ms-1">Compras Realizadas</span>
-          </a>
-        </li>
-        <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Usuarios</h6>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="/users">
-            <i class="material-symbols-rounded opacity-5">person</i>
-            <span class="nav-link-text ms-1">Gestión de usuarios</span>
-          </a>
-        </li>
+        @if($user->name !== 'Vendedor')
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/purchase">
+              <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+              <!-- <i class="bi bi-bag"></i> -->
+              <span class="nav-link-text ms-1">Realizar Compra</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/purchase-orders">
+              <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
+              <span class="nav-link-text ms-1">Compras Realizadas</span>
+            </a>
+          </li>
+          <li class="nav-item mt-3">
+            <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Usuarios</h6>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/users">
+              <i class="material-symbols-rounded opacity-5">person</i>
+              <span class="nav-link-text ms-1">Gestión de usuarios</span>
+            </a>
+          </li>
+        @endif
         <li class="nav-item d-flex" onclick="logOut()">
           <a class="nav-link text-dark">
             <!-- <i class="bi bi-person-circle"></i> -->

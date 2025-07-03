@@ -71,7 +71,7 @@
                 <div class="card h-100">
                   <div class="card-header mx-3 p-3 text-center">
                     <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
-                      <i class="material-symbols-rounded opacity-10">category</i>
+                      <i class="material-symbols-rounded opacity-10">all_inclusive</i>
                     </div>
                   </div>
                   <div class="card-body pt-0 p-3 text-center">
@@ -82,12 +82,30 @@
               </a>
             </div>
             @foreach($categories as $category)
+              @php
+                switch ($category->name) {
+                  case 'Chemises':
+                    $icon = 'accessibility_new';
+                  break;
+                  case 'Pantalones':
+                    $icon = 'vignette';
+                  break;
+                  case 'Camisas':
+                    $icon = 'hiking';
+                  break;
+                  case 'Franelas':
+                    $icon = 'view_stream';
+                  break;
+                  default:
+                    $icon = 'category'; // ícono por defecto
+                }
+              @endphp
               <div class="category-item flex-shrink-0" style="width: 200px; scroll-snap-align: start;" data-name="{{ strtolower($category['name']) }}">
                 <a href="{{ route('products.byCategory', $category->id) }}" class="text-decoration-none">
                   <div class="card h-100">
                     <div class="card-header mx-3 p-3 text-center">
                       <div class="icon icon-shape icon-lg bg-gradient-dark shadow text-center border-radius-lg">
-                        <i class="material-symbols-rounded opacity-10">category</i>
+                        <i class="material-symbols-rounded opacity-10">{{ $icon }}</i>
                       </div>
                     </div>
                     <div class="card-body pt-0 p-3 text-center">
