@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Infinity Center - Ropa Minimalista</title>
+  <title>Shopix</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
@@ -141,7 +141,7 @@
       <source src="../../assets/img/Street.mp4" type="video/mp4" />
     </video>
     <div class="container text-center">
-      <h1 class="glass-text">INFINITY CENTER</h1>
+      <h1 class="glass-text">SHOPIX</h1>
       <h1 class="glass-text">MODA PARA HOY Y SIEMPRE</h1>
       <p class="lead glass-text" style="font-size: 1.5rem;">Chemises, franelas y jeans que definen tu estilo</p>
       <!-- Botón -->
@@ -273,7 +273,7 @@
   <!-- FOOTER -->
   <footer>
     <div class="container">
-      <p>© 2025 Infinity Center. Todos los derechos reservados.</p>
+      <p>© 2025 Shopix. Todos los derechos reservados.</p>
       <a href="http://192.168.1.119:8000/login" class="btn btn-light text-dark fw-bold px-4 py-2 w-50">Soy Admin</a>
 
     </div>

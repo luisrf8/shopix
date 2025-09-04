@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Infinity Center
+    Shopix
   </title>
   <link href="assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="assets/css/nucleo-svg.css" rel="stylesheet" />
@@ -40,7 +40,7 @@
     <div class="container-fluid py-2">
       <div class="row">
         <div class="ms-3">
-          <h3 class="mb-0 h4 font-weight-bolder">Infinity Center</h3>
+          <h3 class="mb-0 h4 font-weight-bolder">Shopix</h3>
           <p class="mb-4">
             Datos y Análisis.
           </p>
