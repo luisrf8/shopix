@@ -40,16 +40,33 @@
       <div class="container-fluid py-1">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <!-- Botón para desktop (toggle con icono que cambia) -->
             <li>
-              <button id="toggleNavbar" class="btn btn-black top-0 start-0 m-2 z-index-3">
+              <button id="btnDesktopNav" class="btn btn-black top-0 start-0 m-2 z-index-3 d-none d-lg-inline-block">
                 <i class="material-symbols-rounded">menu</i>
               </button>
             </li>
-            <li class="breadcrumb-item text-sm d-flex align-items-center"><a class="opacity-5 text-dark" href="/paymentMethods">Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD</a></li>
-            <!-- <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li> -->
-            <!-- <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Billing</li> -->
+
+            <li class="breadcrumb-item text-sm d-flex align-items-center">
+              <a class="opacity-5 text-dark" href="/paymentMethods">
+                Tasa Actual: {{ $dollarRate ? number_format($dollarRate->rate, 2) : 'No disponible' }} VES / USD
+              </a>
+            </li>
+
+            <!-- Botones solo para móvil -->
+            <li class="d-lg-none">
+              <!-- Abrir -->
+              <button id="btnOpenNav" class="btn btn-black top-0 start-0 m-2 z-index-3">
+                <i class="material-symbols-rounded">menu</i>
+              </button>
+              <!-- Cerrar -->
+              <button id="btnCloseNav" class="btn btn-black top-0 start-0 m-2 z-index-3" style="display:none;">
+                <i class="material-symbols-rounded">close</i>
+              </button>
+            </li>
           </ol>
         </nav>
+
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <!-- <div class="ms-md-auto pe-md-3 d-flex align-items-center">
             <div class="input-group input-group-outline">
@@ -65,9 +82,9 @@
               <a class="github-button" href="https://github.com/creativetimofficial/material-dashboard" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star creativetimofficial/material-dashboard on GitHub">Star</a>
             </li> -->
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-            <button class="nav-link text-body p-0" id='toggleSidenav'>
+            <!-- <button class="nav-link text-body p-0" id='toggleSidenav'>
                 <i class="material-symbols-rounded fixed-plugin-button-nav">menu</i>
-              </button>
+              </button> -->
             </li>
             <!-- <li class="nav-item px-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body p-0">
@@ -165,24 +182,54 @@
 
 <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
 
-  <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        const toggleNavbarButton = document.getElementById('toggleNavbar');
-        const sidenav = document.getElementById('sidenav-main');
-        const body = document.getElementById('sidenav-main');
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sidenav = document.getElementById('sidenav-main');
 
-        toggleNavbarButton.addEventListener('click', function () {
+    // Botones
+    const btnDesktop = document.getElementById('btnDesktopNav');
+    const btnOpen = document.getElementById('btnOpenNav');
+    const btnClose = document.getElementById('btnCloseNav');
+
+    // ==== Desktop ====
+    if (btnDesktop) {
+        btnDesktop.addEventListener('click', function () {
             sidenav.classList.toggle('closed');
-            body.classList.toggle('sidenav'); // Agrega o elimina la clase navbar-closed
-            const icon = toggleNavbarButton.querySelector('i');
+            const icon = btnDesktop.querySelector('i');
             if (sidenav.classList.contains('closed')) {
-                icon.textContent = 'menu_open'; // Cambia el ícono a "menu_open"
+                icon.textContent = 'menu_open';
             } else {
-                icon.textContent = 'menu'; // Cambia el ícono a "menu"
+                icon.textContent = 'menu';
             }
         });
+    }
+
+    // ==== Móvil ====
+    function initMobileState() {
+        if (window.innerWidth < 992) {
+            sidenav.classList.add('closed');
+            btnOpen.style.display = "inline-block";
+            btnClose.style.display = "none";
+        }
+    }
+
+    btnOpen.addEventListener('click', function () {
+        sidenav.classList.remove('closed');
+        btnOpen.style.display = "none";
+        btnClose.style.display = "inline-block";
     });
-  </script>
+
+    btnClose.addEventListener('click', function () {
+        sidenav.classList.add('closed');
+        btnClose.style.display = "none";
+        btnOpen.style.display = "inline-block";
+    });
+
+    // Al cargar y al redimensionar
+    initMobileState();
+    window.addEventListener('resize', initMobileState);
+});
+</script>
 
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

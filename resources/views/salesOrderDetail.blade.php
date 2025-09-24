@@ -1,24 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
-  <title>Orden de Venta</title>
-  <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
+@section('title', 'Categorías')
 
-<body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    @extends('layouts.navbar')
-  </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-    @include('layouts.head')
-    <!-- End Navbar -->
+@section('content')
     <div class="container-fluid">
       <h1>Detalles de la Orden Nro {{ $order->id }}</h1>
       <input type="text" id="user-name" class="d-none" value="{{ $order->user->name }}" readonly>
@@ -205,9 +189,9 @@
           </div>
       </div>
     </div>
-  </main>
-  
-<!-- Core JS Files -->
+    @endsection
+
+@push('scripts')
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
@@ -356,7 +340,4 @@ document.getElementById('returnForm').addEventListener('submit', function (event
     });
 });
 </script>
-
-</body>
-
-</html>
+@endpush

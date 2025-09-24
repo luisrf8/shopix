@@ -14,7 +14,9 @@ class ProductVariant extends Model
         'size',
         'price',
         'stock',
+        'unit_type', // agregado
     ];
+
 
     public function product()
     {

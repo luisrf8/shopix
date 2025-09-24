@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\IndexController;
 // use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -69,6 +70,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{id}', [PurchaseOrderController::class, 'showByOrder'])->name('showByOrder');
     Route::get('/sales-orders/{id}/pdf', [SaleController::class, 'downloadPdf']);
 
+    // ----- Tenants ----- //
+    Route::get('/tenants', [TenantController::class, 'index'])->name('tenant.index');
+    Route::get('/create-tenant', function () {
+        return view('createTenant');
+    })->name('createTenant');
+    Route::resource('tenants', TenantController::class);
 });
 
 

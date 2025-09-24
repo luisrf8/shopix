@@ -1,66 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <title>
-    Productos
-  </title>
-  <!--     Fonts and icons     -->
-  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
-  <!-- Nucleo Icons -->
-  <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <!-- Material Icons -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <!-- CSS Files -->
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
+@section('title', 'Categorías')
 
-<body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    @extends('layouts.navbar')
-  </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-    @include('layouts.head')
-    <!-- End Navbar -->
+@section('content')
     <div class="container-fluid py-2">
       <div class="row">
-      <div class="col-md-12 mt-4">
-  <div class="">
-    <div class="pb-0 px-3">
-      <a href="{{ route('products.index') }}" class="d-flex align-items-center">
-        <i class="material-symbols-rounded opacity-10">arrow_back_ios_new</i>
-        <h6 class="mb-0 mx-1">Volver</h6>
-      </a>
-    </div>
-    <div class="pt-4">
-      <div class="row">
-      <div class="container">
-          <div class="row">
-            <div class="col-md-12">
+        <div class="col-md-12 mt-4">
+          <div class="">
+            <div class="pb-0 px-3">
+              <a href="{{ route('products.index') }}" class="d-flex align-items-center">
+                <i class="material-symbols-rounded opacity-10">arrow_back_ios_new</i>
+                <h6 class="mb-0 mx-1">Volver</h6>
+              </a>
+            </div>
+            <div class="pt-4">
+              <div class="row">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
               <!-- <div class="card"> -->
-              <div class="card" data-product-id="{{ $product->id }}">
-                  <div class="card-body d-flex flex-row">
-                    <div class="d-flex">
-                      {{-- Miniaturas a la izquierda --}}
-                      <div class="d-flex flex-column me-3" style="gap: 0.5rem;">
-                        @foreach($product->images as $index => $image)
-                          <img 
-                            src="{{ asset('storage/' . $image->path) }}" 
-                            alt="Miniatura"
-                            class="img-thumbnail cursor-pointer m-0 p-0 border border-1 border-dark text-dark border-radius-lg "
-                            style="width: 4rem; height: 4rem; object-fit: cover;"
-                            onclick="changeMainImage('{{ asset('storage/' . $image->path) }}', {{ $image->id }})"
-                          >
-                        @endforeach
-                      </div>
+                      <div class="card" data-product-id="{{ $product->id }}">
+                          <div class="card-body d-flex flex-row">
+                            <div class="d-flex">
+                              {{-- Miniaturas a la izquierda --}}
+                              <div class="d-flex flex-column me-3" style="gap: 0.5rem;">
+                                @foreach($product->images as $index => $image)
+                                  <img 
+                                    src="{{ asset('storage/' . $image->path) }}" 
+                                    alt="Miniatura"
+                                    class="img-thumbnail cursor-pointer m-0 p-0 border border-1 border-dark text-dark border-radius-lg "
+                                    style="width: 4rem; height: 4rem; object-fit: cover;"
+                                    onclick="changeMainImage('{{ asset('storage/' . $image->path) }}', {{ $image->id }})"
+                                  >
+                                @endforeach
+                              </div>
 
                       {{-- Imagen principal y botones --}}
                       <div class="position-relative" style="width: 25rem; height: 25rem;">
@@ -180,8 +153,9 @@
   </div>
   </div>
   </div>
-</main>
-<!-- Core JS Files -->
+    @endsection
+
+@push('scripts')
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 <!-- Github buttons -->
@@ -428,8 +402,4 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
 });
 
 </script>
-
-
-</body>
-
-</html>
+@endpush

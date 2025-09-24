@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Producto</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="g-sidenav-show  bg-gray-100" id="d-body">
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2" id="sidenav-main">
-    @extends('layouts.navbar')
-  </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-  @include('layouts.head')
+@extends('layouts.app')
 
+@section('title', 'Crear Producto')
+
+@section('content')
     <div class="container">
         <div class="card my-4">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
@@ -65,7 +55,8 @@
         </div>
     </div>
 
-    </main>
+@endsection
+@push('scripts')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -178,5 +169,4 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endpush

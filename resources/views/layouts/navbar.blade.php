@@ -1,28 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <title>
-  </title>
-  <!--     Fonts and icons     -->
-  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
-  <!-- Nucleo Icons -->
-  <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <!-- Material Icons -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-  <!-- CSS Files -->
-  <link href="{{ asset('assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
 <style>
-  #sidenav-main {
+#sidenav-main {
   transition: transform 0.3s ease-in-out;
 }
 
@@ -34,29 +11,42 @@
   transition: margin-left 0.3s ease-in-out;
 }
 
-.sidenav.fixed-start + .main-content {
+/* Desktop */
+@media (min-width: 992px) {
+  .sidenav.fixed-start + .main-content {
     margin-left: 15rem;
     transition: margin 0.3s ease-in-out;
-}
+  }
 
-.sidenav.fixed-end + .main-content {
+  .sidenav.fixed-start.closed + .main-content {
+    margin-left: 0; /* Quita margen cuando está cerrado */
+  }
+
+  .sidenav.fixed-end + .main-content {
     margin-right: 15rem;
     transition: margin 0.3s ease-in-out;
+  }
+
+  .sidenav.fixed-end.closed + .main-content {
+    margin-right: 0; /* Quita margen cuando está cerrado */
+  }
 }
 
-/* Cuando la navbar está oculta */
-.navbar-closed .main-content {
-    margin-left: 0;
-    margin-right: 0;
+/* Móvil y tablet */
+@media (max-width: 991px) {
+  .sidenav.fixed-start + .main-content,
+  .sidenav.fixed-end + .main-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
+
 </style>
 <body class="bg-gray-100">
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 my-2" id="sidenav-main">
-    <div class="sidenav-header bg-gray-900 m-0 p-0 h-15">
+    <div class="sidenav-header m-0 p-0 h-15">
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand d-flex justify-content-center align-items-center" href="/dashboard" target="_blank">
-        <img src="../../assets/img/inf.png" class="navbar-brand-img" width="100" height="100" alt="main_logo">
-        <!-- <span class="ms-1 text-sm text-dark">Infinity Center</span> -->
+        <img src="../../assets/img/shopix5.png" class="navbar-brand-img" width="100" height="100" alt="main_logo">
       </a>
     </div>
     @php
@@ -65,7 +55,7 @@
     <hr class="horizontal dark mt-0 mb-2">
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
       <ul class="navbar-nav">
-      @if($user->name !== 'Vendedor')
+      @if($user->role_id === 1)
         <li class="nav-item">
           <a class="nav-link text-dark" href="/dashboard">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
@@ -75,7 +65,6 @@
         <li class="nav-item">
           <a class="nav-link text-dark" href="/categories">
             <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-            <!-- <i class="bi bi-bag"></i> -->
             <span class="nav-link-text ms-1">Categorías</span>
           </a>
         </li>
@@ -88,11 +77,12 @@
         <li class="nav-item">
           <a class="nav-link text-dark" href="/paymentMethods">
             <i class="material-symbols-rounded opacity-5">view_in_ar</i>
-            <!-- <i class="bi bi-bag"></i> -->
             <span class="nav-link-text ms-1">Métodos de Pago</span>
           </a>
         </li>
       @endif
+        @if($user->role_id === 2 || $user->role_id === 1)
+
         <li class="nav-item">
           <a class="nav-link text-dark" href="/sales">
             <i class="material-symbols-rounded opacity-5">receipt_long</i>
@@ -105,7 +95,8 @@
             <span class="nav-link-text ms-1">Ventas Realizadas</span>
           </a>
         </li>
-        @if($user->name !== 'Vendedor')
+      @endif
+        @if($user->role_id === 2)
           <li class="nav-item">
             <a class="nav-link text-dark" href="/purchase">
               <i class="material-symbols-rounded opacity-5">view_in_ar</i>
@@ -119,8 +110,20 @@
               <span class="nav-link-text ms-1">Compras Realizadas</span>
             </a>
           </li>
-          <li class="nav-item mt-3">
-            <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Usuarios</h6>
+        @endif
+        @if($user->role_id === 4)
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/purchase">
+              <i class="material-symbols-rounded opacity-5">view_in_ar</i>
+              <!-- <i class="bi bi-bag"></i> -->
+              <span class="nav-link-text ms-1">Planes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-dark" href="/tenants">
+              <i class="material-symbols-rounded opacity-5">format_textdirection_r_to_l</i>
+              <span class="nav-link-text ms-1">Tiendas</span>
+            </a>
           </li>
           <li class="nav-item">
             <a class="nav-link text-dark" href="/users">
@@ -142,7 +145,6 @@
       <div class="mx-3">
       </div>
     </div>
-  </aside>
 <!-- Core JS Files -->
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
@@ -164,46 +166,27 @@
     }
   </script>
   <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const currentUrl = window.location.pathname; // Obtén la ruta actual sin el dominio
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link'); // Selecciona los enlaces
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentUrl = window.location.pathname; // Obtén la ruta actual sin el dominio
+        const navLinks = document.querySelectorAll('.navbar-nav .nav-link'); // Selecciona los enlaces
 
-    navLinks.forEach(link => {
-        const linkHref = link.getAttribute('href');
-        if (currentUrl === linkHref) { // Compara la ruta actual con el href
-            link.classList.add("bg-gray-900", "text-white");
-        } else {
-            link.classList.remove("bg-gray-900", "text-white");
-        }
+        navLinks.forEach(link => {
+            const linkHref = link.getAttribute('href');
+            if (currentUrl === linkHref) { // Compara la ruta actual con el href
+                link.classList.add("bg-gray-900", "text-white");
+            } else {
+                link.classList.remove("bg-gray-900", "text-white");
+            }
+        });
+        const toggleNavbarButton = document.getElementById('toggleNavbar');
+        const sidenav = document.getElementById('sidenav-main');
+        const body = document.getElementById('d-body');
+
     });
-    const toggleNavbarButton = document.getElementById('toggleNavbar');
-    const sidenav = document.getElementById('sidenav-main');
-    const body = document.getElementById('d-body');
-
-    toggleNavbarButton.addEventListener('click', function () {
-        sidenav.classList.toggle('closed');
-        body.classList.toggle('navbar-closed');
-    });
-    toggleNavbarButton.addEventListener('click', function () {
-    sidenav.classList.toggle('closed');
-    body.classList.toggle('navbar-closed');
-
-    const icon = toggleNavbarButton.querySelector('i');
-    if (sidenav.classList.contains('closed')) {
-        icon.textContent = 'menu_open'; // Cambia el ícono a "menu_open"
-    } else {
-        icon.textContent = 'menu'; // Cambia el ícono a "menu"
-    }
-});
-});
 
   function logOut() {
-    fetch("/logout", { // Ajusta a `/api/logout` si es una ruta API.
+    fetch("/logout", { 
         method: 'POST',
-        // headers: {
-        //     'Content-Type': 'application/json',
-        //     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Obtener el token CSRF de la meta etiqueta
-        // }
     })
     .then(response => {
         if (response.ok) {
@@ -213,9 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     })
     .then(data => {
-        console.log("Logged out successfully:", data);
-        // localStorage.removeItem('authToken');
-        window.location.href = '/login'; // Redirigir a la página de inicio de sesión.
+        window.location.href = '/login';
     })
     .catch(error => {
         console.error("Error during logout:", error);
@@ -223,10 +204,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 }
 </script>
-  <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script src="{{ asset('assets/js/navbar.js') }}"></script>
-  <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-</body>
-
-</html>

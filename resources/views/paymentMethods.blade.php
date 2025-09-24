@@ -1,26 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
-  <title>Shopix</title>
-  <link href="assets/css/nucleo-icons.css" rel="stylesheet" />
-  <link href="assets/css/nucleo-svg.css" rel="stylesheet" />
-  <link id="pagestyle" href="assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
-</head>
+@section('title', 'Categorías')
 
-<body class="g-sidenav-show bg-gray-100" id="d-body">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2 d-none d-lg-block bg-white my-2" id="sidenav-main">
-    @include('layouts.navbar')
-  </aside>
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-    <!-- Navbar -->
-    @include('layouts.head')
-    <!-- End Navbar -->
-
+@section('content')
     <div class="container-fluid py-2">
       <div class="row align-items-center">
         <div class="col-6 d-flex align-items-center">
@@ -314,8 +296,9 @@
         </div>
       </div>
     </div>
-  </main>
-  <!-- Core JS Files -->
+    @endsection
+
+@push('scripts')
 <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
 
@@ -599,5 +582,4 @@
 
 
   </script>
-</body>
-</html>
+@endpush
