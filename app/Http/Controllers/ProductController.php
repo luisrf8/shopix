@@ -26,13 +26,23 @@ class ProductController extends Controller
     // }
     public function index()
     {
-        $categories = Category::all();
-        $productItems = Product::with(['category', 'images', 'variants'])
-            ->orderBy('created_at', 'desc')
+        $user = auth()->user();
+
+        $categories = Category::with(['products' => function ($query) use ($user) {
+                $query->where('is_active', true)
+                    ->where('tenant_id', $user->tenant_id)
+                    ->with(['variants']);
+            }])
+            ->where('tenant_id', $user->tenant_id) // 👈 aquí filtras las categorías
             ->get();
     
+        $productItems = Product::with(['category', 'images', 'variants'])
+            ->where('tenant_id', $user->tenant_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('products', compact('categories', 'productItems'));
     }
+
     public function getProducts()
     {
         $productItems = Product::with(['category', 'images', 'variants'])
@@ -41,25 +51,33 @@ class ProductController extends Controller
     }
     public function categoriesIndex()
     {
-        $categories = Category::with(['products' => function ($query) {
-            $query->where('is_active', true)->with(['variants']);
-        }])->get();
-    
+        $user = auth()->user();
+
+        $categories = Category::where('tenant_id', $user->tenant_id)
+            ->with(['products' => function ($query) use ($user) {
+                $query->where('is_active', true)
+                    ->where('tenant_id', $user->tenant_id)
+                    ->with('variants');
+            }])
+            ->get();
+
         // Calcular total de stock por categoría
         foreach ($categories as $category) {
             $totalStock = 0;
-    
+
             foreach ($category->products as $product) {
                 foreach ($product->variants as $variant) {
                     $totalStock += $variant->stock;
                 }
             }
-    
-            // Agregamos el total como propiedad adicional para usarlo en la vista
+
+            // Agregar el total como propiedad adicional para usarlo en la vista
             $category->total_available_items = $totalStock;
         }
+
         return view('categories', compact('categories'));
     }
+
     public function showByCategory($categoryId)
     {
         $category = Category::findOrFail($categoryId);
@@ -110,6 +128,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required',
+            'tenant_id' => 'required'
         ]);
 
         // Crear el producto
@@ -136,6 +155,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'name' => $request->productName,
             'description' => $request->productDescription,
+            'tenant_id' => $request->tenant_id
         ]);
         // Guardar cada imagen
         if ($request->hasFile('images')) {
@@ -264,9 +284,11 @@ class ProductController extends Controller
 
     }
 
-    public function generateReport()
+    public function generateReport(Request $request)
     {
-        $products = Product::with('variants')->get();
+        $products = Product::with('variants')
+        ->where('tenant_id', $request->tenant_id)
+        ->get();
 
         $csvData = "Nombre,Descripción,Precio,Stock Total\n";
 

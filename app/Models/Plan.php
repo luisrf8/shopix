@@ -11,6 +11,9 @@ class Plan extends Model
 
     protected $fillable = ['name', 'price', 'duration_days', 'features'];
 
+    protected $casts = [
+        'features' => 'array', // Esto convierte automáticamente JSON a array
+    ];
     public function payments()
     {
         return $this->hasMany(TenantPlanPayment::class);

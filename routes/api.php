@@ -12,6 +12,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GoogleDriveController;
+use App\Http\Controllers\PlanController;
 
 // ------------------------ RUTAS PÚBLICAS ------------------------
 
@@ -104,3 +105,9 @@ Route::post('/sales-orders-report', [SaleController::class, 'viewOrdersReport'])
 
 Route::post('/create-order', [PurchaseOrderController::class, 'store']);
 Route::post('/get-variants', [PurchaseOrderController::class, 'getVariants']);
+
+// ------------------------ Planes ------------------------
+
+Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+Route::post('/plans/{id}', [PlanController::class, 'update']);
+Route::delete('/plans/{id}', [PlanController::class, 'destroy'])->name('plans.destroy');

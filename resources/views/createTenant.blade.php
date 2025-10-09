@@ -63,7 +63,16 @@
                             </div>
 
                         </div>
-
+                        
+                        {{-- Plan --}}
+                        <div class="mb-3">
+                            <label for="plan_id" class="form-label">Plan</label>
+                            <select name="plan_id" id="plan_id" class="form-control border border-radius-lg p-2" required>
+                                @foreach($plans as $plan)
+                                    <option value="{{ $plan->id }}">{{ $plan->name }} - ${{ $plan->price }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
 
 

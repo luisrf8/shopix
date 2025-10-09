@@ -6,15 +6,32 @@ use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Plan;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use App\Models\TenantPlanPayment;
 
 class TenantController extends Controller
 {
-    public function index()
+public function index()
+{
+    // Trae todos los tenants con todos sus planes asociados
+    $tenants = Tenant::with(['tenantPlanPayments.plan'])->get();
+
+    // O solo el plan activo de cada tenant
+    // $tenants = Tenant::with(['activePlanPayment.plan'])->get();
+
+    $plans = Plan::all();
+
+    return view('tenant', compact('tenants', 'plans'));
+}
+
+
+    public function createIndex()
     {
         $tenants = Tenant::all();
-        return view('tenant', compact('tenants'));
+        $plans = Plan::all();
+        return view('createTenant', compact('tenants', 'plans'));
 
     }
 
@@ -29,6 +46,7 @@ class TenantController extends Controller
             'color_secondary' => 'required|string|max:7',
             'color_accent'    => 'required|string|max:7',
             'users'           => 'array',
+            'plan_id'         => 'required|exists:plans,id', 
         ]);
 
         // 📂 Subir logo si existe
@@ -40,7 +58,7 @@ class TenantController extends Controller
         // 🏢 Crear Tenant
         $tenant = Tenant::create([
             'name'            => $request->name,
-            'slug'            => '/' . ltrim(Str::slug($request->slug), '/'), // 🔹 asegura el "/" al inicio
+            'slug'            => '/' . ltrim(Str::slug($request->slug), '/'),
             'email'           => $request->email,
             'logo'            => $logoPath,
             'color_primary'   => $request->color_primary,
@@ -48,6 +66,16 @@ class TenantController extends Controller
             'color_accent'    => $request->color_accent,
         ]);
 
+        // 💳 Crear relación TenantPayment
+        $plan = Plan::findOrFail($request->plan_id);
+
+        TenantPlanPayment::create([
+            'tenant_id' => $tenant->id,
+            'plan_id'   => $plan->id,
+            'amount'    => $plan->price,
+            'status'    => 'paid', // o pending si quieres validar pago
+            'paid_at'   => now(),
+        ]);
 
         // 🎭 Obtener roles existentes
         $roles = Role::whereIn('name', ['owner', 'admin', 'vendor'])->get()->keyBy('name');
@@ -70,7 +98,7 @@ class TenantController extends Controller
 
         return redirect()
             ->route('tenants.index')
-            ->with('success', 'Tenant creado correctamente con sus usuarios.');
+            ->with('success', 'Tenant creado correctamente con su plan y usuarios.');
     }
 
     public function show(Tenant $tenant)

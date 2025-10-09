@@ -109,4 +109,15 @@ class Tenant extends Model
     {
         return $this->hasMany(OrderStatus::class);
     }
+
+    public function tenantPlanPayments()
+    {
+        return $this->hasMany(TenantPlanPayment::class);
+    }
+
+    // Si quieres solo el plan activo:
+    public function activePlanPayment()
+    {
+        return $this->hasOne(TenantPlanPayment::class)->where('status', 'active');
+    }
 }

@@ -140,7 +140,7 @@
                         <strong>Total a pagar: </strong><span id="totalAmountBsValue">0.00</span>Bs 
                     </div>
                     <div class="mb-3">
-                        <strong>Tasa BCV: </strong><span id="dollarRate" data-rate="{{ number_format($dollarRate->rate, 2, '.', '') }}">{{ number_format($dollarRate->rate, 2) }} Bs.</span>
+                        {{-- <strong>Tasa BCV: </strong><span id="dollarRate" data-rate="{{ number_format($dollarRate->rate, 2, '.', '') }}">{{ number_format($dollarRate->rate, 2) }} Bs.</span> --}}
                     </div>
                     <div id="paymentMethods" class="mb-3">
                         @php

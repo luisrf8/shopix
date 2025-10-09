@@ -39,6 +39,15 @@
                     <td>{{ $tenant->email }}</td>
                     <td>{{ $tenant->logo }}</td>
                     <td>
+                      @foreach($tenant->tenantPlanPayments as $payment)
+                          <p>Plan: {{ $payment->plan->name }} - ${{ $payment->amount }} - Estado: {{ $payment->status }}</p>
+                      @endforeach
+                  
+                      {{-- O solo plan activo --}}
+                      {{-- <p>Plan activo: {{ $tenant->activePlanPayment->plan->name ?? 'Sin plan' }}</p> --}}
+                    </td>
+
+                    <td>
                       <a href="javascript:;" 
                          class="text-secondary font-weight-bold text-xs btn-edit-tenant"
                          data-bs-toggle="modal" 

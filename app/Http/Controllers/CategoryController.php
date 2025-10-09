@@ -10,8 +10,10 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with(['products' => function ($query) {
-            $query->where('is_active', true)->with(['variants']);
+        $user = auth()->user();
+
+        $categories = Category::with(['products' => function ($query) use ($user) {
+            $query->where('is_active', true)->where('tenant_id', $user->tenant_id)->with(['variants']);
         }])->get();
     
         // Calcular total de stock por categoría
@@ -29,9 +31,16 @@ class CategoryController extends Controller
         }
         return view('products.index', compact('categories'));
     }
-    public function getCategories()
+    public function getCategories(Request $request)
     {
-        $categories = Category::all();
+        $tenantId = $request->tenant_id; 
+
+        if (!$tenantId || !is_numeric($tenantId)) {
+            return response()->json(['error' => 'Tenant ID inválido o no enviado'], 400);
+        }
+
+        $categories = Category::where('tenant_id', $tenantId)->get();
+        
         return response()->json($categories);
     }
     public function create()
@@ -44,11 +53,13 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:categories',
             'description' => 'nullable|string',
+            'tenant_id' => 'required'
         ]);
 
         $category = Category::create([
             'name' => $request->name,
             'description' => $request->description,
+            'tenant_id' => $request->tenant_id
         ]);
 
         // return redirect()->route('categories.index')->with('success', 'Categoría creada con éxito.');

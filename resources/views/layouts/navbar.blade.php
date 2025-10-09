@@ -43,15 +43,33 @@
 
 </style>
 <body class="bg-gray-100">
+    @php
+      use App\Models\Tenant;
+
+      $user = auth()->user();
+      $tenantLogo = null;
+      $tenant = null;
+      if ($user && $user->tenant_id) {
+          $tenant = Tenant::find($user->tenant_id);
+
+          if ($tenant && $tenant->logo) {
+              // Si el logo está almacenado en storage
+              $tenantLogo = asset('storage/' . $tenant->logo);
+          }
+      }
+    @endphp
     <div class="sidenav-header m-0 p-0 h-15">
-      <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand d-flex justify-content-center align-items-center" href="/dashboard" target="_blank">
-        <img src="../../assets/img/shopix5.png" class="navbar-brand-img" width="100" height="100" alt="main_logo">
+      <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+        aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand d-flex justify-content-center align-items-center" href="/dashboard">
+        <img src="{{ $tenantLogo ?? asset('assets/img/shopix5.png') }}"
+            class="navbar-brand-img"
+            width="100"
+            height="100"
+            alt="main_logo"
+            style="object-fit: contain;">
       </a>
     </div>
-    @php
-      $user = Auth::user();
-    @endphp
     <hr class="horizontal dark mt-0 mb-2">
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
       <ul class="navbar-nav">
@@ -113,7 +131,7 @@
         @endif
         @if($user->role_id === 4)
           <li class="nav-item">
-            <a class="nav-link text-dark" href="/purchase">
+            <a class="nav-link text-dark" href="/plans">
               <i class="material-symbols-rounded opacity-5">view_in_ar</i>
               <!-- <i class="bi bi-bag"></i> -->
               <span class="nav-link-text ms-1">Planes</span>

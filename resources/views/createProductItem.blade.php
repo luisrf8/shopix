@@ -60,8 +60,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            console.log("gola")
-            fetch('api/categories', {
+            const authUser = @json($authUser);
+            const tenantId = Number(authUser.tenant_id);
+            fetch(`api/categories?tenant_id=${tenantId}`, {
                 method: 'GET',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
@@ -121,10 +122,13 @@
         });
 
         document.getElementById('createProductForm').addEventListener('submit', function (event) {
+            const authUser = @json($authUser);
+            const tenantId = Number(authUser.tenant_id);
             event.preventDefault();
 
             let formData = new FormData(this);
-            console.log("formData", formData)
+            formData.append('tenant_id', tenantId); // 👈 Agregas el tenant_id
+
             // Agrega variantes al FormData
             const variants = [];
             document.querySelectorAll('#variantContainer .variant-row').forEach((row) => {

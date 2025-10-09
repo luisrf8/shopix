@@ -47,72 +47,82 @@ class IndexController extends Controller
 
     public function index()
     {
-        $currentDate = Carbon::now();
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $startOfNineMonthsAgo = Carbon::now()->subMonths(8)->startOfMonth(); // Incluye el mes actual
-    
-        $users = User::with('role')->get();
-        $productItems = Product::with(['category', 'images', 'variants'])->get();
-    
-        $salesOrders = SalesOrder::with(['user', 'details', 'details.variant'])
-            ->latest('date')->take(3)->get();
-    
-        $purchaseOrders = PurchaseOrder::with(['detalles'])
-            ->latest('date')->take(3)->get();
-    
-        // Cantidad de ventas en la última semana
-        $weeklySalesCount = SalesOrder::where('date', '>=', $startOfWeek)->count();
+        $now = Carbon::now();
+        $startOfWeek = $now->copy()->startOfWeek();
+        $startOfNineMonthsAgo = $now->copy()->subMonths(8)->startOfMonth(); // incluye mes actual
 
-        $months = collect(range(0, 8))->map(function ($i) {
-            return Carbon::now()->subMonths($i)->format('M');
-        })->reverse()->values();
+        $user = auth()->user();
+        $tenantId = $user->tenant_id;
+
+        // Cargas (filtradas por tenant)
+        $users = User::with('role')->where('tenant_id', $tenantId)->get();
+        $productItems = Product::with(['category', 'images', 'variants'])
+            ->where('tenant_id', $tenantId)
+            ->get();
+
+        $salesOrders = SalesOrder::with(['user', 'details', 'details.variant'])
+            ->where('tenant_id', $tenantId)
+            ->latest('date')->take(3)->get();
+
+        $purchaseOrders = PurchaseOrder::with(['detalles'])
+            ->where('tenant_id', $tenantId)
+            ->latest('date')->take(3)->get();
+
+        // Cantidad de ventas en la última semana (filtrado)
+        $weeklySalesCount = SalesOrder::where('date', '>=', $startOfWeek)
+            ->where('tenant_id', $tenantId)
+            ->count();
+
+        // Meses (últimos 9, incluyendo actual)
+        $months = collect(range(8, 0))->map(function ($i) use ($now) {
+            return $now->copy()->subMonths($i)->format('M');
+        });
 
         // Productos con bajo stock (menos de 10 unidades)
         $lowStockProducts = Product::select('products.id', 'products.name', DB::raw('SUM(product_variants.stock) as total_stock'))
-        ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
-        ->groupBy('products.id', 'products.name')
-        ->orderBy('total_stock', 'asc')
-        ->limit(4)
-        ->get();
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->where('products.tenant_id', $tenantId)
+            ->groupBy('products.id', 'products.name')
+            ->orderBy('total_stock', 'asc')
+            ->limit(4)
+            ->get();
 
-        // Ventas por mes (últimos 9 meses incluyendo el actual)
+        // Ventas por mes (últimos 9 meses)
         $monthlySales = SalesOrder::selectRaw('DATE_FORMAT(date, "%b") as month, COUNT(*) as total')
-        ->where('date', '>=', $startOfNineMonthsAgo)
-        ->groupBy(DB::raw('YEAR(date), MONTH(date), DATE_FORMAT(date, "%b")'))
-        ->orderByRaw('YEAR(date), MONTH(date)')
-        ->get()
-        ->pluck('total', 'month')
-        ->toArray();
-    
-    
-        // Asegurar que cada mes esté presente (aunque sea 0)
-        $months = collect(range(0, 8))->map(function ($i) {
-            return Carbon::now()->subMonths($i)->format('M');
-        })->reverse()->values();
-    
+            ->where('date', '>=', $startOfNineMonthsAgo)
+            ->where('tenant_id', $tenantId)
+            ->groupBy(DB::raw('YEAR(date), MONTH(date), DATE_FORMAT(date, "%b")'))
+            ->orderByRaw('YEAR(date), MONTH(date)')
+            ->get()
+            ->pluck('total', 'month')
+            ->toArray();
+
         $monthlySalesFormatted = $months->map(function ($month) use ($monthlySales) {
             return $monthlySales[$month] ?? 0;
         });
-    
-        $topProducts = SalesOrderDetail::with('variant.product')
-        ->select('products.id', 'products.name', DB::raw('SUM(quantity) as total_sales'))
-        ->join('product_variants', 'sales_order_details.product_variant_id', '=', 'product_variants.id')
-        ->join('products', 'product_variants.product_id', '=', 'products.id')
-        ->groupBy('products.id', 'products.name')
-        ->orderByDesc('total_sales')
-        ->limit(5)
-        ->get();
-    
-        $topProductNames = $topProducts->pluck('name');
-        $topProductSales = $topProducts->pluck('total_sales');
-    
+
+        // Top products (asegurando que el producto pertenezca al tenant)
+        $topProducts = SalesOrderDetail::select('products.id', 'products.name', DB::raw('SUM(quantity) as total_sales'))
+            ->join('product_variants', 'sales_order_details.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->where('sales_order_details.tenant_id', $tenantId)
+            ->where('products.tenant_id', $tenantId)
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get();
+
+        $topProductNames = $topProducts->pluck('name')->toArray();
+        $topProductSales = $topProducts->pluck('total_sales')->toArray();
+
+        // Stats: usar counts filtrados por tenant (antes usabas Model::count() global)
         $stats = [
-            ['name' => 'Usuarios', 'count' => User::count(), 'link' => '/users'],
-            ['name' => 'Productos', 'count' => Product::count(), 'link' => '/products'],
-            ['name' => 'Órdenes de Venta', 'count' => SalesOrder::count(), 'link' => '/sales-orders'],
-            ['name' => 'Órdenes de Compra', 'count' => PurchaseOrder::count(), 'link' => '/purchase-orders'],
+            ['name' => 'Usuarios', 'count' => User::where('tenant_id', $tenantId)->count(), 'link' => '/users'],
+            ['name' => 'Productos', 'count' => Product::where('tenant_id', $tenantId)->count(), 'link' => '/products'],
+            ['name' => 'Órdenes de Venta', 'count' => SalesOrder::where('tenant_id', $tenantId)->count(), 'link' => '/sales-orders'],
+            ['name' => 'Órdenes de Compra', 'count' => PurchaseOrder::where('tenant_id', $tenantId)->count(), 'link' => '/purchase-orders'],
         ];
-    
+
         return view('dashboard', compact(
             'stats',
             'purchaseOrders',
@@ -122,7 +132,8 @@ class IndexController extends Controller
             'topProductNames',
             'topProductSales',
             'months',
-            'lowStockProducts'
+            'lowStockProducts',
+            'user'
         ));
     }
     

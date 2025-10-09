@@ -36,17 +36,18 @@ class SaleController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $customerId = $user;
         // Traer todos los productos con sus variantes
         $productItems = Product::with(['category', 'images', 'variants'])
+        ->where('tenant_id', $user->tenant_id)
         ->orderBy('created_at', 'desc')->get();
-        $paymentMethods = PaymentMethod::with('currency')->get();
-        $dollarRate = DollarRate::latest('created_at')->first();
+        $paymentMethods = PaymentMethod::with('currency')->where('tenant_id', $user->tenant_id)->get();
+        $dollarRate = DollarRate::latest('created_at')->where('tenant_id', $user->tenant_id)->first();
 
         // Traer todas las categorías
-        $categories = Category::all();
-    
+        $categories = Category::where('tenant_id', $user->tenant_id)->get();
+
         return view('sales', compact('categories', 'paymentMethods', 'productItems', 'dollarRate', 'customerId'));
     }
     
@@ -318,13 +319,14 @@ class SaleController extends Controller
 
     public function viewOrders()
     {
+        $user = auth()->user();
         $salesOrders = SalesOrder::with([
             'user', 
             'details', 
             'details.variant', 
             'payments' // Agregamos la relación de pagos
-        ])->orderBy('id', 'desc')->get();
-    
+        ])->where('tenant_id', $user->tenant_id)->orderBy('id', 'desc')->get();
+
         foreach ($salesOrders as $order) {
             $order->total_items = $order->details->sum('quantity');
         }

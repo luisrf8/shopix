@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Categorías')
-
 @section('content')
     <div class="container-fluid py-2">
       <!-- Modal para crear categoría -->
@@ -35,6 +33,9 @@
       <!-- Modal para crear categoría -->
       <!-- Tabla para mostrar categorías -->
       <div class="row">
+        {{ $authUser?->name }}
+        {{ $authUser?->tenant_id }}
+
         <div class="col-12">
           <div class="card my-4">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
@@ -141,10 +142,13 @@
 
 @push('scripts')
   <script>
+    const authUser = @json($authUser);
+    const tenantId = Number(authUser.tenant_id);
     document.getElementById('createCategoryForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Evita el envío normal del formulario
+      event.preventDefault();
 
-      let formData = new FormData(this); // Crear un FormData con los datos del formulario
+      let formData = new FormData(this);
+      formData.append('tenant_id', tenantId); // 👈 Agregas el tenant_id
       fetch('api/create-category', {
         method: 'POST',
         headers: {
@@ -153,7 +157,7 @@
         body: formData
       })
       .then(response => {
-        if (response.status === 201) { // Valida el código de estado HTTP
+        if (response.status === 201) {
           alert('Categoría creada correctamente');
           window.location.reload();
         } else {
@@ -207,7 +211,6 @@
     });
     document.querySelectorAll('.toggle-status-btn').forEach(button => {
       button.addEventListener('click', function () {
-        console.log("hola")
         const categoryId = this.getAttribute('data-id');
         const currentStatus = this.getAttribute('data-status');
         // Alternar el estado
@@ -219,7 +222,9 @@
           headers: {
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
           },
-          body: { is_active: newStatus === 'active' ? 1 : 0 } // Enviar el estado como JSON
+            body: JSON.stringify({
+              is_active: newStatus === 'active' ? 1 : 0,
+            })
         })
           .then(response => {
             if (response.status === 200) { // Valida el código de estado HTTP

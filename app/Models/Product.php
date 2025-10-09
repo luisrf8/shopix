@@ -13,7 +13,8 @@ class Product extends Model
         'name',
         'description',
         'category_id',
-        'is_active'
+        'is_active',
+        'tenant_id'
     ];
 
     public function images()

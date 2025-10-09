@@ -65,7 +65,6 @@
 
         submitButton.textContent = "Cargando...";
         submitButton.disabled = true;
-        console.log("Enviando datos:", ...formData); // Para depuración
         fetch("/login", {
             method: "POST",
             body: formData
@@ -73,6 +72,7 @@
         .then(response => {
             return response.json().then(data => {
                 if (response.ok) {
+                    console.log("response", data)
                     window.location.href = '/dashboard'; // Descomenta si deseas redirigir
                 } else {
                     alert(data.message || "Credenciales incorrectas");

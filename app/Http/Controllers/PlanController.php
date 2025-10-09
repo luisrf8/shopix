@@ -9,29 +9,56 @@ class PlanController extends Controller
 {
     public function index()
     {
-        return Plan::all();
+        $plans = Plan::all();
+        return view('plans', compact('plans'));
     }
 
     public function store(Request $request)
     {
-        $plan = Plan::create($request->all());
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'price'         => 'required|numeric|min:0',
+            'duration_days' => 'required|integer|min:1',
+            'logo'          => 'nullable|string|max:500',
+            'features'      => 'nullable|string'
+        ]);
+
+        $validated['features'] = $validated['features']
+            ? json_encode(array_map('trim', explode(',', $validated['features'])))
+            : json_encode([]);
+
+        $plan = Plan::create($validated);
+
         return response()->json($plan, 201);
     }
 
-    public function show(Plan $plan)
+    public function update(Request $request, $id)
     {
-        return $plan;
-    }
+        $plan = Plan::findOrFail($id);
 
-    public function update(Request $request, Plan $plan)
-    {
-        $plan->update($request->all());
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'price'         => 'required|numeric|min:0',
+            'duration_days' => 'required|integer|min:1',
+            'logo'          => 'nullable|string|max:500',
+            'features'      => 'nullable|string'
+        ]);
+
+        $validated['features'] = $validated['features']
+            ? array_map('trim', explode(',', $validated['features']))
+            : [];
+
+        $plan->update($validated);
+
         return response()->json($plan);
     }
 
-    public function destroy(Plan $plan)
+
+    public function destroy($id)
     {
+        $plan = Plan::findOrFail($id);
         $plan->delete();
+
         return response()->noContent();
     }
 }

@@ -13,11 +13,13 @@ class PaymentMethodController extends Controller
 {
     public function index()
     {
-        $currencies = Currency::all();
-        $paymentMethods = PaymentMethod::with('currency')->get();
+        $user = auth()->user();
+
+        $currencies = Currency::all()->where('tenant_id', $user->tenant_id);
+        $paymentMethods = PaymentMethod::with('currency')->where('tenant_id', $user->tenant_id)->get();
 
         // Obtener el último valor de la tasa del dólar
-        $dollarRate = DollarRate::latest('created_at')->first();
+        $dollarRate = DollarRate::latest('created_at')->where('tenant_id', $user->tenant_id)->first();
 
         // Agrupar métodos de pago por moneda
         $groupedPaymentMethods = $paymentMethods->groupBy(function ($paymentMethod) {
